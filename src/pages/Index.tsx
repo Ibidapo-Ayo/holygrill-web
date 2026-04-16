@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Flame, ArrowRight, Zap, Trophy, Gift } from 'lucide-react';
+import heroBurger from '@/assets/hero-burger.jpg';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FoodCard } from '@/components/menu/FoodCard';
