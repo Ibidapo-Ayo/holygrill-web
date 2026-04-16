@@ -28,6 +28,10 @@ const Index = () => {
       {/* Hero */}
       <section className="relative pt-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+        <div className="absolute right-0 top-16 w-1/2 h-full hidden lg:block">
+          <img src={heroBurger} alt="Holy Grills Burger" className="w-full h-full object-cover opacity-40 mask-gradient" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        </div>
         <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
