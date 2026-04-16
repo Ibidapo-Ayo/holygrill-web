@@ -1,0 +1,38 @@
+import { Flame } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+interface HPBadgeProps {
+  value: number;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'earned' | 'available';
+  animated?: boolean;
+}
+
+const sizeClasses = {
+  sm: 'text-xs px-1.5 py-0.5 gap-0.5',
+  md: 'text-sm px-2 py-1 gap-1',
+  lg: 'text-base px-3 py-1.5 gap-1.5',
+};
+
+const iconSizes = { sm: 10, md: 14, lg: 18 };
+
+export function HPBadge({ value, size = 'sm', variant = 'earned', animated = false }: HPBadgeProps) {
+  const Wrapper = animated ? motion.span : 'span';
+  const animProps = animated
+    ? { initial: { scale: 0.5, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', stiffness: 300 } }
+    : {};
+
+  return (
+    <Wrapper
+      {...(animProps as any)}
+      className={`inline-flex items-center font-body font-semibold rounded-full ${sizeClasses[size]} ${
+        variant === 'earned'
+          ? 'bg-success/20 text-success'
+          : 'bg-accent/20 text-accent'
+      }`}
+    >
+      <Flame size={iconSizes[size]} />
+      +{value} HP
+    </Wrapper>
+  );
+}
