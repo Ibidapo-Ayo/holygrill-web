@@ -9,7 +9,7 @@ export interface MenuItem {
   isAvailable: boolean;
 }
 
-export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered';
+export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'refunded';
 
 export interface OrderItem {
   id: string;
@@ -45,6 +45,49 @@ export interface Order {
   estimatedDelivery: string;
   statusHistory: StatusEvent[];
   createdAt: string;
+  cancelReason?: string;
+  refundedAt?: string;
+}
+
+export type PaymentStatus = 'success' | 'pending' | 'failed' | 'refunded';
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  paystackRef: string;
+  amount: number;
+  status: PaymentStatus;
+  channel: 'card' | 'bank_transfer' | 'ussd';
+  customerEmail: string;
+  customerPhone: string;
+  paidAt: string;
+  refundedAt?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface TicketMessage {
+  id: string;
+  sender: 'customer' | 'admin';
+  message: string;
+  timestamp: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  orderId?: string;
+  subject: string;
+  status: TicketStatus;
+  priority: TicketPriority;
+  messages: TicketMessage[];
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
 }
 
 export interface UserProfile {

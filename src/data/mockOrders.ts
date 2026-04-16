@@ -1,4 +1,4 @@
-import type { Order } from '@/types';
+import type { Order, Payment, SupportTicket } from '@/types';
 
 export const MOCK_ORDERS: Order[] = [
   {
@@ -133,6 +133,147 @@ export const MOCK_ORDERS: Order[] = [
       { status: 'delivered', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
     ],
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'ORD-007',
+    userId: 'usr-006',
+    items: [
+      { id: '1', name: 'Holy Smash Burger', price: 3500, quantity: 1, imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&h=100&fit=crop' },
+    ],
+    status: 'cancelled',
+    subtotal: 3500,
+    deliveryFee: 500,
+    total: 4000,
+    address: { streetAddress: 'FUTA East Gate', city: 'Akure', phone: '08066778899' },
+    paystackRef: 'PSK_ref_007',
+    hpEarned: 0,
+    estimatedDelivery: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    statusHistory: [
+      { status: 'placed', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+      { status: 'cancelled', timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    cancelReason: 'Customer requested cancellation — wrong address',
+  },
+  {
+    id: 'ORD-008',
+    userId: 'usr-007',
+    items: [
+      { id: '3', name: 'Suya Grill Platter', price: 4500, quantity: 2, imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=100&h=100&fit=crop' },
+    ],
+    status: 'refunded',
+    subtotal: 9000,
+    deliveryFee: 500,
+    total: 9500,
+    address: { streetAddress: 'FUTA Staff Quarters', city: 'Akure', phone: '07044556677' },
+    paystackRef: 'PSK_ref_008',
+    hpEarned: 0,
+    estimatedDelivery: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    statusHistory: [
+      { status: 'placed', timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
+      { status: 'confirmed', timestamp: new Date(Date.now() - 7.5 * 60 * 60 * 1000).toISOString() },
+      { status: 'refunded', timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+    cancelReason: 'Item out of stock after confirmation',
+    refundedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+export const MOCK_PAYMENTS: Payment[] = [
+  { id: 'PAY-001', orderId: 'ORD-001', paystackRef: 'PSK_ref_001', amount: 9300, status: 'success', channel: 'card', customerEmail: 'adewale@futa.edu.ng', customerPhone: '08012345678', paidAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() },
+  { id: 'PAY-002', orderId: 'ORD-002', paystackRef: 'PSK_ref_002', amount: 7400, status: 'success', channel: 'bank_transfer', customerEmail: 'funmi@futa.edu.ng', customerPhone: '08098765432', paidAt: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+  { id: 'PAY-003', orderId: 'ORD-003', paystackRef: 'PSK_ref_003', amount: 6000, status: 'success', channel: 'card', customerEmail: 'chinedu@futa.edu.ng', customerPhone: '09011223344', paidAt: new Date(Date.now() - 45 * 60 * 1000).toISOString() },
+  { id: 'PAY-004', orderId: 'ORD-004', paystackRef: 'PSK_ref_004', amount: 12500, status: 'success', channel: 'ussd', customerEmail: 'adewale@futa.edu.ng', customerPhone: '08012345678', paidAt: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
+  { id: 'PAY-005', orderId: 'ORD-005', paystackRef: 'PSK_ref_005', amount: 10300, status: 'success', channel: 'card', customerEmail: 'blessing@futa.edu.ng', customerPhone: '07033445566', paidAt: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
+  { id: 'PAY-006', orderId: 'ORD-006', paystackRef: 'PSK_ref_006', amount: 6900, status: 'success', channel: 'bank_transfer', customerEmail: 'taiwo@futa.edu.ng', customerPhone: '08055667788', paidAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() },
+  { id: 'PAY-007', orderId: 'ORD-007', paystackRef: 'PSK_ref_007', amount: 4000, status: 'refunded', channel: 'card', customerEmail: 'nneka@futa.edu.ng', customerPhone: '08066778899', paidAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), refundedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString() },
+  { id: 'PAY-008', orderId: 'ORD-008', paystackRef: 'PSK_ref_008', amount: 9500, status: 'refunded', channel: 'card', customerEmail: 'samuel@futa.edu.ng', customerPhone: '07044556677', paidAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), refundedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
+  { id: 'PAY-009', orderId: '', paystackRef: 'PSK_ref_009', amount: 5500, status: 'failed', channel: 'ussd', customerEmail: 'amara@futa.edu.ng', customerPhone: '08099001122', paidAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() },
+  { id: 'PAY-010', orderId: '', paystackRef: 'PSK_ref_010', amount: 3000, status: 'pending', channel: 'bank_transfer', customerEmail: 'chinedu@futa.edu.ng', customerPhone: '09011223344', paidAt: new Date(Date.now() - 5 * 60 * 1000).toISOString() },
+];
+
+export const MOCK_TICKETS: SupportTicket[] = [
+  {
+    id: 'TKT-001',
+    userId: 'usr-002',
+    userName: 'Funmilayo Adebayo',
+    userEmail: 'funmi@futa.edu.ng',
+    orderId: 'ORD-002',
+    subject: 'Order taking too long',
+    status: 'open',
+    priority: 'high',
+    messages: [
+      { id: 'm1', sender: 'customer', message: 'My order has been preparing for over 30 minutes. Is everything okay?', timestamp: new Date(Date.now() - 20 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'TKT-002',
+    userId: 'usr-006',
+    userName: 'Nneka Uche',
+    userEmail: 'nneka@futa.edu.ng',
+    orderId: 'ORD-007',
+    subject: 'Wrong address on cancelled order',
+    status: 'in_progress',
+    priority: 'medium',
+    messages: [
+      { id: 'm2', sender: 'customer', message: 'I had to cancel my order because the address was wrong. Can I get help reordering to the correct address?', timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString() },
+      { id: 'm3', sender: 'admin', message: 'Hi Nneka! Sorry about that. You can place a new order with the correct address and we\'ll waive the delivery fee. Use code FREEDELIVERY at checkout.', timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
+      { id: 'm4', sender: 'customer', message: 'Thank you! I\'ll order now.', timestamp: new Date(Date.now() - 55 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'TKT-003',
+    userId: 'usr-007',
+    userName: 'Samuel Ajayi',
+    userEmail: 'samuel@futa.edu.ng',
+    orderId: 'ORD-008',
+    subject: 'Refund not received',
+    status: 'open',
+    priority: 'urgent',
+    messages: [
+      { id: 'm5', sender: 'customer', message: 'My order was refunded but I haven\'t received the money back in my account yet. It\'s been over 3 hours.', timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() },
+      { id: 'm6', sender: 'customer', message: 'Please help, I really need this money back. The amount is ₦9,500.', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'TKT-004',
+    userId: 'usr-004',
+    userName: 'Blessing Eze',
+    userEmail: 'blessing@futa.edu.ng',
+    subject: 'Missing HP from last order',
+    status: 'resolved',
+    priority: 'low',
+    messages: [
+      { id: 'm7', sender: 'customer', message: 'I didn\'t get HP credited for my last order. Can you check?', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+      { id: 'm8', sender: 'admin', message: 'Hi Blessing! I\'ve checked and it looks like there was a sync delay. I\'ve manually added 43 HP to your account. You should see it now!', timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString() },
+      { id: 'm9', sender: 'customer', message: 'I can see it now. Thank you so much!', timestamp: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString(),
+    resolvedAt: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'TKT-005',
+    userId: 'usr-001',
+    userName: 'Adewale Johnson',
+    userEmail: 'adewale@futa.edu.ng',
+    subject: 'How to redeem HP?',
+    status: 'closed',
+    priority: 'low',
+    messages: [
+      { id: 'm10', sender: 'customer', message: 'How do I redeem my Holy Points for free food?', timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString() },
+      { id: 'm11', sender: 'admin', message: 'Great question! HP redemption is coming soon. For now, keep earning — we\'ll notify you when the rewards store launches!', timestamp: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString() },
+    ],
+    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
+    resolvedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
