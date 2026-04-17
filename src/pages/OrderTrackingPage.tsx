@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Footer } from '@/components/layout/Footer';
 import { StatusBar } from '@/components/orders/StatusBar';
 import { CountdownTimer } from '@/components/orders/CountdownTimer';
@@ -23,9 +24,10 @@ const OrderTrackingPage = () => {
   const isDelivered = order.status === 'delivered';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
       <Navbar />
-      <main className="flex-1 pt-24 pb-12">
+      <MobileHeader title="Track Order" />
+      <main className="flex-1 md:pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-2xl">
           <Link to="/dashboard" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm font-body mb-4 transition-colors">
             <ArrowLeft size={14} /> Back to Dashboard

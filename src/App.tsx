@@ -11,7 +11,9 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
+import RewardsPage from "./pages/RewardsPage";
 import NotFound from "./pages/NotFound";
+import { BottomTabBar } from "./components/layout/BottomTabBar";
 
 // Admin pages (lazy loaded)
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -52,6 +54,7 @@ const App = () => (
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/orders/:id" element={<OrderTrackingPage />} />
+            <Route path="/rewards" element={<RewardsPage />} />
             {/* Admin routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
@@ -63,6 +66,7 @@ const App = () => (
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <BottomTabBar />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>

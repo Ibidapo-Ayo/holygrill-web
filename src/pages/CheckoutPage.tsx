@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Footer } from '@/components/layout/Footer';
 import { useCartStore, selectSubtotal, selectTotalHP } from '@/stores/cartStore';
 import { DELIVERY_FEE, formatPrice } from '@/data/menu';
@@ -44,9 +45,10 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
       <Navbar />
-      <main className="flex-1 pt-24 pb-12">
+      <MobileHeader title="Checkout" />
+      <main className="flex-1 md:pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-3xl">
           <h1 className="font-display font-bold text-foreground text-2xl md:text-3xl mb-8">Checkout</h1>
 

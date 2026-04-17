@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Syne", "sans-serif"],
-        body: ["Space Grotesk", "sans-serif"],
+        display: ["Nunito", "sans-serif"],
+        body: ["Nunito", "sans-serif"],
+        sans: ["Nunito", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -55,6 +56,12 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        brand: {
+          brown: "hsl(var(--brand-brown))",
+          "brown-foreground": "hsl(var(--brand-brown-foreground))",
+          beige: "hsl(var(--beige))",
+          "beige-soft": "hsl(var(--beige-soft))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
