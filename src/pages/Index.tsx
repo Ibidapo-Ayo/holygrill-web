@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Flame, ArrowRight, Zap, Trophy, Gift, Star, Users, ShoppingBag, MapPin, Clock, ChevronRight } from 'lucide-react';
 import heroBurger from '@/assets/hero-burger.jpg';
 import { Navbar } from '@/components/layout/Navbar';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Footer } from '@/components/layout/Footer';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { useCartStore } from '@/stores/cartStore';
@@ -35,11 +36,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
       <Navbar />
+      <MobileHeader />
 
       {/* Hero */}
-      <section className="relative pt-16 overflow-hidden">
+      <section className="relative md:pt-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
         <div className="absolute right-0 top-16 w-1/2 h-full hidden lg:block">
           <img src={heroBurger} alt="Holy Grills Burger" className="w-full h-full object-cover opacity-40" />
