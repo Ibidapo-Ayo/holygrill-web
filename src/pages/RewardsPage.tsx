@@ -39,7 +39,7 @@ const RewardsPage = () => {
             </div>
             <p className="text-sm opacity-80 mt-2">Earn 1 HP for every ₦100 spent. Redeem for free meals.</p>
             <div className="mt-5">
-              <HPProgressBar currentHP={currentHP} nextTierHP={300} />
+              <HPProgressBar currentHP={currentHP} label="Next tier: Holy Eater (300 HP)" />
             </div>
           </div>
 
