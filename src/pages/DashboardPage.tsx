@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Footer } from '@/components/layout/Footer';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
@@ -15,9 +16,10 @@ const totalHP = userOrders.reduce((s, o) => s + o.hpEarned, 0);
 
 const DashboardPage = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
       <Navbar />
-      <main className="flex-1 pt-24 pb-12">
+      <MobileHeader title="My Orders" />
+      <main className="flex-1 md:pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Profile header */}
           <div className="bg-card rounded-xl border border-border p-6 mb-6">
