@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 import { Footer } from '@/components/layout/Footer';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { CategoryTabs } from '@/components/menu/CategoryTabs';
@@ -30,11 +31,12 @@ const MenuPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
       <Navbar />
-      <main className="flex-1 pt-16">
+      <MobileHeader title="Menu" />
+      <main className="flex-1 md:pt-16">
         {/* Sticky header */}
-        <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="sticky top-14 md:top-16 z-30 bg-background/85 backdrop-blur-xl border-b border-border">
           <div className="container mx-auto px-4 py-4 space-y-3">
             <SearchBar value={search} onChange={setSearch} />
             <CategoryTabs categories={CATEGORIES} activeCategory={category} onChange={setCategory} />
