@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,58 +6,71 @@
 
 @layer base {
   :root {
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
+    --font-display: 'Nunito', sans-serif;
+    --font-body: 'Nunito', sans-serif;
 
-    /* Brand */
-    --primary: 18 100% 50%;
+    /* Brand — warm food palette */
+    /* Primary Red #E70E0E */
+    --primary: 0 88% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 18 100% 45%;
+    --primary-hover: 0 88% 42%;
 
-    /* Gold accent for HP */
-    --accent: 51 100% 50%;
-    --accent-foreground: 0 0% 7%;
+    /* Accent Yellow #F2B84B */
+    --accent: 39 86% 62%;
+    --accent-foreground: 18 100% 12%;
 
-    /* Dark neutrals */
-    --background: 30 8% 5%;
-    --foreground: 30 20% 94%;
-    --card: 30 6% 10%;
-    --card-foreground: 30 20% 94%;
-    --popover: 30 6% 10%;
-    --popover-foreground: 30 20% 94%;
-    --secondary: 30 4% 14%;
-    --secondary-foreground: 30 10% 60%;
-    --muted: 30 4% 14%;
-    --muted-foreground: 30 6% 58%;
-    --border: 30 5% 17%;
-    --input: 30 5% 17%;
-    --ring: 18 100% 50%;
+    /* Deep Brown #6A1F00 */
+    --brand-brown: 18 100% 21%;
+    --brand-brown-foreground: 38 50% 95%;
 
-    --destructive: 0 84% 60%;
+    /* Neutral Beige #E5D6BD & soft bg #F3EBDD */
+    --beige: 36 47% 82%;
+    --beige-soft: 38 56% 91%;
+
+    /* Surfaces — light, warm */
+    --background: 38 56% 95%;
+    --foreground: 18 100% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 18 100% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 18 100% 12%;
+    --secondary: 36 47% 88%;
+    --secondary-foreground: 18 100% 21%;
+    --muted: 38 40% 92%;
+    --muted-foreground: 18 30% 35%;
+    --border: 36 35% 82%;
+    --input: 36 35% 82%;
+    --ring: 0 88% 48%;
+
+    --destructive: 0 88% 48%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142 71% 45%;
+    --success: 142 65% 38%;
     --success-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Gradients */
-    --gradient-fire: linear-gradient(135deg, hsl(18, 100%, 50%), hsl(35, 100%, 50%));
-    --gradient-gold: linear-gradient(135deg, hsl(51, 100%, 50%), hsl(40, 100%, 55%));
-    --gradient-dark: linear-gradient(180deg, hsl(30, 8%, 5%), hsl(30, 6%, 8%));
+    /* Gradients (per spec) */
+    --gradient-cta: linear-gradient(135deg, #E70E0E, #F2B84B);
+    --gradient-fire: linear-gradient(135deg, #E70E0E, #F2B84B);
+    --gradient-card: linear-gradient(135deg, #F2B84B, #E5D6BD);
+    --gradient-dark: linear-gradient(135deg, #6A1F00, #1F0A00);
+    --gradient-soft: linear-gradient(135deg, #F3EBDD, #E5D6BD);
+    --gradient-gold: linear-gradient(135deg, #F2B84B, #E5D6BD);
 
     /* Shadows */
-    --shadow-glow: 0 0 30px hsl(18 100% 50% / 0.15);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 10px 30px -10px hsl(0 88% 48% / 0.35);
+    --shadow-card: 0 8px 24px -8px hsl(18 100% 12% / 0.12);
+    --shadow-tab: 0 -8px 24px -6px hsl(18 100% 12% / 0.10);
 
-    /* Sidebar */
-    --sidebar-background: 30 6% 8%;
-    --sidebar-foreground: 30 10% 60%;
-    --sidebar-primary: 18 100% 50%;
+    /* Sidebar (admin) */
+    --sidebar-background: 18 100% 12%;
+    --sidebar-foreground: 38 50% 90%;
+    --sidebar-primary: 0 88% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 4% 14%;
-    --sidebar-accent-foreground: 30 20% 94%;
-    --sidebar-border: 30 5% 17%;
-    --sidebar-ring: 18 100% 50%;
+    --sidebar-accent: 18 80% 18%;
+    --sidebar-accent-foreground: 38 50% 95%;
+    --sidebar-border: 18 60% 22%;
+    --sidebar-ring: 39 86% 62%;
   }
 }
 
@@ -69,42 +82,42 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
   .text-gradient-fire {
-    background: var(--gradient-fire);
+    background: var(--gradient-cta);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .bg-gradient-fire {
-    background: var(--gradient-fire);
-  }
+  .bg-gradient-cta { background: var(--gradient-cta); }
+  .bg-gradient-fire { background: var(--gradient-cta); }
+  .bg-gradient-card { background: var(--gradient-card); }
+  .bg-gradient-dark { background: var(--gradient-dark); }
+  .bg-gradient-soft { background: var(--gradient-soft); }
+  .bg-gradient-gold { background: var(--gradient-gold); }
 
-  .bg-gradient-gold {
-    background: var(--gradient-gold);
-  }
-
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
-  }
-
-  .shadow-card {
-    box-shadow: var(--shadow-card);
-  }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-tab { box-shadow: var(--shadow-tab); }
 
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* Safe area padding for mobile bottom tab */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .with-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
 }
