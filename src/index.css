@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-display: 'Nunito', sans-serif;
+    --font-body: 'Nunito', sans-serif;
+
+    /* Brand — warm food palette */
+    /* Primary Red #E70E0E */
+    --primary: 0 88% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 0 88% 42%;
+
+    /* Accent Yellow #F2B84B */
+    --accent: 39 86% 62%;
+    --accent-foreground: 18 100% 12%;
+
+    /* Deep Brown #6A1F00 */
+    --brand-brown: 18 100% 21%;
+    --brand-brown-foreground: 38 50% 95%;
+
+    /* Neutral Beige #E5D6BD & soft bg #F3EBDD */
+    --beige: 36 47% 82%;
+    --beige-soft: 38 56% 91%;
+
+    /* Surfaces — light, warm */
+    --background: 38 56% 95%;
+    --foreground: 18 100% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 18 100% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 18 100% 12%;
+    --secondary: 36 47% 88%;
+    --secondary-foreground: 18 100% 21%;
+    --muted: 38 40% 92%;
+    --muted-foreground: 18 30% 35%;
+    --border: 36 35% 82%;
+    --input: 36 35% 82%;
+    --ring: 0 88% 48%;
+
+    --destructive: 0 88% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 65% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --radius: 1rem;
+
+    /* Gradients (per spec) */
+    --gradient-cta: linear-gradient(135deg, #E70E0E, #F2B84B);
+    --gradient-fire: linear-gradient(135deg, #E70E0E, #F2B84B);
+    --gradient-card: linear-gradient(135deg, #F2B84B, #E5D6BD);
+    --gradient-dark: linear-gradient(135deg, #6A1F00, #1F0A00);
+    --gradient-soft: linear-gradient(135deg, #F3EBDD, #E5D6BD);
+    --gradient-gold: linear-gradient(135deg, #F2B84B, #E5D6BD);
+
+    /* Shadows */
+    --shadow-glow: 0 10px 30px -10px hsl(0 88% 48% / 0.35);
+    --shadow-card: 0 8px 24px -8px hsl(18 100% 12% / 0.12);
+    --shadow-tab: 0 -8px 24px -6px hsl(18 100% 12% / 0.10);
+
+    /* Sidebar (admin) */
+    --sidebar-background: 18 100% 12%;
+    --sidebar-foreground: 38 50% 90%;
+    --sidebar-primary: 0 88% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 18 80% 18%;
+    --sidebar-accent-foreground: 38 50% 95%;
+    --sidebar-border: 18 60% 22%;
+    --sidebar-ring: 39 86% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .text-gradient-fire {
+    background: var(--gradient-cta);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-cta { background: var(--gradient-cta); }
+  .bg-gradient-fire { background: var(--gradient-cta); }
+  .bg-gradient-card { background: var(--gradient-card); }
+  .bg-gradient-dark { background: var(--gradient-dark); }
+  .bg-gradient-soft { background: var(--gradient-soft); }
+  .bg-gradient-gold { background: var(--gradient-gold); }
+
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-tab { box-shadow: var(--shadow-tab); }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* Safe area padding for mobile bottom tab */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .with-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+}
