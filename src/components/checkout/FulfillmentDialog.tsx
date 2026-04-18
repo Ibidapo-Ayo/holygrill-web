@@ -89,7 +89,12 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden">
+    <DialogContent
+      className="max-w-3xl w-full p-0 overflow-hidden rounded-t-2xl sm:rounded-lg
+                 left-1/2 top-auto bottom-0 translate-x-[-50%] translate-y-0
+                 sm:top-1/2 sm:bottom-auto sm:translate-y-[-50%]
+                 max-h-[85vh] sm:max-h-[90vh] data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4"
+    >
         <DialogHeader className="px-6 pt-6">
           <DialogTitle className="font-display text-xl">Delivery or Pickup</DialogTitle>
           <p className="text-sm text-muted-foreground font-body">
