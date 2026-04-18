@@ -1,114 +1,176 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
-export default {
-  darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
-  prefix: "",
+const rem = (value: number) => `${value / 16}rem`;
+const nunitoStack = [
+  "var(--font-nunito)",
+  "Nunito",
+  ...defaultTheme.fontFamily.sans,
+];
+
+const config: Config = {
+  darkMode: "class",
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./lib/**/*.{ts,tsx}",
+  ],
   theme: {
     container: {
       center: true,
-      padding: "1rem",
+      padding: {
+        DEFAULT: rem(16),
+        sm: rem(16),
+        md: rem(20),
+        lg: rem(24),
+        xl: rem(24),
+        "tablet-md": rem(20),
+        mobile: rem(16),
+        tablet: rem(20),
+        desktop: rem(24),
+      },
       screens: {
-        "2xl": "1400px",
+        sm: rem(640),
+        md: rem(768),
+        lg: rem(1024),
+        xl: rem(1280),
+        "2xl": rem(1400),
+        "tablet-md": rem(820),
+        mobile: rem(640),
+        tablet: rem(960),
+        desktop: rem(1208),
       },
     },
     extend: {
-      fontFamily: {
-        display: ["Nunito", "sans-serif"],
-        body: ["Nunito", "sans-serif"],
-        sans: ["Nunito", "sans-serif"],
+      screens: {
+        "tablet-md": rem(820),
+        mobile: rem(640),
+        tablet: rem(960),
+        desktop: rem(1208),
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-          hover: "hsl(var(--primary-hover))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+        transparent: "transparent",
+        current: "currentColor",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
         },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+          50: "var(--primary-50)",
+          100: "var(--primary-100)",
+          200: "var(--primary-200)",
         },
-        brand: {
-          brown: "hsl(var(--brand-brown))",
-          "brown-foreground": "hsl(var(--brand-brown-foreground))",
-          beige: "hsl(var(--beige))",
-          "beige-soft": "hsl(var(--beige-soft))",
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground, #ffffff)",
+        },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        icon: "var(--icon-color)",
         sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+          DEFAULT: "var(--sidebar)",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)",
         },
+        chart: {
+          1: "var(--chart-1)",
+          2: "var(--chart-2)",
+          3: "var(--chart-3)",
+          4: "var(--chart-4)",
+          5: "var(--chart-5)",
+        },
+      },
+      spacing: {
+        "2.5": rem(10),
+        "3": rem(12),
+        "3.5": rem(14),
+        "3.25": rem(13),
+        "3.75": rem(15),
+        "4.75": rem(19),
+        "5.25": rem(21),
+        "5.75": rem(23),
+        "6": rem(24),
+        "6.25": rem(25),
+        "7.5": rem(30),
+        "8": rem(32),
+        "9.5": rem(38),
+        "10": rem(40),
+        "10.5": rem(42),
+        "12.5": rem(50),
+        "15.5": rem(62),
+        "18.75": rem(75),
+        "19.5": rem(78),
+        "20.5": rem(82),
+        "25": rem(100),
+        "37.5": rem(150),
+        "52.5": rem(210),
+        "57.75": rem(231),
+        "69.5": rem(278),
+        "89.25": rem(357),
+        "114.75": rem(459),
+      },
+      fontSize: {
+        "body-sm": [rem(14), { lineHeight: rem(17), letterSpacing: rem(0.5) }],
+        "body-base": [rem(16), { lineHeight: rem(17), letterSpacing: rem(0.5) }],
+        "body-lg": [rem(18), { lineHeight: rem(20), letterSpacing: rem(0.5) }],
+        display: [rem(32), { lineHeight: rem(35), letterSpacing: rem(2) }],
+      },
+      lineHeight: {
+        "5.25": rem(21),
+      },
+      borderWidth: {
+        DEFAULT: rem(1),
+        1.5: rem(1.5),
+        3: rem(3),
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        DEFAULT: "var(--radius)",
+        xl: "var(--radius-xl)",
+        lg: "var(--radius-lg)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+        pill: rem(999),
+        12: rem(12),
+        8: rem(8),
+        6: rem(6),
+        4: rem(4),
+        2: rem(2),
+        0: rem(0),
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-        "pulse-ring": {
-          "0%": { transform: "scale(0.8)", opacity: "1" },
-          "100%": { transform: "scale(1.4)", opacity: "0" },
-        },
-        "slide-up": {
-          "0%": { transform: "translateY(20px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-ring": "pulse-ring 1.5s ease-out infinite",
-        "slide-up": "slide-up 0.4s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
+      fontFamily: {
+        nunito: nunitoStack,
+        sans: nunitoStack,
+        mono: [...defaultTheme.fontFamily.mono],
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [],
+};
+
+export default config;
