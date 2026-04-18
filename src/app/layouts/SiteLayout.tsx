@@ -7,16 +7,17 @@ import { BottomTabBar } from '@/components/layout/BottomTabBar';
 interface SiteLayoutProps {
   title?: string;
   children: ReactNode;
+  hideChrome?: boolean;
 }
 
-export function SiteLayout({ title, children }: SiteLayoutProps) {
+export function SiteLayout({ title, children, hideChrome = false }: SiteLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
-      <Navbar />
-      <MobileHeader title={title} />
+      {!hideChrome && <Navbar />}
+      {!hideChrome && <MobileHeader title={title} />}
       <div className="flex-1 flex flex-col">{children}</div>
-      <Footer />
-      <BottomTabBar />
+      {!hideChrome && <Footer />}
+      {!hideChrome && <BottomTabBar />}
     </div>
   );
 }

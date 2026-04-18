@@ -54,8 +54,8 @@ const App = () => (
             <Route path="/menu" element={<SiteLayout title="Menu"><MenuPage /></SiteLayout>} />
             <Route path="/cart" element={<SiteLayout title="Your Cart"><CartPage /></SiteLayout>} />
             <Route path="/checkout" element={<SiteLayout title="Checkout"><CheckoutPage /></SiteLayout>} />
-            <Route path="/login" element={<SiteLayout title="Login"><LoginPage /></SiteLayout>} />
-            <Route path="/signup" element={<SiteLayout title="Create Account"><SignupPage /></SiteLayout>} />
+            <Route path="/login" element={<SiteLayout title="Login" hideChrome><LoginPage /></SiteLayout>} />
+            <Route path="/signup" element={<SiteLayout title="Create Account" hideChrome><SignupPage /></SiteLayout>} />
             <Route path="/dashboard" element={<SiteLayout title="Dashboard"><AccountDashboard /></SiteLayout>} />
             <Route path="/orders" element={<SiteLayout title="Orders"><OrdersPage /></SiteLayout>} />
             <Route path="/orders/:id" element={<SiteLayout title="Order Tracking"><OrderTrackingPage /></SiteLayout>} />
