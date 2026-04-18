@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore, selectSubtotal, selectTotalHP } from '@/stores/cartStore';
 import { DELIVERY_FEE, formatPrice } from '@/data/menu';
@@ -8,7 +8,7 @@ import { FulfillmentDialog } from '@/components/checkout/FulfillmentDialog';
 import { hasDeliveryInfo, hasPickupInfo, useFulfillmentStore } from '@/stores/fulfillmentStore';
 
 const CheckoutPage = () => {
-  const { items, clearCart } = useCartStore();
+  const { items } = useCartStore();
   const subtotal = useCartStore(selectSubtotal);
   const totalHP = useCartStore(selectTotalHP);
   const navigate = useNavigate();
@@ -36,11 +36,10 @@ const CheckoutPage = () => {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    clearCart();
-    toast.success('Order placed successfully! 🎉');
-    navigate('/orders/demo-order');
-    setLoading(false);
+    navigate('/payment/processing', {
+      state: { total, method, hp: totalHP },
+      replace: true,
+    });
   };
 
   const renderDeliverySummary = () => (

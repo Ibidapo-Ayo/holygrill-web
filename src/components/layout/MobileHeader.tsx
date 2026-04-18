@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import logo from '@/assets/logo.png';
+import { MobileSidebar } from './MobileSidebar';
 
 interface MobileHeaderProps {
   title?: string;
@@ -18,10 +19,13 @@ export function MobileHeader({ title }: MobileHeaderProps) {
           <img src={logo} alt="Holy Grills" className="h-8 w-auto" />
         </Link>
         {title && <h1 className="text-base font-extrabold text-foreground truncate">{title}</h1>}
-        <button className="relative p-2 text-brand-brown/70 rounded-full hover:bg-secondary">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button className="relative p-2 text-brand-brown/70 rounded-full hover:bg-secondary">
+            <Bell size={20} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+          </button>
+          <MobileSidebar />
+        </div>
       </div>
     </header>
   );

@@ -11,8 +11,11 @@ import LoginPage from "@/app/routes/public/Login";
 import SignupPage from "@/app/routes/public/Signup";
 import AccountDashboard from "@/app/routes/public/AccountDashboard";
 import OrderTrackingPage from "@/app/routes/public/OrderTracking";
+import OrdersPage from "@/app/routes/public/OrdersPage";
 import RewardsPage from "@/app/routes/public/Rewards";
 import MenuItemDetail from "@/app/routes/public/MenuItemDetail";
+import PaymentProcessingPage from "@/app/routes/public/PaymentProcessing";
+import PaymentSuccessPage from "@/app/routes/public/PaymentSuccess";
 import NotFound from "@/app/routes/public/NotFound";
 import { SiteLayout } from "@/app/layouts/SiteLayout";
 import { AdminPage } from "@/app/layouts/AdminPage";
@@ -54,9 +57,12 @@ const App = () => (
             <Route path="/login" element={<SiteLayout title="Login"><LoginPage /></SiteLayout>} />
             <Route path="/signup" element={<SiteLayout title="Create Account"><SignupPage /></SiteLayout>} />
             <Route path="/dashboard" element={<SiteLayout title="Dashboard"><AccountDashboard /></SiteLayout>} />
+            <Route path="/orders" element={<SiteLayout title="Orders"><OrdersPage /></SiteLayout>} />
             <Route path="/orders/:id" element={<SiteLayout title="Order Tracking"><OrderTrackingPage /></SiteLayout>} />
             <Route path="/rewards" element={<SiteLayout title="Rewards"><RewardsPage /></SiteLayout>} />
             <Route path="/menu/:menuId" element={<SiteLayout><MenuItemDetail /></SiteLayout>} />
+            <Route path="/payment/processing" element={<SiteLayout title="Payment"><PaymentProcessingPage /></SiteLayout>} />
+            <Route path="/payment/success" element={<SiteLayout title="Payment"><PaymentSuccessPage /></SiteLayout>} />
             <Route path="/admin" element={<AdminPage title="Overview" subtitle="Performance & insights"><AdminDashboard /></AdminPage>} />
             <Route path="/admin/orders" element={<AdminPage title="Orders" subtitle="Manage live orders"><AdminOrders /></AdminPage>} />
             <Route path="/admin/payments" element={<AdminPage title="Payments" subtitle="Transactions & payouts"><AdminPayments /></AdminPage>} />
