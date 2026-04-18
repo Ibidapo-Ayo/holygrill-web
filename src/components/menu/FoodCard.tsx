@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Plus, Minus } from 'lucide-react';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { formatPrice } from '@/data/menu';
@@ -25,7 +26,7 @@ export function FoodCard({
         !isAvailable ? 'opacity-50 pointer-events-none' : ''
       }`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <Link to={`/menu/${id}`} className="relative block aspect-[4/3] overflow-hidden">
         <img
           src={imageUrl}
           alt={name}
@@ -40,10 +41,14 @@ export function FoodCard({
             <span className="text-sm font-semibold text-muted-foreground font-body">Unavailable</span>
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="p-4 space-y-2">
-        <h3 className="font-display font-bold text-foreground text-base leading-tight truncate">{name}</h3>
+        <Link to={`/menu/${id}`} className="block">
+          <h3 className="font-display font-bold text-foreground text-base leading-tight truncate hover:text-primary transition-colors">
+            {name}
+          </h3>
+        </Link>
         <p className="text-xs text-muted-foreground font-body line-clamp-2">{description}</p>
 
         <div className="flex items-center justify-between pt-1">
