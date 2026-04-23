@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router';
 import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog';
 import { Menu, X, ChevronRight } from 'lucide-react';
 

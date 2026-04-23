@@ -1,18 +1,14 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from '@/lib/router';
 import { motion } from 'framer-motion';
-import HomeIcon from '@/assets/icons/home.svg?react';
-import CartIcon from '@/assets/icons/cart.svg?react';
-import RewardsIcon from '@/assets/icons/rewards.svg?react';
-import ClockIcon from '@/assets/icons/clock.svg?react';
-import { UtensilsCrossed } from 'lucide-react';
+import { UtensilsCrossed, House, ShoppingCart, Gift, Clock3 } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
 
 const TABS = [
-  { to: '/', label: 'Home', Icon: HomeIcon, type: 'svg' as const },
+  { to: '/', label: 'Home', Icon: House, type: 'lucide' as const },
   { to: '/menu', label: 'Menu', Icon: UtensilsCrossed, type: 'lucide' as const },
-  { to: '/dashboard', label: 'My Orders', Icon: ClockIcon, type: 'svg' as const },
-  { to: '/rewards', label: 'Rewards', Icon: RewardsIcon, type: 'svg' as const },
-  { to: '/cart', label: 'Cart', Icon: CartIcon, type: 'svg' as const, badgeKey: 'cart' as const },
+  { to: '/dashboard', label: 'My Orders', Icon: Clock3, type: 'lucide' as const },
+  { to: '/rewards', label: 'Rewards', Icon: Gift, type: 'lucide' as const },
+  { to: '/cart', label: 'Cart', Icon: ShoppingCart, type: 'lucide' as const, badgeKey: 'cart' as const },
 ];
 
 export function BottomTabBar() {

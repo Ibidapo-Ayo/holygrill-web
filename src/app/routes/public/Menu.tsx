@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { CategoryTabs } from '@/components/menu/CategoryTabs';
 import { SearchBar } from '@/components/menu/SearchBar';
 import { useCartStore } from '@/stores/cartStore';
-import { MOCK_MENU, CATEGORIES } from '@/data/menu';
+import { MOCK_MENU } from '@/data/menu';
+import { fetchMenuItems } from '@/lib/api/menu';
 import { toast } from 'sonner';
 
 const MenuPage = () => {
@@ -12,16 +14,23 @@ const MenuPage = () => {
   const [category, setCategory] = useState('All');
   const { items, addItem, updateQuantity } = useCartStore();
 
+  const { data: menuItems = MOCK_MENU, isLoading, isError } = useQuery({
+    queryKey: ['menu-items'],
+    queryFn: fetchMenuItems,
+  });
+
+  const categories = useMemo(() => ['All', ...Array.from(new Set(menuItems.map((item) => item.category)))], [menuItems]);
+
   const filtered = useMemo(() => {
-    return MOCK_MENU.filter((item) => {
+    return menuItems.filter((item) => {
       const matchCat = category === 'All' || item.category === category;
       const matchSearch = !search || item.name.toLowerCase().includes(search.toLowerCase()) || item.description.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [search, category]);
+  }, [search, category, menuItems]);
 
   const handleAdd = (id: string) => {
-    const item = MOCK_MENU.find((m) => m.id === id);
+    const item = menuItems.find((m) => m.id === id);
     if (!item) return;
     addItem({ id: item.id, name: item.name, price: item.price, imageUrl: item.imageUrl, hpValue: item.hpValue });
     toast.success(`${item.name} added to cart 🔥`);
@@ -33,13 +42,21 @@ const MenuPage = () => {
       <div className="sticky top-14 md:top-16 z-30 bg-background/85 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4 space-y-3">
           <SearchBar value={search} onChange={setSearch} />
-          <CategoryTabs categories={CATEGORIES} activeCategory={category} onChange={setCategory} />
+          <CategoryTabs categories={categories} activeCategory={category} onChange={setCategory} />
         </div>
       </div>
 
       {/* Grid */}
       <div className="container mx-auto px-4 py-8">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground font-body text-sm">Loading menu...</p>
+          </div>
+        ) : isError ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground font-body text-sm">Unable to load menu. Showing cached data.</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-body text-sm">No items found for "{search || category}"</p>
           </div>

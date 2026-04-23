@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from '@/lib/router';
 import { motion } from 'framer-motion';
 import { StatusBar } from '@/components/orders/StatusBar';
 import { CountdownTimer } from '@/components/orders/CountdownTimer';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router';
 import { Flame, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

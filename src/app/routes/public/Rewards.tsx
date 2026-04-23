@@ -1,7 +1,6 @@
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { Trophy, Gift, Flame, Star } from 'lucide-react';
-import RewardsIcon from '@/assets/icons/rewards.svg?react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router';
 
 const TIERS = [
   { name: 'Rookie', min: 0, perk: '5% off first order', color: 'bg-secondary' },
@@ -25,7 +24,7 @@ const RewardsPage = () => {
       <div className="container mx-auto px-4 max-w-3xl space-y-10">
         <div className="rounded-3xl bg-gradient-dark text-brand-brown-foreground p-6 md:p-8 shadow-card relative overflow-hidden">
           <div className="absolute -right-6 -top-6 opacity-20">
-            <RewardsIcon className="w-40 h-40" style={{ fill: 'currentColor' }} />
+            <Gift className="w-40 h-40" />
           </div>
           <p className="text-xs font-bold uppercase tracking-widest opacity-80">Your Holy Points</p>
           <div className="flex items-end gap-2 mt-2">

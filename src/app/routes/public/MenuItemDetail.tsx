@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from '@/lib/router';
 import { ArrowLeft, Plus, Minus, Flame, ShoppingBag, Heart } from 'lucide-react';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
 import { useCartStore } from '@/stores/cartStore';

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@/lib/router';
 import { 
   LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, 
   Flame, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3,

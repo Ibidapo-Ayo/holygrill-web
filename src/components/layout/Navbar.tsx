@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@/lib/router';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
-import logo from '@/assets/logo.png';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -21,7 +20,7 @@ export function Navbar() {
     <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Holy Grills" className="h-9 w-auto" />
+          <img src="/logo.png" alt="Holy Grills" className="h-9 w-auto" />
         </Link>
 
         <div className="flex items-center gap-6">
