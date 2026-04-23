@@ -3,27 +3,32 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
-import Index from "./pages/Index";
-import MenuPage from "./pages/MenuPage";
-import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import DashboardPage from "./pages/DashboardPage";
-import OrderTrackingPage from "./pages/OrderTrackingPage";
-import RewardsPage from "./pages/RewardsPage";
-import NotFound from "./pages/NotFound";
-import { BottomTabBar } from "./components/layout/BottomTabBar";
+import Home from "@/app/routes/public/Home";
+import MenuPage from "@/app/routes/public/Menu";
+import CartPage from "@/app/routes/public/Cart";
+import CheckoutPage from "@/app/routes/public/Checkout";
+import LoginPage from "@/app/routes/public/Login";
+import SignupPage from "@/app/routes/public/Signup";
+import AccountDashboard from "@/app/routes/public/AccountDashboard";
+import OrderTrackingPage from "@/app/routes/public/OrderTracking";
+import OrdersPage from "@/app/routes/public/OrdersPage";
+import RewardsPage from "@/app/routes/public/Rewards";
+import MenuItemDetail from "@/app/routes/public/MenuItemDetail";
+import PaymentProcessingPage from "@/app/routes/public/PaymentProcessing";
+import PaymentSuccessPage from "@/app/routes/public/PaymentSuccess";
+import NotFound from "@/app/routes/public/NotFound";
+import { SiteLayout } from "@/app/layouts/SiteLayout";
+import { AdminPage } from "@/app/layouts/AdminPage";
 
 // Admin pages (lazy loaded)
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
-const AdminMenu = lazy(() => import("./pages/admin/AdminMenu"));
-const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
-const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
-const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
-const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
-const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+const AdminDashboard = lazy(() => import("@/app/routes/admin/Dashboard"));
+const AdminOrders = lazy(() => import("@/app/routes/admin/Orders"));
+const AdminMenu = lazy(() => import("@/app/routes/admin/Menu"));
+const AdminUsers = lazy(() => import("@/app/routes/admin/Users"));
+const AdminAnalytics = lazy(() => import("@/app/routes/admin/Analytics"));
+const AdminSettings = lazy(() => import("@/app/routes/admin/Settings"));
+const AdminPayments = lazy(() => import("@/app/routes/admin/Payments"));
+const AdminSupport = lazy(() => import("@/app/routes/admin/Support"));
 
 const queryClient = new QueryClient();
 
@@ -45,28 +50,29 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<AdminLoader />}>
           <Routes>
-            {/* Customer routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/menu" element={<MenuPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/orders/:id" element={<OrderTrackingPage />} />
-            <Route path="/rewards" element={<RewardsPage />} />
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/payments" element={<AdminPayments />} />
-            <Route path="/admin/menu" element={<AdminMenu />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/support" element={<AdminSupport />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
+            <Route path="/menu" element={<SiteLayout title="Menu"><MenuPage /></SiteLayout>} />
+            <Route path="/cart" element={<SiteLayout title="Your Cart"><CartPage /></SiteLayout>} />
+            <Route path="/checkout" element={<SiteLayout title="Checkout"><CheckoutPage /></SiteLayout>} />
+            <Route path="/login" element={<SiteLayout title="Login" hideChrome><LoginPage /></SiteLayout>} />
+            <Route path="/signup" element={<SiteLayout title="Create Account" hideChrome><SignupPage /></SiteLayout>} />
+            <Route path="/dashboard" element={<SiteLayout title="Dashboard"><AccountDashboard /></SiteLayout>} />
+            <Route path="/orders" element={<SiteLayout title="Orders"><OrdersPage /></SiteLayout>} />
+            <Route path="/orders/:id" element={<SiteLayout title="Order Tracking"><OrderTrackingPage /></SiteLayout>} />
+            <Route path="/rewards" element={<SiteLayout title="Rewards"><RewardsPage /></SiteLayout>} />
+            <Route path="/menu/:menuId" element={<SiteLayout><MenuItemDetail /></SiteLayout>} />
+            <Route path="/payment/processing" element={<SiteLayout title="Payment"><PaymentProcessingPage /></SiteLayout>} />
+            <Route path="/payment/success" element={<SiteLayout title="Payment"><PaymentSuccessPage /></SiteLayout>} />
+            <Route path="/admin" element={<AdminPage title="Overview" subtitle="Performance & insights"><AdminDashboard /></AdminPage>} />
+            <Route path="/admin/orders" element={<AdminPage title="Orders" subtitle="Manage live orders"><AdminOrders /></AdminPage>} />
+            <Route path="/admin/payments" element={<AdminPage title="Payments" subtitle="Transactions & payouts"><AdminPayments /></AdminPage>} />
+            <Route path="/admin/menu" element={<AdminPage title="Menu" subtitle="Menu management"><AdminMenu /></AdminPage>} />
+            <Route path="/admin/users" element={<AdminPage title="Users" subtitle="Customer profiles & HP"><AdminUsers /></AdminPage>} />
+            <Route path="/admin/analytics" element={<AdminPage title="Analytics" subtitle="Business insights"><AdminAnalytics /></AdminPage>} />
+            <Route path="/admin/support" element={<AdminPage title="Support" subtitle="Tickets & responses"><AdminSupport /></AdminPage>} />
+            <Route path="/admin/settings" element={<AdminPage title="Settings" subtitle="Configure your store"><AdminSettings /></AdminPage>} />
+            <Route path="*" element={<SiteLayout><NotFound /></SiteLayout>} />
           </Routes>
-          <BottomTabBar />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_USERS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
 import { Search, X, Flame, TrendingUp, Crown, ChevronDown, Edit3 } from 'lucide-react';
@@ -30,7 +29,7 @@ const AdminUsers = () => {
   };
 
   return (
-    <AdminLayout title="Users & HP" subtitle={`${users.length} registered users`}>
+    <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
@@ -188,7 +187,7 @@ const AdminUsers = () => {
           ))}
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

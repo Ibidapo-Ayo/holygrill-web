@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_MENU, CATEGORIES, formatPrice } from '@/data/menu';
 import type { MenuItem } from '@/types';
 import { Plus, Edit3, Trash2, Search, X, Eye, EyeOff } from 'lucide-react';
@@ -64,7 +63,7 @@ const AdminMenu = () => {
   };
 
   return (
-    <AdminLayout title="Menu Management" subtitle={`${items.length} items`}>
+    <div className="space-y-6">
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -160,7 +159,7 @@ const AdminMenu = () => {
           />
         )}
       </AnimatePresence>
-    </AdminLayout>
+    </div>
   );
 };
 

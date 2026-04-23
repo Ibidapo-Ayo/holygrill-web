@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatCard } from '@/components/admin/StatCard';
 import { MOCK_PAYMENTS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
@@ -45,7 +44,7 @@ const AdminPayments = () => {
   const maxChannelRevenue = Math.max(...Object.values(channelBreakdown));
 
   return (
-    <AdminLayout title="Payments" subtitle={`${MOCK_PAYMENTS.length} transactions via Paystack`}>
+    <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <StatCard title="Total Revenue" value={formatPrice(totalRevenue)} change="+18.2% vs last week" changeType="positive" icon={DollarSign} />
@@ -211,7 +210,7 @@ const AdminPayments = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

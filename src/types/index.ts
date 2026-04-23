@@ -7,6 +7,15 @@ export interface MenuItem {
   category: string;
   hpValue: number;
   isAvailable: boolean;
+  sizes?: string[];
+  tagLine?: string;
+  slashedPrice?: number;
+  percentageOff?: number;
+  extras?: {
+    title: string;
+    price: number;
+    imageUrl: string;
+  }[];
 }
 
 export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'refunded';
