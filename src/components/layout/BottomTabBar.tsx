@@ -45,16 +45,13 @@ export function BottomTabBar() {
                       <div className="relative">
                         {type === 'svg' ? (
                           <Icon
-                            className={`w-6 h-6 transition-colors ${
-                              isActive ? 'text-primary' : 'text-brand-brown/60'
-                            }`}
+                            className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`}
                             style={{ fill: 'currentColor' }}
                           />
                         ) : (
                           <Icon
-                            className={`w-6 h-6 transition-colors ${
-                              isActive ? 'text-primary' : 'text-brand-brown/60'
-                            }`}
+                            className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`}
+                            strokeWidth={isActive ? 2.6 : 2.2}
                           />
                         )}
                         {badgeKey === 'cart' && cartCount > 0 && (

@@ -1,4 +1,3 @@
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_ORDERS, MOCK_USERS } from '@/data/mockOrders';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
 import { motion } from 'framer-motion';
@@ -39,7 +38,7 @@ const AdminAnalytics = () => {
   const maxWeekly = Math.max(...weeklyData.map((d) => d.revenue));
 
   return (
-    <AdminLayout title="Analytics" subtitle="Business insights and performance metrics">
+    <div className="space-y-6">
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
@@ -174,7 +173,7 @@ const AdminAnalytics = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

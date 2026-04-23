@@ -2,9 +2,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Flame, ArrowRight, Zap, Trophy, Gift, Star, Users, ShoppingBag, MapPin, Clock, ChevronRight } from 'lucide-react';
 import heroBurger from '@/assets/hero-burger.jpg';
-import { Navbar } from '@/components/layout/Navbar';
-import { MobileHeader } from '@/components/layout/MobileHeader';
-import { Footer } from '@/components/layout/Footer';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { useCartStore } from '@/stores/cartStore';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
@@ -25,7 +22,7 @@ const STATS = [
   { icon: Clock, value: '22 min', label: 'Avg Delivery' },
 ];
 
-const Index = () => {
+const Home = () => {
   const { items, addItem, updateQuantity } = useCartStore();
 
   const handleAdd = (id: string) => {
@@ -36,10 +33,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background with-tabbar md:pb-0">
-      <Navbar />
-      <MobileHeader />
-
+    <main className="flex-1 flex flex-col">
       {/* Hero */}
       <section className="relative md:pt-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
@@ -277,9 +271,8 @@ const Index = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+    </main>
   );
 };
 
-export default Index;
+export default Home;

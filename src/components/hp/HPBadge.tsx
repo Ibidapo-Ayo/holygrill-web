@@ -1,5 +1,5 @@
 import { Flame } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, type MotionProps } from 'framer-motion';
 
 interface HPBadgeProps {
   value: number;
@@ -18,13 +18,13 @@ const iconSizes = { sm: 10, md: 14, lg: 18 };
 
 export function HPBadge({ value, size = 'sm', variant = 'earned', animated = false }: HPBadgeProps) {
   const Wrapper = animated ? motion.span : 'span';
-  const animProps = animated
+  const animProps: MotionProps = animated
     ? { initial: { scale: 0.5, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', stiffness: 300 } }
     : {};
 
   return (
     <Wrapper
-      {...(animProps as any)}
+      {...animProps}
       className={`inline-flex items-center font-body font-semibold rounded-full ${sizeClasses[size]} ${
         variant === 'earned'
           ? 'bg-success/20 text-success'

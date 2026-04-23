@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_ORDERS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
 import type { Order, OrderStatus } from '@/types';
@@ -111,7 +110,7 @@ const AdminOrders = () => {
   }, {} as Record<string, number>);
 
   return (
-    <AdminLayout title="Orders Management" subtitle={`${orders.length} total orders · Last synced ${lastPolled.toLocaleTimeString()}`}>
+    <div className="space-y-6">
       {/* Status summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-6">
         {Object.entries(STATUS_CONFIG).filter(([k]) => k !== 'all').map(([key, config]) => (
@@ -406,7 +405,7 @@ const AdminOrders = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </AdminLayout>
+    </div>
   );
 };
 

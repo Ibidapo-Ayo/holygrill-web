@@ -1,4 +1,3 @@
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatCard } from '@/components/admin/StatCard';
 import { OrderCard } from '@/components/orders/OrderCard';
 import { MOCK_ORDERS } from '@/data/mockOrders';
@@ -15,7 +14,7 @@ const AdminDashboard = () => {
   const totalHP = MOCK_ORDERS.reduce((sum, o) => sum + o.hpEarned, 0);
 
   return (
-    <AdminLayout title="Dashboard" subtitle="Overview of your store performance">
+    <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <StatCard title="Total Revenue" value={formatPrice(totalRevenue)} change="+12.5%" changeType="positive" icon={DollarSign} />
@@ -119,7 +118,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

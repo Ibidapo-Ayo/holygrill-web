@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_TICKETS } from '@/data/mockOrders';
 import type { SupportTicket, TicketStatus, TicketPriority } from '@/types';
 import { MessageSquare, Search, X, Send, AlertTriangle, Clock, CheckCircle2, XCircle, ChevronDown, User } from 'lucide-react';
@@ -79,10 +78,7 @@ const AdminSupport = () => {
   const urgentCount = tickets.filter((t) => t.priority === 'urgent' && t.status !== 'resolved' && t.status !== 'closed').length;
 
   return (
-    <AdminLayout
-      title="Support"
-      subtitle={`${openCount} open ticket${openCount !== 1 ? 's' : ''}${urgentCount > 0 ? ` · ${urgentCount} urgent` : ''}`}
-    >
+    <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-10rem)]">
         {/* Ticket list */}
         <div className="lg:col-span-1 flex flex-col">
@@ -263,7 +259,7 @@ const AdminSupport = () => {
           )}
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 

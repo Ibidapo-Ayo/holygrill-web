@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Flame, Store, Truck, Bell, Shield, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -24,8 +23,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <AdminLayout title="Settings" subtitle="Configure your store">
-      <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6">
         {/* Store Info */}
         <div className="bg-card rounded-xl border border-border p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -163,7 +161,6 @@ const AdminSettings = () => {
           Save All Settings
         </button>
       </div>
-    </AdminLayout>
   );
 };
 
