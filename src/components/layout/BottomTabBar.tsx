@@ -4,11 +4,11 @@ import { UtensilsCrossed, House, ShoppingCart, Gift, Clock3 } from 'lucide-react
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
 
 const TABS = [
-  { to: '/', label: 'Home', Icon: House, type: 'lucide' as const },
-  { to: '/menu', label: 'Menu', Icon: UtensilsCrossed, type: 'lucide' as const },
-  { to: '/dashboard', label: 'My Orders', Icon: Clock3, type: 'lucide' as const },
-  { to: '/rewards', label: 'Rewards', Icon: Gift, type: 'lucide' as const },
-  { to: '/cart', label: 'Cart', Icon: ShoppingCart, type: 'lucide' as const, badgeKey: 'cart' as const },
+  { to: '/', label: 'Home', Icon: House },
+  { to: '/menu', label: 'Menu', Icon: UtensilsCrossed },
+  { to: '/dashboard', label: 'My Orders', Icon: Clock3 },
+  { to: '/rewards', label: 'Rewards', Icon: Gift },
+  { to: '/cart', label: 'Cart', Icon: ShoppingCart, badgeKey: 'cart' as const },
 ];
 
 export function BottomTabBar() {
@@ -26,7 +26,7 @@ export function BottomTabBar() {
           aria-label="Primary"
         >
           <ul className="grid grid-cols-5 px-2 py-2">
-            {TABS.map(({ to, label, Icon, type, badgeKey }) => (
+            {TABS.map(({ to, label, Icon, badgeKey }) => (
               <li key={to} className="flex">
                 <NavLink to={to} end={to === '/'} className="flex-1">
                   {({ isActive }) => (
@@ -39,17 +39,11 @@ export function BottomTabBar() {
                         />
                       )}
                       <div className="relative">
-                        {type === 'svg' ? (
-                          <Icon
-                            className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`}
-                            style={{ fill: 'currentColor' }}
-                          />
-                        ) : (
-                          <Icon
+                        <Icon
                             className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`}
                             strokeWidth={isActive ? 2.6 : 2.2}
                           />
-                        )}
+
                         {badgeKey === 'cart' && cartCount > 0 && (
                           <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                             {cartCount}
