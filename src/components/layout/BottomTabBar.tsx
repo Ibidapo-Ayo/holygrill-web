@@ -1,12 +1,13 @@
 import { NavLink, useLocation } from '@/lib/router';
 import { motion } from 'framer-motion';
-import { UtensilsCrossed, House, ShoppingCart, Gift, Clock3 } from 'lucide-react';
+import { UtensilsCrossed, House, ShoppingCart, Gift, Clock3, Heart } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
+import { useFavouritesStore } from '@/stores/favouritesStore';
 
 const TABS = [
   { to: '/', label: 'Home', Icon: House },
   { to: '/menu', label: 'Menu', Icon: UtensilsCrossed },
-  { to: '/dashboard', label: 'My Orders', Icon: Clock3 },
+  { to: '/favourites', label: 'Saved', Icon: Heart, badgeKey: 'fav' as const },
   { to: '/rewards', label: 'Rewards', Icon: Gift },
   { to: '/cart', label: 'Cart', Icon: ShoppingCart, badgeKey: 'cart' as const },
 ];
@@ -14,6 +15,7 @@ const TABS = [
 export function BottomTabBar() {
   const location = useLocation();
   const cartCount = useCartStore(selectItemCount);
+  const favCount = useFavouritesStore((s) => s.items.length);
 
   // Hide on admin routes
   if (location.pathname.startsWith('/admin')) return null;
@@ -47,6 +49,11 @@ export function BottomTabBar() {
                         {badgeKey === 'cart' && cartCount > 0 && (
                           <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                             {cartCount}
+                          </span>
+                        )}
+                        {badgeKey === 'fav' && favCount > 0 && (
+                          <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                            {favCount}
                           </span>
                         )}
                       </div>

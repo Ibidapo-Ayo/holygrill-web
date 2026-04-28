@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from '@/lib/router';
 import { ArrowLeft, CheckCircle2, Clock, Flame, Heart, Minus, Plus, ShoppingBag, Truck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
 import { useCartStore } from '@/stores/cartStore';
+import { useFavouritesStore } from '@/stores/favouritesStore';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { toast } from 'sonner';
@@ -14,8 +16,10 @@ const MenuItemDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const { items, addItem, updateQuantity } = useCartStore();
+  const { toggle: toggleFavourite, isFavourite } = useFavouritesStore();
 
   const item = useMemo(() => MOCK_MENU.find((m) => m.id === menuId), [menuId]);
+  const isFav = item ? isFavourite(item.id) : false;
   const related = useMemo(() => {
     if (!item) return [];
     return MOCK_MENU.filter((m) => m.category === item.category && m.id !== item.id).slice(0, 3);
@@ -80,6 +84,15 @@ const MenuItemDetail = () => {
     );
   };
 
+  const handleFavourite = () => {
+    toggleFavourite(item);
+    if (isFav) {
+      toast(`${item.name} removed from favourites`, { icon: '💔' });
+    } else {
+      toast.success(`${item.name} saved to favourites`, { icon: '❤️' });
+    }
+  };
+
   return (
     <main className="flex-1 md:pt-16 pb-16">
 
@@ -109,12 +122,18 @@ const MenuItemDetail = () => {
                 <ArrowLeft size={14} />
                 Back
               </button>
-              <button
-                aria-label="Save to favourites"
-                className="w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/90 hover:bg-black/50 transition-colors"
+              <motion.button
+                onClick={handleFavourite}
+                aria-label={isFav ? 'Remove from favourites' : 'Save to favourites'}
+                whileTap={{ scale: 0.85 }}
+                className={`w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors ${
+                  isFav
+                    ? 'bg-primary/80 text-white hover:bg-primary'
+                    : 'bg-black/30 text-white/90 hover:bg-black/50'
+                }`}
               >
-                <Heart size={16} />
-              </button>
+                <Heart size={16} className={isFav ? 'fill-current' : ''} />
+              </motion.button>
             </div>
 
             {/* Category pill + name + tagline overlaid at image bottom */}
@@ -357,7 +376,21 @@ const MenuItemDetail = () => {
               >
                 <ArrowLeft size={16} /> Back
               </button>
-              <HPBadge value={item.hpValue} variant="available" />
+              <div className="flex items-center gap-2">
+                <HPBadge value={item.hpValue} variant="available" />
+                <motion.button
+                  onClick={handleFavourite}
+                  aria-label={isFav ? 'Remove from favourites' : 'Save to favourites'}
+                  whileTap={{ scale: 0.85 }}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${
+                    isFav
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border text-muted-foreground hover:text-primary hover:border-primary bg-card'
+                  }`}
+                >
+                  <Heart size={15} className={isFav ? 'fill-current' : ''} />
+                </motion.button>
+              </div>
             </div>
           </div>
           <div className="container mx-auto px-4 max-w-2xl">
