@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { OrderCard } from '@/components/orders/OrderCard';

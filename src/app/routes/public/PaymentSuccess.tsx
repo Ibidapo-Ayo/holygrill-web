@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from '@/lib/router';
 import { CheckCircle2, ArrowRight, Flame } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 

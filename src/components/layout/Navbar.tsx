@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { Link, useLocation } from '@/lib/router';
+import { Heart, ShoppingCart, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
-import logo from '@/assets/logo.png';
+import { useFavouritesStore } from '@/stores/favouritesStore';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -16,12 +16,13 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const itemCount = useCartStore(selectItemCount);
+  const favCount = useFavouritesStore((s) => s.items.length);
 
   return (
     <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Holy Grills" className="h-9 w-auto" />
+          <img src="/logo.png" alt="Holy Grills" className="h-9 w-auto" />
         </Link>
 
         <div className="flex items-center gap-6">
@@ -39,6 +40,19 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link to="/favourites" className="relative p-2 text-brand-brown/70 hover:text-primary transition-colors" aria-label="Favourites">
+            <Heart size={20} />
+            {favCount > 0 && (
+              <motion.span
+                key={favCount}
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center"
+              >
+                {favCount}
+              </motion.span>
+            )}
+          </Link>
           <Link to="/cart" className="relative p-2 text-brand-brown/70 hover:text-foreground transition-colors">
             <ShoppingCart size={20} />
             {itemCount > 0 && (
