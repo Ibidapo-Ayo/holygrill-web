@@ -276,7 +276,7 @@ const MenuItemDetail = () => {
             <hr className="border-border" />
 
             {/* Quantity stepper + live order total */}
-            <div className="flex items-center justify-between gap-6">
+            <div className="grid grid-cols-2 items-center justify-between gap-6">
               <div>
                 <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-2">
                   Quantity

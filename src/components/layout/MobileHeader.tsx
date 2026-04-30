@@ -17,7 +17,7 @@ export function MobileHeader({ title }: MobileHeaderProps) {
         <Link to="/" className="flex items-center">
           <img src="/logo.png" alt="Holy Grills" className="h-8 w-auto" />
         </Link>
-        {title && <h1 className="text-base font-extrabold text-foreground truncate">{title}</h1>}
+        {/* {title && <h1 className="text-base font-extrabold text-foreground truncate">{title}</h1>} */}
         <div className="flex items-center gap-2">
           <button className="relative p-2 text-brand-brown/70 rounded-full hover:bg-secondary">
             <Bell size={20} />
