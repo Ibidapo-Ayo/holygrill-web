@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import { Control, FieldValues } from 'react-hook-form'
 import {
     FormControl,
@@ -17,7 +17,9 @@ import "react-datepicker/dist/react-datepicker.css"
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Eye, EyeOff } from 'lucide-react'
 import { FormFieldTypes } from '@/lib/form-field-type'
+import { cn } from '@/lib/utils'
 
 interface CustomProps {
     control: Control<FieldValues>
@@ -35,6 +37,63 @@ interface CustomProps {
     /** HTML input type, e.g. "text" | "email" | "password" */
     type?: string
     renderSkeleton?: (field: unknown) => React.ReactNode
+}
+
+type IconComponentType = React.ComponentType<{ size?: number | string; className?: string }>
+
+/** Owns its own show-password toggle state — only rendered for type="password" inputs. */
+const PasswordInputField = ({
+    field,
+    props,
+    IconComponent,
+    iconPath,
+}: {
+    field: { value: unknown; onChange: (val: unknown) => void }
+    props: CustomProps
+    IconComponent: IconComponentType | null
+    iconPath: string | null
+}) => {
+    const [showPassword, setShowPassword] = useState(false)
+    const { placeholder, iconAlt } = props
+
+    return (
+        <div className="relative">
+            {/* Left icon */}
+            {IconComponent && (
+                <IconComponent
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                />
+            )}
+            {iconPath && (
+                <Image
+                    src={iconPath}
+                    width={16}
+                    height={16}
+                    alt={iconAlt ?? 'icon'}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+            )}
+            <FormControl>
+                <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={placeholder}
+                    {...(field as React.ComponentProps<typeof Input>)}
+                    className={cn('shad-input', 'pr-10')}
+                    disabled={props.disabled}
+                />
+            </FormControl>
+            {/* Right eye toggle */}
+            <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+        </div>
+    )
 }
 
 const RenderField = ({
@@ -56,16 +115,25 @@ const RenderField = ({
         name,
     } = props
 
-    // Lucide icon component (passed as a React component type)
     const IconComponent =
         iconSrc && typeof iconSrc !== 'string'
-            ? (iconSrc as React.ComponentType<{ size?: number | string; className?: string }>)
+            ? (iconSrc as IconComponentType)
             : null
-    // Image path string (SVG etc.)
     const iconPath = typeof iconSrc === 'string' ? iconSrc : null
 
     switch (fieldType) {
         case FormFieldTypes.INPUT:
+            // Password fields use a dedicated component to isolate show/hide state
+            if (props.type === 'password') {
+                return (
+                    <PasswordInputField
+                        field={field}
+                        props={props}
+                        IconComponent={IconComponent}
+                        iconPath={iconPath}
+                    />
+                )
+            }
             return (
                 <div className="relative">
                     {IconComponent && (
