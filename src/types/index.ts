@@ -115,3 +115,23 @@ export interface CartItem {
   imageUrl: string;
   hpValue: number;
 }
+
+/** A single call-to-action button on the hero carousel */
+export interface HeroCTA {
+  label: string;
+  href: string;
+  variant: 'primary' | 'secondary';
+}
+
+/** One slide in the hero carousel – stored and managed via the admin panel */
+export interface HeroSlide {
+  id: string;
+  /** Small badge text above the title, e.g. "FUTA's #1 Food Platform" */
+  tag: string;
+  title: string;
+  description: string;
+  /** Up to 2 call-to-action buttons */
+  ctaButtons: HeroCTA[];
+  imageUrl: string;
+  isActive: boolean;
+}
