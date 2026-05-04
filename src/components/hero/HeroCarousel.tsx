@@ -173,7 +173,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             key={`progress-${slide.id}-${isPaused ? 'paused' : 'playing'}`}
             className="h-full bg-gradient-fire origin-left"
             initial={{ scaleX: 0 }}
-            animate={{ scaleX: isPaused ? undefined : 1 }}
+            animate={{ scaleX: isPaused ? 0 : 1 }}
             transition={{ duration: SLIDE_DURATION_MS / 1000, ease: 'linear' }}
           />
         </div>

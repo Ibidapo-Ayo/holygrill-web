@@ -20,7 +20,12 @@ import type { HeroSlide } from '@/types';
 const IMG_BASE =
   'https://raw.githubusercontent.com/Ibidapo-Ayo/holygrill/main/public/images/custom-images/menu';
 
-/** Mutable store – mutated by the admin PUT /api/hero route */
+/** Mutable store – mutated by the admin PUT /api/hero route.
+ *
+ * ⚠️  Production note: Replace this in-memory array with real database reads/writes
+ * (e.g. `db.heroSlides.findMany()`). Module-level mutation is only safe for
+ * demo/prototyping where a single Node.js process serves all requests.
+ */
 export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 'slide-1',

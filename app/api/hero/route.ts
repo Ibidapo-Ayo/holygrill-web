@@ -31,7 +31,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "slides must be an array" }, { status: 400 });
   }
 
-  // Mutate the shared in-memory store so the next SSR render picks up the change
+  // Mutate the shared in-memory store so the next SSR render picks up the change.
+  // ⚠️  Production note: Replace this with a proper database write. Mutating a
+  // module-level array is only safe in single-process demo environments.
   HERO_SLIDES.splice(0, HERO_SLIDES.length, ...slides);
 
   return NextResponse.json({ data: HERO_SLIDES });

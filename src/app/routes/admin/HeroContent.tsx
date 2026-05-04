@@ -26,7 +26,7 @@ import type { HeroSlide, HeroCTA } from '@/types';
 
 /* ── Default empty slide template ── */
 const EMPTY_SLIDE = (): HeroSlide => ({
-  id: `slide-${Date.now()}`,
+  id: crypto.randomUUID(),
   tag: "FUTA's #1 Food Platform",
   title: 'Your Title\nGoes Here',
   description: 'Describe this slide in one or two sentences.',
@@ -198,10 +198,10 @@ const AdminHeroContent = () => {
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => moveSlide(slide.id, 'up')} disabled={idx === 0} className="p-1.5 rounded hover:bg-secondary transition-colors disabled:opacity-30">
+                  <button onClick={() => moveSlide(slide.id, 'up')} disabled={idx === 0} aria-label="Move slide up" className="p-1.5 rounded hover:bg-secondary transition-colors disabled:opacity-30">
                     <ChevronUp size={13} />
                   </button>
-                  <button onClick={() => moveSlide(slide.id, 'down')} disabled={idx === slides.length - 1} className="p-1.5 rounded hover:bg-secondary transition-colors disabled:opacity-30">
+                  <button onClick={() => moveSlide(slide.id, 'down')} disabled={idx === slides.length - 1} aria-label="Move slide down" className="p-1.5 rounded hover:bg-secondary transition-colors disabled:opacity-30">
                     <ChevronDown size={13} />
                   </button>
                   <button
