@@ -1,8 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@/lib/router';
 import { 
   LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, 
   Flame, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3,
-  CreditCard, MessageSquare
+  CreditCard, MessageSquare, LayoutTemplate
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,6 +28,12 @@ const NAV_SECTIONS = [
     items: [
       { to: '/admin/users', label: 'Users & HP', icon: Users },
       { to: '/admin/support', label: 'Support', icon: MessageSquare, badge: 2 },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { to: '/admin/hero', label: 'Hero Content', icon: LayoutTemplate },
     ],
   },
   {

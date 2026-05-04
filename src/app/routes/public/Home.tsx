@@ -1,11 +1,24 @@
-import { Link } from 'react-router-dom';
+"use client";
+
+/**
+ * Home.tsx
+ * ---------------------------------------------------------------------------
+ * Main public homepage.
+ *
+ * heroSlides is fetched server-side in app/page.tsx (SSR) and passed in as a
+ * prop, so the carousel renders with real content on the very first HTML
+ * response — no client-side fetch needed.
+ */
+
+import { Link } from '@/lib/router';
 import { motion } from 'framer-motion';
 import { Flame, ArrowRight, Zap, Trophy, Gift, Star, Users, ShoppingBag, MapPin, Clock, ChevronRight } from 'lucide-react';
-import heroBurger from '@/assets/hero-burger.jpg';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { useCartStore } from '@/stores/cartStore';
-import { MOCK_MENU, formatPrice } from '@/data/menu';
+import { MOCK_MENU } from '@/data/menu';
 import { toast } from 'sonner';
+import { HeroCarousel } from '@/components/hero/HeroCarousel';
+import type { HeroSlide } from '@/types';
 
 const FEATURED = MOCK_MENU.filter((i) => i.isAvailable).slice(0, 4);
 
@@ -22,7 +35,7 @@ const STATS = [
   { icon: Clock, value: '22 min', label: 'Avg Delivery' },
 ];
 
-const Home = () => {
+const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
   const { items, addItem, updateQuantity } = useCartStore();
 
   const handleAdd = (id: string) => {
@@ -34,53 +47,8 @@ const Home = () => {
 
   return (
     <main className="flex-1 flex flex-col">
-      {/* Hero */}
-      <section className="relative md:pt-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="absolute right-0 top-16 w-1/2 h-full hidden lg:block">
-          <img src={heroBurger} alt="Holy Grills Burger" className="w-full h-full object-cover opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        </div>
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Flame size={14} className="text-primary" />
-              <span className="text-xs font-body font-medium text-primary">FUTA's #1 Food Platform</span>
-            </div>
-
-            <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6">
-              Every Meal,{' '}
-              <span className="text-gradient-fire">Every Point,</span>{' '}
-              Every Moment.
-            </h1>
-
-            <p className="font-body text-muted-foreground text-base md:text-lg max-w-lg mb-8 leading-relaxed">
-              Order delicious grills, earn Holy Points, and join the most vibrant food community on campus.
-            </p>
-
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/menu"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity shadow-glow"
-              >
-                Order Now
-                <ArrowRight size={16} />
-              </Link>
-              <Link
-                to="/signup"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-secondary text-foreground font-display font-bold text-sm hover:bg-border transition-colors"
-              >
-                Join for Free
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Hero Carousel – slides are fetched server-side (SSR) in app/page.tsx */}
+      <HeroCarousel slides={heroSlides} />
 
       {/* Stats Banner */}
       <section className="border-y border-border bg-card/50">

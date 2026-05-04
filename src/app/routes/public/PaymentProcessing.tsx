@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from '@/lib/router';
 import { Loader2 } from 'lucide-react';
+import { processPayment } from '@/lib/api/payments';
 
 type PaymentState = {
   total: number;
@@ -18,10 +19,18 @@ const PaymentProcessingPage = () => {
       navigate('/checkout', { replace: true });
       return;
     }
-    const timer = setTimeout(() => {
-      navigate('/payment/success', { replace: true, state });
-    }, 1800);
-    return () => clearTimeout(timer);
+    let active = true;
+    const run = async () => {
+      try {
+        const result = await processPayment(state);
+        if (!active) return;
+        navigate('/payment/success', { replace: true, state: result });
+      } catch {
+        navigate('/checkout', { replace: true });
+      }
+    };
+    run();
+    return () => { active = false; };
   }, [state, navigate]);
 
   if (!state) return null;

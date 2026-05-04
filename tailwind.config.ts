@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
@@ -15,9 +16,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Nunito", "sans-serif"],
-        body: ["Nunito", "sans-serif"],
-        sans: ["Nunito", "sans-serif"],
+        display: ["Nunito", ...defaultTheme.fontFamily.sans],
+        body: ["Nunito", ...defaultTheme.fontFamily.sans],
+        sans: ["Nunito", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",
