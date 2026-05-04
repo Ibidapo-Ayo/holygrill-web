@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Link } from "@/lib/router";
 import { Flame, Mail, Lock, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { CreateUserInput } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createUserSchema, CreateUserInput } from "@/lib/validations";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import CustomFormField from "@/components/CustomFormField";
@@ -11,6 +11,7 @@ import { FormFieldTypes } from "@/lib/form-field-type";
 const SignupPage = () => {
   // React form hook
   const form = useForm<CreateUserInput>({
+    resolver: zodResolver(createUserSchema),
     defaultValues: {
       name: "",
       email: "",
