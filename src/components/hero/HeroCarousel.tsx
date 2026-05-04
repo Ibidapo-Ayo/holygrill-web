@@ -85,10 +85,10 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               alt={slide.title.replace(/\n/g, ' ')}
               className="w-full h-full object-cover object-center"
             />
-            {/* Dark-brown tint keeps the moody feel */}
-            <div className="absolute inset-0 bg-[#1a0802]/55" />
-            {/* Bottom-to-top fade ensures text is legible over the image */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
+            {/* Dark-brown tint — strengthened for readable text contrast */}
+            <div className="absolute inset-0 bg-[#1a0802]/65" />
+            {/* Bottom-to-top fade anchors the text area in a deeper shadow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           </div>
 
           {/* ── Desktop: right-half image ── */}
@@ -119,18 +119,18 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             className="max-w-2xl"
           >
             {/* Tag badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Flame size={14} className="text-primary" />
-              <span className="text-xs font-body font-medium text-primary">{slide.tag}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/30 lg:bg-primary/10 lg:border-primary/20 mb-6">
+              <Flame size={14} className="text-white lg:text-primary" />
+              <span className="text-xs font-body font-medium text-white lg:text-primary">{slide.tag}</span>
             </div>
 
             {/* Title — newlines become line breaks for dramatic multi-line effect */}
-            <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl text-foreground leading-[1.05] mb-6 whitespace-pre-line">
+            <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl text-white lg:text-foreground leading-[1.05] mb-6 whitespace-pre-line">
               {formatTitle(slide.title)}
             </h1>
 
             {/* Description */}
-            <p className="font-body text-muted-foreground text-base md:text-lg max-w-lg mb-8 leading-relaxed">
+            <p className="font-body text-white/80 lg:text-muted-foreground text-base md:text-lg max-w-lg mb-8 leading-relaxed">
               {slide.description}
             </p>
 
