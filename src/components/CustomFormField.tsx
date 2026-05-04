@@ -33,32 +33,26 @@ interface CustomProps {
     fieldType: FormFieldTypes
     name: string
     placeholder?: string
-    iconSrc?: string
+    iconSrc?: string | React.ComponentType<any>
     iconAlt?: string
     label?: string
     disabled?: boolean
     dateFormat?: string
     showTimeSelect?: boolean
     children?: React.ReactNode
+    type?: string
     renderSkeleton?: (field: unknown) => React.ReactNode
 }
 
 const RenderField = ({ field, props }: { field: { value: unknown; onChange: (val: unknown) => void }, props: CustomProps }) => {
     const { fieldType, placeholder, iconSrc, iconAlt, showTimeSelect, dateFormat, renderSkeleton, label, name } = props
+    const IconComponent = typeof iconSrc !== 'string' ? iconSrc : null
 
     switch (fieldType) {
         case FormFieldTypes.INPUT:
             return (
                 <div className="flex rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring">
-                    {iconSrc && (
-                        <Image
-                            src={iconSrc}
-                            height={24}
-                            width={24}
-                            alt={iconAlt ?? 'icon'}
-                            className="ml-3 my-auto shrink-0"
-                        />
-                    )}
+                    {IconComponent && <IconComponent />}
                     <FormControl>
                         <Input
                             placeholder={placeholder}
