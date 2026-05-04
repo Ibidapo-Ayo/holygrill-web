@@ -80,12 +80,16 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         >
           {/* Hero image — right half, desktop only */}
           <div className="absolute right-0 top-0 w-1/2 h-full hidden lg:block">
+            {/* Image at full opacity so the food is actually visible */}
             <img
               src={slide.imageUrl}
               alt={slide.title.replace(/\n/g, ' ')}
-              className="w-full h-full object-cover opacity-40"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+            {/* Warm dark-brown tint layer — softens the image without hiding it */}
+            <div className="absolute inset-0 bg-[#1a0802]/45" />
+            {/* Left-to-right fade so the text side blends cleanly into the background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
           </div>
         </motion.div>
       </AnimatePresence>
