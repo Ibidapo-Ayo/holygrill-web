@@ -78,7 +78,20 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
           transition={{ duration: 0.55, ease: 'easeInOut' }}
           className="absolute inset-0"
         >
-          {/* Hero image — right half, desktop only */}
+          {/* ── Mobile: full-bleed background image ── */}
+          <div className="absolute inset-0 block lg:hidden">
+            <img
+              src={slide.imageUrl}
+              alt={slide.title.replace(/\n/g, ' ')}
+              className="w-full h-full object-cover object-center"
+            />
+            {/* Dark-brown tint keeps the moody feel */}
+            <div className="absolute inset-0 bg-[#1a0802]/55" />
+            {/* Bottom-to-top fade ensures text is legible over the image */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
+          </div>
+
+          {/* ── Desktop: right-half image ── */}
           <div className="absolute right-0 top-0 w-1/2 h-full hidden lg:block">
             {/* Image at full opacity so the food is actually visible */}
             <img
