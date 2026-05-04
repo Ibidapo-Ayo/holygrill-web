@@ -78,31 +78,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
           transition={{ duration: 0.55, ease: 'easeInOut' }}
           className="absolute inset-0"
         >
-          {/* ── Mobile: full-bleed background image ── */}
-          <div className="absolute inset-0 block lg:hidden">
+          {/* ── Full-bleed background image (all breakpoints) ── */}
+          <div className="absolute inset-0">
             <img
               src={slide.imageUrl}
               alt={slide.title.replace(/\n/g, ' ')}
               className="w-full h-full object-cover object-center"
             />
-            {/* Dark-brown tint — strengthened for readable text contrast */}
+            {/* Dark-brown tint for moody contrast */}
             <div className="absolute inset-0 bg-[#1a0802]/65" />
-            {/* Bottom-to-top fade anchors the text area in a deeper shadow */}
+            {/* Bottom-to-top fade keeps the text area deeply shadowed */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-          </div>
-
-          {/* ── Desktop: right-half image ── */}
-          <div className="absolute right-0 top-0 w-1/2 h-full hidden lg:block">
-            {/* Image at full opacity so the food is actually visible */}
-            <img
-              src={slide.imageUrl}
-              alt={slide.title.replace(/\n/g, ' ')}
-              className="w-full h-full object-cover"
-            />
-            {/* Warm dark-brown tint layer — softens the image without hiding it */}
-            <div className="absolute inset-0 bg-[#1a0802]/45" />
-            {/* Left-to-right fade so the text side blends cleanly into the background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
           </div>
         </motion.div>
       </AnimatePresence>
@@ -119,18 +105,18 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             className="max-w-2xl"
           >
             {/* Tag badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/30 lg:bg-primary/10 lg:border-primary/20 mb-6">
-              <Flame size={14} className="text-white lg:text-primary" />
-              <span className="text-xs font-body font-medium text-white lg:text-primary">{slide.tag}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 border border-white/30 mb-6">
+              <Flame size={14} className="text-white" />
+              <span className="text-xs font-body font-medium text-white">{slide.tag}</span>
             </div>
 
             {/* Title — newlines become line breaks for dramatic multi-line effect */}
-            <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl text-white lg:text-foreground leading-[1.05] mb-6 whitespace-pre-line">
+            <h1 className="font-display font-extrabold text-4xl md:text-6xl lg:text-7xl text-white leading-[1.05] mb-6 whitespace-pre-line">
               {formatTitle(slide.title)}
             </h1>
 
             {/* Description */}
-            <p className="font-body text-white/80 lg:text-muted-foreground text-base md:text-lg max-w-lg mb-8 leading-relaxed">
+            <p className="font-body text-white/80 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
               {slide.description}
             </p>
 
