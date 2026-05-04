@@ -120,4 +120,80 @@
   /* Safe area padding for mobile bottom tab */
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
   .with-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+
+  /* ─── Custom Form Field ──────────────────────────────────────────── */
+
+  /* Base text input — icon wrapper strips its own border so the outer
+     wrapper provides the single visible border + focus ring */
+  .shad-input {
+    @apply h-11 w-full bg-transparent px-3 py-2 text-sm text-foreground
+           placeholder:text-muted-foreground
+           focus-visible:outline-none
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Multi-line textarea */
+  .shad-text-area {
+    @apply min-h-[120px] w-full rounded-md border border-input bg-background
+           px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground
+           resize-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Phone number input container (react-phone-number-input) */
+  .input-phone {
+    @apply flex h-11 w-full items-center rounded-md border border-input
+           bg-background px-3 py-2 text-sm text-foreground
+           placeholder:text-muted-foreground
+           focus-within:ring-2 focus-within:ring-ring;
+  }
+
+  /* Override react-phone-number-input inner input */
+  .input-phone .PhoneInputInput {
+    @apply flex-1 bg-transparent text-sm text-foreground
+           placeholder:text-muted-foreground outline-none;
+  }
+
+  /* react-datepicker wrapper fills its parent */
+  .date-picker {
+    @apply w-full;
+  }
+
+  /* Override react-datepicker inner input to match other fields */
+  .date-picker .react-datepicker__input-container input {
+    @apply h-11 w-full bg-transparent px-3 py-2 text-sm text-foreground
+           placeholder:text-muted-foreground outline-none;
+  }
+
+  /* Select trigger */
+  .shad-select-trigger {
+    @apply h-11 w-full rounded-md border border-input bg-background
+           px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground
+           focus:outline-none focus:ring-2 focus:ring-ring
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Select dropdown content */
+  .shad-select-content {
+    @apply z-50 overflow-hidden rounded-md border border-border
+           bg-popover text-popover-foreground shadow-card;
+  }
+
+  /* Form label */
+  .shad-form-label {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  /* Validation error */
+  .shad-error {
+    @apply text-xs font-medium text-destructive;
+  }
+
+  /* Checkbox label */
+  .checkbox-label {
+    @apply text-sm font-medium text-foreground leading-none
+           cursor-pointer select-none
+           peer-disabled:cursor-not-allowed peer-disabled:opacity-50;
+  }
 }
