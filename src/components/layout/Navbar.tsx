@@ -4,7 +4,7 @@ import { Heart, ShoppingCart, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
-import { useAuthStore, getInitials } from '@/stores/authStore';
+import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -72,9 +72,9 @@ export function Navbar() {
           {isAuthenticated && user ? (
             <div className="flex items-center gap-2">
               <Link to="/profile" className="flex items-center gap-2 group" aria-label="Profile">
-                {user.avatarUrl ? (
+                {safeImageUrl(user.avatarUrl) ? (
                   <img
-                    src={user.avatarUrl}
+                    src={safeImageUrl(user.avatarUrl)!}
                     alt={user.name}
                     className="w-8 h-8 rounded-full object-cover border-2 border-primary"
                   />

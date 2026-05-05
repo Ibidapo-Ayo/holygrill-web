@@ -6,7 +6,7 @@ import { MOCK_ORDERS } from '@/data/mockOrders';
 import { User, LogOut, ShoppingBag, ArrowRight, Settings, Flame, TrendingUp } from 'lucide-react';
 import { formatPrice } from '@/data/menu';
 import { motion } from 'framer-motion';
-import { useAuthStore, getInitials } from '@/stores/authStore';
+import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const userOrders = MOCK_ORDERS.filter((o) => o.userId === 'usr-001');
 const totalSpent = userOrders.reduce((s, o) => s + o.total, 0);
@@ -31,8 +31,8 @@ const AccountDashboardPage = () => {
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-fire flex items-center justify-center shrink-0 overflow-hidden">
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+              {safeImageUrl(user?.avatarUrl) ? (
+                <img src={safeImageUrl(user!.avatarUrl)!} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <span className="text-primary-foreground font-bold text-xl">{initials}</span>
               )}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from '@/lib/router';
+import { useNavigate, Link } from '@/lib/router';
 import { useCartStore, selectSubtotal, selectTotalHP } from '@/stores/cartStore';
 import { DELIVERY_FEE, formatPrice } from '@/data/menu';
 import { Flame, Loader2, MapPin, Home, Clock, UserRound, Mail, Phone } from 'lucide-react';
@@ -98,7 +98,9 @@ const CheckoutPage = () => {
                   <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Guest Checkout</p>
                   <h3 className="font-display font-bold text-foreground text-base">Contact Info</h3>
                   <p className="text-xs text-muted-foreground font-body mt-1">
-                    Provide your email or phone so we can track your order. <a href="/signup" className="text-primary hover:underline">Create an account</a> for full order history.
+                    provide your email or phone so we can track your order.{' '}
+                  <Link to="/signup" className="text-primary hover:underline">Create an account</Link>{' '}
+                  for full order history.
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

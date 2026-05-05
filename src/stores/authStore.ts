@@ -23,6 +23,12 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 
+/** Returns the URL only if it starts with http:// or https://. Prevents javascript: URI injection. */
+export function safeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return /^https?:\/\//i.test(url) ? url : null;
+}
+
 /** Derive user initials from a display name (up to 2 letters). */
 export function getInitials(name: string): string {
   return name

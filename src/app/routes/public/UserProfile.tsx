@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '@/lib/router';
 import { User, Mail, Camera, Loader2, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuthStore, getInitials } from '@/stores/authStore';
+import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const UserProfilePage = () => {
   const { user, setUser, isAuthenticated } = useAuthStore();
@@ -12,6 +12,9 @@ const UserProfilePage = () => {
   const [email, setEmail] = useState(user?.email ?? '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
   const [saving, setSaving] = useState(false);
+
+  /** Only allow http/https URLs to avoid javascript: URI injection. */
+  const safeAvatarUrl = safeImageUrl(avatarUrl);
 
   if (!isAuthenticated || !user) {
     return (
@@ -61,9 +64,9 @@ const UserProfilePage = () => {
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative w-24 h-24">
-              {avatarUrl ? (
+              {safeAvatarUrl ? (
                 <img
-                  src={avatarUrl}
+                  src={safeAvatarUrl}
                   alt={name}
                   className="w-24 h-24 rounded-full object-cover border-4 border-primary"
                   onError={() => setAvatarUrl('')}

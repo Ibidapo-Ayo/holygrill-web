@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Menu, ChevronRight, LogOut, User } from "lucide-react";
-import { useAuthStore, getInitials } from "@/stores/authStore";
+import { useAuthStore, getInitials, safeImageUrl } from "@/stores/authStore";
 
 const LINKS = [
   { label: "About HG", to: "/about" },
@@ -51,9 +51,9 @@ export function MobileSidebar() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-3"
             >
-              {user.avatarUrl ? (
+              {safeImageUrl(user.avatarUrl) ? (
                 <img
-                  src={user.avatarUrl}
+                  src={safeImageUrl(user.avatarUrl)!}
                   alt={user.name}
                   className="w-10 h-10 rounded-full object-cover border-2 border-primary"
                 />
