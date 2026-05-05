@@ -26,7 +26,12 @@ interface AuthState {
 /** Returns the URL only if it starts with http:// or https://. Prevents javascript: URI injection. */
 export function safeImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  return /^https?:\/\//i.test(url) ? url : null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Derive user initials from a display name (up to 2 letters). */

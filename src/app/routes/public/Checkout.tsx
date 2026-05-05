@@ -98,7 +98,7 @@ const CheckoutPage = () => {
                   <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Guest Checkout</p>
                   <h3 className="font-display font-bold text-foreground text-base">Contact Info</h3>
                   <p className="text-xs text-muted-foreground font-body mt-1">
-                    provide your email or phone so we can track your order.{' '}
+                    Provide your email or phone so we can track your order.{' '}
                   <Link to="/signup" className="text-primary hover:underline">Create an account</Link>{' '}
                   for full order history.
                   </p>
