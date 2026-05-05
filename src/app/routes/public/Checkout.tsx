@@ -2,22 +2,29 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@/lib/router';
 import { useCartStore, selectSubtotal, selectTotalHP } from '@/stores/cartStore';
 import { DELIVERY_FEE, formatPrice } from '@/data/menu';
-import { Flame, Loader2, MapPin, Home, Clock, UserRound } from 'lucide-react';
+import { Flame, Loader2, MapPin, Home, Clock, UserRound, Mail, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { FulfillmentDialog } from '@/components/checkout/FulfillmentDialog';
 import { hasDeliveryInfo, hasPickupInfo, useFulfillmentStore } from '@/stores/fulfillmentStore';
+import { useAuthStore } from '@/stores/authStore';
 
 const CheckoutPage = () => {
   const { items } = useCartStore();
   const subtotal = useCartStore(selectSubtotal);
   const totalHP = useCartStore(selectTotalHP);
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuthStore();
 
   const { method, deliveryInfo, pickupInfo, setMethod } = useFulfillmentStore();
   const deliveryReady = useFulfillmentStore(hasDeliveryInfo);
   const pickupReady = useFulfillmentStore(hasPickupInfo);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Guest contact info
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestContactError, setGuestContactError] = useState('');
 
   const deliveryFee = method === 'delivery' ? DELIVERY_FEE : 0;
   const total = subtotal + deliveryFee;
@@ -30,7 +37,16 @@ const CheckoutPage = () => {
 
   const canPay = method === 'delivery' ? deliveryReady : pickupReady;
 
+  const guestContactValid = isAuthenticated || guestEmail.trim() || guestPhone.trim();
+
   const handlePay = async () => {
+    if (!isAuthenticated) {
+      if (!guestEmail.trim() && !guestPhone.trim()) {
+        setGuestContactError('Please enter your email or phone number so we can identify your order.');
+        return;
+      }
+      setGuestContactError('');
+    }
     if (!canPay) {
       toast.error('Please save your delivery or pickup info first.');
       setDialogOpen(true);
@@ -74,6 +90,49 @@ const CheckoutPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Fulfillment & payment */}
           <div className="md:col-span-3 space-y-5">
+
+            {/* Guest contact (only shown if not authenticated) */}
+            {!isAuthenticated && (
+              <div className="bg-card rounded-lg border border-border p-5 space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Guest Checkout</p>
+                  <h3 className="font-display font-bold text-foreground text-base">Contact Info</h3>
+                  <p className="text-xs text-muted-foreground font-body mt-1">
+                    Provide your email or phone so we can track your order. <a href="/signup" className="text-primary hover:underline">Create an account</a> for full order history.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground font-body mb-1">
+                      <Mail size={13} className="text-primary" /> Email
+                    </label>
+                    <input
+                      type="email"
+                      value={guestEmail}
+                      onChange={(e) => { setGuestEmail(e.target.value); setGuestContactError(''); }}
+                      placeholder="you@example.com"
+                      className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground font-body mb-1">
+                      <Phone size={13} className="text-primary" /> Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={guestPhone}
+                      onChange={(e) => { setGuestPhone(e.target.value); setGuestContactError(''); }}
+                      placeholder="08012345678"
+                      className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                </div>
+                {guestContactError && (
+                  <p className="text-destructive text-xs font-body">{guestContactError}</p>
+                )}
+              </div>
+            )}
+
             <div className="bg-card rounded-lg border border-border p-5 space-y-4">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div>
