@@ -23,12 +23,7 @@ const SignupPage = () => {
   });
 
   const handleSubmit = async (data: CreateUserInput) => {
-    form.setError("root", {
-      message: "This is a demo, registration is disabled.",
-    });
-    toast.error(
-      "Registration is disabled in this demo. Please use the login page.",
-    );
+    console.log(data)
     return;
   };
 
@@ -96,7 +91,7 @@ const SignupPage = () => {
             className="space-y-4"
           >
             {fields.map((f) => (
-              <div className="relative">
+              <div className="relative" key={f.key}>
                 <CustomFormField
                   key={f.key}
                   control={form.control}
