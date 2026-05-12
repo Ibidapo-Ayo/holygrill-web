@@ -101,7 +101,7 @@ const SignupPage = () => {
             className="space-y-4"
           >
             {fields.map((f) => (
-              <div className="relative">
+              <div className="relative" key={f.key}>
                 <CustomFormField
                   key={f.key}
                   control={form.control}
