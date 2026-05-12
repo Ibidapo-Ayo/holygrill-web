@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from '@/lib/router';
+import { Link, useNavigate } from '@/lib/router';
 import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, ChevronRight } from 'lucide-react';
+import { ChevronRight, LogOut, Menu, User } from 'lucide-react';
+import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const LINKS = [
   { label: 'Leaderboard', to: '/leaderboard' },
@@ -14,6 +15,14 @@ const LINKS = [
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate('/');
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -27,7 +36,43 @@ export function MobileSidebar() {
         <div className="border-b border-border px-5 py-4">
           <p className="font-display font-bold text-foreground">Explore Holy Grills</p>
         </div>
+
+        {isAuthenticated && user ? (
+          <div className="border-b border-border px-5 pb-4">
+            <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3">
+              {safeImageUrl(user.avatarUrl) ? (
+                <img
+                  src={safeImageUrl(user.avatarUrl)!}
+                  alt={user.name}
+                  className="h-10 w-10 rounded-full border-2 border-primary object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-fire text-sm font-bold text-primary-foreground">
+                  {getInitials(user.name)}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-foreground">{user.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            </Link>
+          </div>
+        ) : null}
+
         <nav className="space-y-2 p-5">
+          {!isAuthenticated ? (
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold text-primary"
+            >
+              <span className="flex items-center gap-2">
+                <User size={16} /> Login
+              </span>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+          ) : null}
+
           {LINKS.map((item) => (
             <Link
               key={item.label}
@@ -39,6 +84,15 @@ export function MobileSidebar() {
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
           ))}
+
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="inline-flex w-full items-center gap-2 px-3 py-2 text-md font-bold text-destructive"
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          ) : null}
         </nav>
       </DialogContent>
     </Dialog>

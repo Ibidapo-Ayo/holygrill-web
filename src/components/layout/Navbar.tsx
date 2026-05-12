@@ -1,12 +1,14 @@
 import { Link, useLocation } from '@/lib/router';
-import { ShoppingCart, User, Wallet } from 'lucide-react';
+import { LogOut, ShoppingCart, User, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
+import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 import { DESKTOP_NAV_LINKS } from '@/constants/navigation';
 
 export function Navbar() {
   const location = useLocation();
   const itemCount = useCartStore(selectItemCount);
+  const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 hidden border-b border-border bg-background/85 backdrop-blur-xl md:block">
@@ -32,12 +34,19 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/wallet" className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/30">
+          <Link
+            to="/wallet"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/30"
+          >
             <Wallet size={16} className="text-primary" /> ₦8,400
           </Link>
-          <Link to="/cart" className="relative rounded-full p-2 text-brand-brown/70 transition-colors hover:text-foreground" aria-label="Cart">
+          <Link
+            to="/cart"
+            className="relative rounded-full p-2 text-brand-brown/70 transition-colors hover:text-foreground"
+            aria-label="Cart"
+          >
             <ShoppingCart size={20} />
-            {itemCount > 0 && (
+            {itemCount > 0 ? (
               <motion.span
                 key={itemCount}
                 initial={{ scale: 0.5 }}
@@ -46,11 +55,48 @@ export function Navbar() {
               >
                 {itemCount}
               </motion.span>
-            )}
+            ) : null}
           </Link>
-          <Link to="/dashboard" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20" aria-label="Profile">
-            <User size={18} />
-          </Link>
+
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-1.5 text-primary transition-colors hover:bg-primary/20"
+                aria-label="Profile"
+              >
+                {safeImageUrl(user.avatarUrl) ? (
+                  <img
+                    src={safeImageUrl(user.avatarUrl)!}
+                    alt={user.name}
+                    className="h-7 w-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-fire text-xs font-bold text-primary-foreground">
+                    {getInitials(user.name)}
+                  </span>
+                )}
+                <span className="hidden text-sm font-semibold text-foreground lg:block">
+                  {user.name.split(' ')[0]}
+                </span>
+              </Link>
+              <button
+                onClick={logout}
+                className="rounded-full p-2 text-brand-brown/70 transition-colors hover:text-destructive"
+                aria-label="Logout"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-cta px-4 py-2 text-sm font-bold text-primary-foreground shadow-glow transition-opacity hover:opacity-95"
+            >
+              <User size={16} />
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

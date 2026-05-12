@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Clock, MapPin, Package, Phone, UserRound, Flame, MessageSquare } from 'lucide-react';
+import { Clock, MapPin, Package, Phone, UserRound, Flame, MessageSquare, Search } from 'lucide-react';
+import { Link, useNavigate } from '@/lib/router';
+import { useAuthStore } from '@/stores/authStore';
 
 const PROGRESS = [
   { title: 'Cooking your meal', description: 'Flavors are firing up in the kitchen!', Icon: Flame },
@@ -7,7 +9,58 @@ const PROGRESS = [
   { title: 'Arrived! Collect within 5 mins', description: 'Your order is ready at the counter.', Icon: Package },
 ];
 
+const GuestOrderLookup = () => {
+  const [orderId, setOrderId] = useState('');
+  const navigate = useNavigate();
+
+  const handleLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = orderId.trim();
+    if (!trimmed) return;
+    navigate(`/orders/${trimmed}`);
+  };
+
+  return (
+    <main className="flex-1 md:pt-16 pb-12 flex items-center justify-center">
+      <div className="container mx-auto px-4 max-w-sm">
+        <div className="bg-card border border-border rounded-2xl shadow-card p-8 text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <Search size={28} className="text-primary" />
+          </div>
+          <div className="space-y-1">
+            <h1 className="font-display font-bold text-foreground text-xl">Track Your Order</h1>
+            <p className="text-sm text-muted-foreground font-body">Enter your Order ID to view the current status.</p>
+          </div>
+          <form onSubmit={handleLookup} className="space-y-3 text-left">
+            <label className="text-xs text-muted-foreground font-body">Order ID</label>
+            <input
+              type="text"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="e.g. ord-1234567890"
+              required
+              className="w-full px-4 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity"
+            >
+              Track Order
+            </button>
+          </form>
+          <p className="text-xs text-muted-foreground font-body">
+            Have an account?{' '}
+            <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>{' '}
+            for full order history.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+};
+
 const OrdersPage = () => {
+  const { isAuthenticated } = useAuthStore();
   const [activeStage, setActiveStage] = useState(0);
 
   useEffect(() => {
@@ -16,6 +69,10 @@ const OrdersPage = () => {
     }, 8000);
     return () => clearInterval(interval);
   }, []);
+
+  if (!isAuthenticated) {
+    return <GuestOrderLookup />;
+  }
 
   return (
     <main className="flex-1 md:pt-16 pb-12">
