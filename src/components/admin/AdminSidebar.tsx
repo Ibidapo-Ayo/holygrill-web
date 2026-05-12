@@ -48,8 +48,26 @@ export function AdminSidebar() {
     <aside className={`fixed bottom-0 left-0 top-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="flex h-16 items-center border-b border-border px-4 shrink-0">
         <Link to="/admin" className="flex items-center gap-2 overflow-hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-fire shrink-0"><Flame size={18} className="text-primary-foreground" /></div>
-          <AnimatePresence>{!collapsed ? <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="overflow-hidden"><span className="block whitespace-nowrap font-display text-sm font-bold text-foreground">Holy Grills</span><span className="block whitespace-nowrap text-[9px] text-muted-foreground">Ops Console</span></motion.div> : null}</AnimatePresence>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-fire">
+            <Flame size={18} className="text-primary-foreground" />
+          </div>
+          <AnimatePresence>
+            {!collapsed ? (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden"
+              >
+                <span className="block whitespace-nowrap font-display text-sm font-bold text-foreground">
+                  Holy Grills
+                </span>
+                <span className="block whitespace-nowrap text-[9px] text-muted-foreground">
+                  Ops Console
+                </span>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </Link>
       </div>
 
