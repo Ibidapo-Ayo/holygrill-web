@@ -1,4 +1,4 @@
-import { Link } from "@/lib/router";
+import { Link, useNavigate } from "@/lib/router";
 import { Flame, Mail, Lock, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,8 +8,12 @@ import { Form } from "@/components/ui/form";
 import CustomFormField from "@/components/CustomFormField";
 import { FormFieldTypes } from "@/lib/form-field-type";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
+import { useAuthStore } from "@/stores/authStore";
 
 const SignupPage = () => {
+  const signup = useAuthStore((s) => s.signup);
+  const navigate = useNavigate();
+
   // React form hook
   const form = useForm<CreateUserInput>({
     resolver: zodResolver(createUserSchema),
@@ -23,8 +27,14 @@ const SignupPage = () => {
   });
 
   const handleSubmit = async (data: CreateUserInput) => {
-    console.log(data)
-    return;
+    try {
+      await signup(data.name, data.email, data.password, data.phone_number);
+      toast.success("Account created! Welcome to Holy Grills 🔥");
+      navigate("/dashboard");
+    } catch {
+      form.setError("root", { message: "Failed to create account. Please try again." });
+      toast.error("Failed to create account. Please try again.");
+    }
   };
 
   const fields = [
@@ -104,6 +114,10 @@ const SignupPage = () => {
                 />
               </div>
             ))}
+
+            {form.formState.errors.root && (
+              <p className="text-sm text-destructive font-body text-center">{form.formState.errors.root.message}</p>
+            )}
 
             <button
               type="submit"

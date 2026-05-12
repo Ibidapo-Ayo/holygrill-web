@@ -1,6 +1,7 @@
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
-import { Trophy, Gift, Flame, Star } from 'lucide-react';
+import { Trophy, Gift, Flame, Star, Lock } from 'lucide-react';
 import { Link } from '@/lib/router';
+import { useAuthStore } from '@/stores/authStore';
 
 const TIERS = [
   { name: 'Rookie', min: 0, perk: '5% off first order', color: 'bg-secondary' },
@@ -17,7 +18,43 @@ const REWARDS = [
 ];
 
 const RewardsPage = () => {
-  const currentHP = 185; // mock
+  const { isAuthenticated, user } = useAuthStore();
+  const currentHP = 185; // mock HP value for authenticated users
+
+  if (!isAuthenticated) {
+    return (
+      <main className="flex-1 pt-4 md:pt-24 pb-12 flex items-center justify-center">
+        <div className="container mx-auto px-4 max-w-md text-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <Lock size={36} className="text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-display font-bold text-foreground text-2xl">Members Only</h1>
+            <p className="text-muted-foreground font-body text-sm">
+              Sign in to view your Holy Points, unlock tier rewards, and redeem free meals.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-cta text-primary-foreground font-extrabold shadow-glow"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-primary text-primary font-extrabold hover:bg-primary/5 transition-colors"
+            >
+              Create Account
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground font-body">
+            Earn 1 HP for every ₦100 spent. Redeem for free meals.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 pt-4 md:pt-24 pb-12">

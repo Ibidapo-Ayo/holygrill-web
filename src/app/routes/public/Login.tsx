@@ -1,4 +1,4 @@
-import { Link } from '@/lib/router';
+import { Link, useNavigate } from '@/lib/router';
 import { Flame, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,16 +8,26 @@ import { Form } from '@/components/ui/form';
 import CustomFormField from '@/components/CustomFormField';
 import { FormFieldTypes } from '@/lib/form-field-type';
 import GoogleAuthButton from '@/components/GoogleAuthButton';
+import { useAuthStore } from '@/stores/authStore';
 
 const LoginPage = () => {
+  const login = useAuthStore((s) => s.login);
+  const navigate = useNavigate();
+
   const form = useForm<LoginUserInput>({
     resolver: zodResolver(loginUserSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  const handleSubmit = async (_data: LoginUserInput) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    toast.success('Welcome back! 🔥');
+  const handleSubmit = async (data: LoginUserInput) => {
+    try {
+      await login(data.email, data.password);
+      toast.success('Welcome back! 🔥');
+      navigate('/dashboard');
+    } catch {
+      form.setError('root', { message: 'Invalid email or password.' });
+      toast.error('Invalid email or password.');
+    }
   };
 
   return (
@@ -55,6 +65,10 @@ const LoginPage = () => {
               iconSrc={Lock}
             />
 
+            {form.formState.errors.root && (
+              <p className="text-sm text-destructive font-body text-center">{form.formState.errors.root.message}</p>
+            )}
+
             <button
               type="submit"
               disabled={form.formState.isSubmitting}
@@ -68,6 +82,10 @@ const LoginPage = () => {
             </button>
           </form>
         </Form>
+
+        <p className="text-center text-xs text-muted-foreground font-body mt-3">
+          Demo: <span className="font-medium">demo@futa.edu.ng</span> / <span className="font-medium">password</span>
+        </p>
 
         {/* Divider */}
         <div className="relative my-6">
