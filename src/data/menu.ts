@@ -28,7 +28,7 @@ export const MOCK_MENU: MenuItem[] = [
         author: 'Omoayena A',
         rating: 5,
         comment:
-          "It was wonderful 😭😭😭😭😭😭🥰,, I was even so full i couldn't finish my chips. But it was lovely I enjoyed the sausage so much with the sauce.",
+          "It was wonderful 😭😭😭😭😭😭🥰, I was even so full i couldn't finish my chips. But it was lovely I enjoyed the sausage so much with the sauce.",
         createdAt: '2 days ago',
         rewardHP: 10,
       },

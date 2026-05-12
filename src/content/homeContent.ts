@@ -82,7 +82,7 @@ export const HOME_HOLY_POINTS_FEATURES: HomeHolyPointsFeature[] = [
 export const HOME_TESTIMONIALS: HomeTestimonial[] = [
   {
     name: 'Omoayena A',
-    quote: "It was wonderful 😭😭😭😭😭😭🥰,, I was even so full i couldn't finish my chips. But it was lovely I enjoyed the sausage so much with the sauce.",
+    quote: "It was wonderful 😭😭😭😭😭😭🥰, I was even so full i couldn't finish my chips. But it was lovely I enjoyed the sausage so much with the sauce.",
   },
   {
     name: 'Owoeye I.B',
