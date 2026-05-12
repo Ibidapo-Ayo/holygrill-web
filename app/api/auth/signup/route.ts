@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -9,8 +10,8 @@ export async function POST(request: Request) {
 
   // In a real app you'd persist to a database. For demo, just return a new user.
   const userId = `usr-${Date.now()}`;
-  const tokenPayload = btoa(JSON.stringify({ id: userId, email, ts: Date.now() }));
-  const token = `hg_${tokenPayload}`;
+  // TODO: Replace this mock token with backend-issued signed auth tokens once auth is wired up.
+  const token = `hg_${randomBytes(24).toString('hex')}`;
 
   return NextResponse.json(
     {
