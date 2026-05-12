@@ -1,46 +1,79 @@
+import { Flame, Wallet } from 'lucide-react';
 import { formatPrice } from '@/data/menu';
-import { Flame } from 'lucide-react';
 
 interface CartSummaryProps {
   subtotal: number;
   deliveryFee: number;
+  promoDiscount: number;
+  hpRedemption: number;
+  walletApplied: number;
   total: number;
   hpToEarn: number;
   onCheckout: () => void;
   isCheckoutDisabled?: boolean;
+  checkoutLabel?: string;
 }
 
-export function CartSummary({ subtotal, deliveryFee, total, hpToEarn, onCheckout, isCheckoutDisabled }: CartSummaryProps) {
+export function CartSummary({
+  subtotal,
+  deliveryFee,
+  promoDiscount,
+  hpRedemption,
+  walletApplied,
+  total,
+  hpToEarn,
+  onCheckout,
+  isCheckoutDisabled,
+  checkoutLabel = 'Checkout',
+}: CartSummaryProps) {
   return (
-    <div className="bg-card rounded-lg border border-border p-5 space-y-4 sticky top-24">
-      <h3 className="font-display font-bold text-foreground text-lg">Order Summary</h3>
+    <div className="sticky top-24 space-y-4 rounded-3xl border border-border bg-card p-5">
+      <h3 className="font-display text-lg font-bold text-foreground">Checkout summary</h3>
 
-      <div className="space-y-2 text-sm font-body">
+      <div className="space-y-2 text-sm">
         <div className="flex justify-between text-muted-foreground">
           <span>Subtotal</span>
           <span className="text-foreground">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex justify-between text-muted-foreground">
-          <span>Delivery Fee</span>
+          <span>Delivery fee</span>
           <span className="text-foreground">{formatPrice(deliveryFee)}</span>
         </div>
-        <div className="border-t border-border pt-2 flex justify-between font-bold text-foreground text-base">
-          <span>Total</span>
+        <div className="flex justify-between text-muted-foreground">
+          <span>Promo savings</span>
+          <span className="text-success">-{formatPrice(promoDiscount)}</span>
+        </div>
+        <div className="flex justify-between text-muted-foreground">
+          <span>HP redemption</span>
+          <span className="text-success">-{formatPrice(hpRedemption)}</span>
+        </div>
+        <div className="flex justify-between text-muted-foreground">
+          <span>Wallet applied</span>
+          <span className="text-success">-{formatPrice(walletApplied)}</span>
+        </div>
+        <div className="flex justify-between border-t border-border pt-3 text-base font-bold text-foreground">
+          <span>Pay now</span>
           <span className="text-primary">{formatPrice(total)}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-accent/10 rounded-md px-3 py-2">
-        <Flame size={16} className="text-accent" />
-        <span className="text-xs font-body text-accent font-medium">You'll earn +{hpToEarn} HP with this order!</span>
+      <div className="rounded-2xl bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
+        <div className="flex items-center gap-2">
+          <Flame size={16} /> +{hpToEarn} HP projected on this order
+        </div>
+      </div>
+      <div className="rounded-2xl bg-secondary/70 px-3 py-2 text-xs font-medium text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Wallet size={16} /> Wallet-first checkout supported for backend handoff
+        </div>
       </div>
 
       <button
         onClick={onCheckout}
         disabled={isCheckoutDisabled}
-        className="w-full py-3 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full rounded-2xl bg-gradient-fire py-3 text-base font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Checkout — {formatPrice(total)}
+        {checkoutLabel} — {formatPrice(total)}
       </button>
     </div>
   );

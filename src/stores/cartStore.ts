@@ -16,23 +16,23 @@ export const useCartStore = create<CartState>()(
       items: [],
       addItem: (item) =>
         set((state) => {
-          const existing = state.items.find((i) => i.id === item.id);
+          const existing = state.items.find((entry) => entry.id === item.id);
           if (existing) {
             return {
-              items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+              items: state.items.map((entry) =>
+                entry.id === item.id ? { ...entry, quantity: entry.quantity + 1 } : entry
               ),
             };
           }
           return { items: [...state.items, { ...item, quantity: 1 }] };
         }),
       removeItem: (id) =>
-        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+        set((state) => ({ items: state.items.filter((item) => item.id !== id) })),
       updateQuantity: (id, quantity) =>
         set((state) => {
-          if (quantity <= 0) return { items: state.items.filter((i) => i.id !== id) };
+          if (quantity <= 0) return { items: state.items.filter((item) => item.id !== id) };
           return {
-            items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+            items: state.items.map((item) => (item.id === id ? { ...item, quantity } : item)),
           };
         }),
       clearCart: () => set({ items: [] }),
@@ -42,8 +42,8 @@ export const useCartStore = create<CartState>()(
 );
 
 export const selectItemCount = (state: CartState) =>
-  state.items.reduce((sum, i) => sum + i.quantity, 0);
+  state.items.reduce((sum, item) => sum + item.quantity, 0);
 export const selectSubtotal = (state: CartState) =>
-  state.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 export const selectTotalHP = (state: CartState) =>
-  state.items.reduce((sum, i) => sum + i.hpValue * i.quantity, 0);
+  state.items.reduce((sum, item) => sum + item.hpValue * item.quantity, 0);

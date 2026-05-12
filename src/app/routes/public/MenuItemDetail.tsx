@@ -1,528 +1,292 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from '@/lib/router';
-import { ArrowLeft, CheckCircle2, Clock, Flame, Heart, Minus, Plus, ShoppingBag, Truck } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Flame, Heart, MessageSquare, Minus, Plus, ShoppingBag, Star, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate, useParams } from '@/lib/router';
+import { FoodCard } from '@/components/menu/FoodCard';
+import { HPBadge } from '@/components/hp/HPBadge';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { StatusStrip } from '@/components/shared/StatusStrip';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
-import { FoodCard } from '@/components/menu/FoodCard';
-import { HPBadge } from '@/components/hp/HPBadge';
+import { createCartLineId, getCartQuantityForMenuItem, getConfiguredMenuPrice, getPrimaryCartLineId } from '@/utils/pricing';
 import { toast } from 'sonner';
 
 const MenuItemDetail = () => {
-  const { menuId } = useParams();
+  const { menuId } = useParams<{ menuId: string }>();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
   const { items, addItem, updateQuantity } = useCartStore();
   const { toggle: toggleFavourite, isFavourite } = useFavouritesStore();
 
-  const item = useMemo(() => MOCK_MENU.find((m) => m.id === menuId), [menuId]);
-  const isFav = item ? isFavourite(item.id) : false;
-  const related = useMemo(() => {
-    if (!item) return [];
-    return MOCK_MENU.filter((m) => m.category === item.category && m.id !== item.id).slice(0, 3);
-  }, [item]);
+  const item = useMemo(() => MOCK_MENU.find((entry) => entry.id === menuId), [menuId]);
+  const related = useMemo(() => item ? MOCK_MENU.filter((entry) => entry.category === item.category && entry.id !== item.id).slice(0, 3) : [], [item]);
+  const isSaved = item ? isFavourite(item.id) : false;
 
-  // Reset selections whenever the viewed item changes
   useEffect(() => {
-    setSelectedSize(item?.sizes?.[0] ?? null);
+    if (!item) return;
+    setSelectedSize(item.sizes?.[0]?.label ?? null);
     setSelectedExtras([]);
     setQuantity(1);
   }, [item]);
 
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setIsDesktop(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
   if (!item) {
     return (
-      <main className="flex-1 md:pt-24 pb-12">
-        <div className="container mx-auto px-4 max-w-3xl text-center space-y-4">
-          <p className="text-lg font-display font-bold text-foreground">Item not found</p>
-          <p className="text-sm text-muted-foreground font-body">The menu item you're looking for doesn't exist.</p>
-          <button
-            onClick={() => navigate('/menu')}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary-hover transition-colors"
-          >
-            Back to Menu
-          </button>
+      <main className="flex-1 pb-12 md:pt-24">
+        <div className="container mx-auto max-w-3xl px-4">
+          <EmptyState icon={ShoppingBag} title="Item not found" description="This menu item is unavailable or has moved." ctaLabel="Back to menu" ctaTo="/menu" />
         </div>
       </main>
     );
   }
 
-  const existingQty = items.find((i) => i.id === item.id)?.quantity ?? 0;
-
-  // Accumulate price of selected extras
-  const extrasTotal = selectedExtras.reduce((acc, extTitle) => {
-    const ext = item.extras?.find((e) => e.title === extTitle);
-    return acc + (ext?.price ?? 0);
-  }, 0);
-
-  const unitPrice = item.price + extrasTotal;
+  const unitPrice = getConfiguredMenuPrice(item, selectedSize, selectedExtras);
   const total = unitPrice * quantity;
   const hpTotal = item.hpValue * quantity;
+  const existingQty = getCartQuantityForMenuItem(items, item.id);
+
+  const toggleExtra = (title: string) => setSelectedExtras((current) => current.includes(title) ? current.filter((entry) => entry !== title) : [...current, title]);
 
   const handleAdd = () => {
     if (!item.isAvailable) return;
-    if (!existingQty) {
+    const lineId = createCartLineId(item.id, selectedSize, selectedExtras);
+    const existingLine = items.find((entry) => entry.id === lineId);
+    if (!existingLine) {
       addItem({
-        id: item.id,
+        id: lineId,
+        menuItemId: item.id,
         name: item.name,
-        price: item.price,
+        price: unitPrice,
         imageUrl: item.imageUrl,
         hpValue: item.hpValue,
+        sizeLabel: selectedSize ?? undefined,
+        extras: selectedExtras,
       });
+      if (quantity > 1) updateQuantity(lineId, quantity);
+    } else {
+      updateQuantity(lineId, existingLine.quantity + quantity);
     }
-    updateQuantity(item.id, existingQty + quantity);
-    toast.success(`${item.name} added to cart`, {
-      description: `${quantity} × ${formatPrice(item.price)} • +${hpTotal} HP`,
-    });
-  };
-
-  const toggleExtra = (title: string) => {
-    setSelectedExtras((prev) =>
-      prev.includes(title) ? prev.filter((e) => e !== title) : [...prev, title]
-    );
+    toast.success(`${item.name} added to cart`, { description: `${quantity} × ${formatPrice(unitPrice)} • +${hpTotal} HP` });
   };
 
   const handleFavourite = () => {
     toggleFavourite(item);
-    if (isFav) {
-      toast(`${item.name} removed from favourites`, { icon: '💔' });
-    } else {
-      toast.success(`${item.name} saved to favourites`, { icon: '❤️' });
-    }
+    toast(isSaved ? `${item.name} removed from saved items` : `${item.name} saved for later`, { icon: isSaved ? '💔' : '❤️' });
   };
 
-  return (
-    <main className="flex-1 md:pt-16 pb-16">
-
-      {/* ═══════════════════════════════════════════════════════
-          DESKTOP LAYOUT — sticky image left + purchase panel right
-          Visible only on lg and above.
-          ═══════════════════════════════════════════════════════ */}
-      <div className="hidden lg:flex items-start">
-
-        {/* Left: sticky full-height image column */}
-        <div className="sticky top-16 w-[52%] shrink-0 h-[calc(100vh-4rem)]">
-          <div className="relative h-full overflow-hidden">
-            <img
-              src={item.imageUrl}
-              alt={item.name}
-              className="w-full h-full object-cover"
-            />
-            {/* Dual-direction gradient for top & bottom overlays */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
-
-            {/* Back + heart buttons (top-left / top-right) */}
-            <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
+  const optionBlocks = (
+    <>
+      {item.sizes?.length ? (
+        <section className="space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Choose size</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {item.sizes.map((size) => (
               <button
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2 text-sm font-body text-white/90 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full hover:bg-black/50 transition-colors"
+                key={size.label}
+                onClick={() => setSelectedSize(size.label)}
+                className={`rounded-2xl border p-4 text-left transition-colors ${selectedSize === size.label ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/30'}`}
               >
-                <ArrowLeft size={14} />
-                Back
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-display font-bold text-foreground">{size.label}</span>
+                  <span className="text-sm font-semibold text-primary">{formatPrice(size.price)}</span>
+                </div>
+                {size.description ? <p className="mt-1 text-xs text-muted-foreground">{size.description}</p> : null}
               </button>
-              <motion.button
-                onClick={handleFavourite}
-                aria-label={isFav ? 'Remove from favourites' : 'Save to favourites'}
-                whileTap={{ scale: 0.85 }}
-                className={`w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors ${
-                  isFav
-                    ? 'bg-primary/80 text-white hover:bg-primary'
-                    : 'bg-black/30 text-white/90 hover:bg-black/50'
-                }`}
-              >
-                <Heart size={16} className={isFav ? 'fill-current' : ''} />
-              </motion.button>
-            </div>
-
-            {/* Category pill + name + tagline overlaid at image bottom */}
-            <div className="absolute bottom-0 left-0 right-0 px-8 pb-8">
-              <span className="inline-block text-[10px] font-body font-semibold text-white/70 uppercase tracking-widest bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full mb-3">
-                {item.category}
-              </span>
-              <h1 className="font-display font-extrabold text-white text-4xl xl:text-5xl leading-tight drop-shadow-lg">
-                {item.name}
-              </h1>
-              {item.tagLine && (
-                <p className="text-white/75 font-body italic mt-2 text-base leading-relaxed">
-                  {item.tagLine}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: scrollable purchase panel */}
-        <div className="flex-1 min-h-[calc(100vh-4rem)]">
-          <div className="max-w-lg xl:max-w-xl mx-auto px-10 xl:px-12 py-10 space-y-7">
-
-            {/* Price + discount badges + HP badge + availability */}
-            <div className="space-y-3">
-              <div className="flex items-end gap-3 flex-wrap">
-                <span className="font-display font-extrabold text-5xl text-primary leading-none">
-                  {formatPrice(item.price)}
-                </span>
-                {item.slashedPrice && (
-                  <span className="text-xl text-muted-foreground line-through font-body mb-1">
-                    {formatPrice(item.slashedPrice)}
-                  </span>
-                )}
-                {item.percentageOff && (
-                  <span className="text-xs font-bold bg-success/15 text-success px-2.5 py-1 rounded-full mb-1">
-                    {item.percentageOff}% off
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <HPBadge value={item.hpValue} variant="available" size="md" />
-                {item.isAvailable ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-body text-success bg-success/10 px-3 py-1 rounded-full">
-                    <CheckCircle2 size={11} />
-                    Available now
-                  </span>
-                ) : (
-                  <span className="text-xs font-body text-destructive bg-destructive/10 px-3 py-1 rounded-full">
-                    Unavailable
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-2">
-                About this dish
-              </p>
-              <p className="text-muted-foreground font-body leading-relaxed text-base">
-                {item.description}
-              </p>
-            </div>
-
-            {/* Size selector — shown only when sizes exist */}
-            {item.sizes && item.sizes.length > 0 && (
-              <div>
-                <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-3">
-                  Choose Size
-                </p>
-                <div className="flex gap-2">
-                  {item.sizes.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSelectedSize(s)}
-                      className={`w-12 h-12 rounded-xl text-sm font-display font-bold border-2 transition-all ${
-                        selectedSize === s
-                          ? 'border-primary bg-primary text-primary-foreground shadow-glow'
-                          : 'border-border bg-secondary text-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Extras / add-ons — shown only when extras exist */}
-            {item.extras && item.extras.length > 0 && (
-              <div>
-                <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-3">
-                  Add Extras
-                </p>
-                <div className="space-y-2">
-                  {item.extras.map((ext) => {
-                    const isSelected = selectedExtras.includes(ext.title);
-                    return (
-                      <button
-                        key={ext.title}
-                        onClick={() => toggleExtra(ext.title)}
-                        className={`w-full flex items-center justify-between gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                          isSelected
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:border-primary/40'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={ext.imageUrl}
-                            alt={ext.title}
-                            className="w-10 h-10 rounded-lg object-cover shrink-0"
-                          />
-                          <span className="font-body font-medium text-sm text-foreground">
-                            {ext.title}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-sm font-display font-bold text-primary">
-                            +{formatPrice(ext.price)}
-                          </span>
-                          <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors shrink-0 ${
-                              isSelected ? 'bg-primary border-primary' : 'border-border'
-                            }`}
-                          >
-                            {isSelected && (
-                              <CheckCircle2 size={11} className="text-primary-foreground" />
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <hr className="border-border" />
-
-            {/* Quantity stepper + live order total */}
-            <div className="grid grid-cols-2 items-center justify-between gap-6">
-              <div>
-                <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-2">
-                  Quantity
-                </p>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-11 h-11 rounded-xl bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="text-2xl font-display font-bold min-w-[2.5ch] text-center">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary-hover transition-colors"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-body font-semibold text-muted-foreground uppercase tracking-widest mb-1">
-                  Order Total
-                </p>
-                <p className="text-4xl font-display font-extrabold text-foreground leading-none">
-                  {formatPrice(total)}
-                </p>
-                <p className="text-xs font-body text-accent flex items-center gap-1 justify-end mt-1.5">
-                  <Flame size={11} />
-                  +{hpTotal} HP earned
-                </p>
-              </div>
-            </div>
-
-            {/* Delivery info strip */}
-            <div className="flex items-center gap-5 bg-secondary/60 rounded-xl px-4 py-3 text-sm font-body text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Truck size={15} className="text-primary shrink-0" />
-                <span>~20–25 min delivery</span>
-              </div>
-              <span className="text-border select-none">·</span>
-              <div className="flex items-center gap-1.5">
-                <Clock size={15} className="text-primary shrink-0" />
-                <span>Peak hours may vary</span>
-              </div>
-            </div>
-
-            {/* Primary CTA — shows running total */}
-            <div className="space-y-2">
-              <button
-                onClick={handleAdd}
-                disabled={!item.isAvailable}
-                className="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-fire text-primary-foreground font-display font-extrabold py-4 text-base hover:opacity-90 transition-opacity disabled:opacity-50 shadow-glow"
-              >
-                <ShoppingBag size={18} />
-                Add to Cart — {formatPrice(total)}
-              </button>
-              {existingQty > 0 && (
-                <p className="text-xs text-muted-foreground font-body text-center">
-                  {existingQty} already in cart · adding {quantity} more
-                </p>
-              )}
-            </div>
-
-            {/* HP Perks callout */}
-            <div className="rounded-xl border border-accent/25 bg-accent/5 p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <Flame size={15} className="text-accent" />
-                <p className="text-sm font-display font-bold text-foreground">Holy Points Perks</p>
-              </div>
-              <ul className="text-xs text-muted-foreground font-body space-y-1 pl-0.5">
-                <li>· +{item.hpValue} HP earned per unit ordered</li>
-                <li>· HP accumulates across all your orders</li>
-                <li>· Redeem HP for free food & exclusive rewards</li>
-              </ul>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════
-          MOBILE LAYOUT — stacked card (unchanged from original)
-          Visible below lg breakpoint.
-          ═══════════════════════════════════════════════════════ */}
-      <div className="lg:hidden">
-        <div className="relative w-full overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
-          <div className="container mx-auto px-4 max-w-2xl">
-            <div className="flex items-center justify-between py-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft size={16} /> Back
-              </button>
-              <div className="flex items-center gap-2">
-                <HPBadge value={item.hpValue} variant="available" />
-                <motion.button
-                  onClick={handleFavourite}
-                  aria-label={isFav ? 'Remove from favourites' : 'Save to favourites'}
-                  whileTap={{ scale: 0.85 }}
-                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${
-                    isFav
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-border text-muted-foreground hover:text-primary hover:border-primary bg-card'
-                  }`}
-                >
-                  <Heart size={15} className={isFav ? 'fill-current' : ''} />
-                </motion.button>
-              </div>
-            </div>
-          </div>
-          <div className="container mx-auto px-4 max-w-2xl">
-            <div className="relative rounded-3xl overflow-hidden border border-border bg-card shadow-card">
-              <div className="relative h-72 md:h-80">
-                <img
-                  src={item.imageUrl}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              </div>
-              <div className="p-6 space-y-4">
-                <div>
-                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">
-                    {item.category}
-                  </p>
-                  <h1 className="font-display font-bold text-foreground text-2xl leading-tight mt-1">
-                    {item.name}
-                  </h1>
-                </div>
-                <p className="text-sm text-muted-foreground font-body leading-relaxed">
-                  {item.description}
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-sm font-display font-bold">
-                    {formatPrice(item.price)}
-                  </div>
-                  <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-body">
-                    <Flame size={14} /> Earn {item.hpValue} HP each
-                  </div>
-                  {item.isAvailable ? (
-                    <span className="text-xs font-body text-success bg-success/10 px-3 py-1 rounded-full">
-                      Available
-                    </span>
-                  ) : (
-                    <span className="text-xs font-body text-destructive bg-destructive/10 px-3 py-1 rounded-full">
-                      Unavailable
-                    </span>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-4 rounded-xl border border-border bg-card/70">
-                    <p className="text-xs text-muted-foreground font-body mb-2">Quantity</p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="text-base font-display font-bold min-w-[1.5ch] text-center">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity((q) => q + 1)}
-                        className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary-hover transition-colors"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-4 rounded-xl border border-border bg-card/70">
-                    <p className="text-xs text-muted-foreground font-body mb-1">Total</p>
-                    <p className="text-lg font-display font-bold text-foreground">
-                      {formatPrice(total)}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-body">+{hpTotal} HP</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-border bg-card/70">
-                    <p className="text-xs text-muted-foreground font-body mb-1">Delivery</p>
-                    <p className="text-sm font-body text-foreground">~20-25 min</p>
-                    <p className="text-[10px] text-muted-foreground font-body">Peak may vary</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleAdd}
-                  disabled={!item.isAvailable}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground font-display font-bold py-3 text-sm hover:bg-primary-hover transition-colors disabled:opacity-60"
-                >
-                  <ShoppingBag size={16} />
-                  Add to Cart
-                </button>
-                {existingQty > 0 && (
-                  <p className="text-xs text-muted-foreground font-body text-center">
-                    You already have {existingQty} in cart. Adding {quantity} more.
-                  </p>
-                )}
-                <div className="p-4 rounded-xl border border-border bg-secondary/50 space-y-2">
-                  <p className="text-sm font-display font-bold text-foreground">HP Perks</p>
-                  <ul className="text-xs text-muted-foreground font-body space-y-1 list-disc list-inside">
-                    <li>+{item.hpValue} HP per unit</li>
-                    <li>HP adds up across orders</li>
-                    <li>Redeem HP for rewards anytime</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Related items — visible at all breakpoints */}
-      {related.length > 0 && (
-        <section className="container mx-auto px-4 max-w-5xl mt-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-bold text-foreground text-xl">You might also like</h2>
-            <button
-              onClick={() => navigate('/menu')}
-              className="text-sm text-primary font-body font-medium hover:underline"
-            >
-              Back to menu
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {related.map((rel) => (
-              <FoodCard
-                key={rel.id}
-                {...rel}
-                quantityInCart={items.find((i) => i.id === rel.id)?.quantity}
-                onAddToCart={(id) => {
-                  const found = MOCK_MENU.find((m) => m.id === id);
-                  if (!found) return;
-                  addItem({ id: found.id, name: found.name, price: found.price, imageUrl: found.imageUrl, hpValue: found.hpValue });
-                  toast.success(`${found.name} added to cart`);
-                }}
-                onUpdateQuantity={(id, qty) => updateQuantity(id, qty)}
-              />
             ))}
           </div>
         </section>
-      )}
+      ) : null}
+
+      {item.extras?.length ? (
+        <section className="space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Add extras</p>
+          <div className="space-y-2">
+            {item.extras.map((extra) => {
+              const selected = selectedExtras.includes(extra.title);
+              return (
+                <button
+                  key={extra.title}
+                  onClick={() => toggleExtra(extra.title)}
+                  className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-3 text-left transition-colors ${selected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/30'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={extra.imageUrl} alt={extra.title} className="h-11 w-11 rounded-xl object-cover" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{extra.title}</p>
+                      <p className="text-xs text-muted-foreground">+{formatPrice(extra.price)}</p>
+                    </div>
+                  </div>
+                  {selected ? <CheckCircle2 size={18} className="text-primary" /> : null}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+    </>
+  );
+
+  const summaryPanel = (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <HPBadge value={item.hpValue} variant="available" size="md" />
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${item.isAvailable ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+            {item.isAvailable ? 'Available now' : 'Currently unavailable'}
+          </span>
+        </div>
+        <div className="flex items-end gap-3">
+          <span className="font-display text-4xl font-extrabold text-primary">{formatPrice(unitPrice)}</span>
+          {item.slashedPrice ? <span className="text-sm text-muted-foreground line-through">{formatPrice(item.slashedPrice)}</span> : null}
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+      </div>
+
+      {optionBlocks}
+
+      <div className="grid gap-4 rounded-3xl border border-border bg-card p-4 sm:grid-cols-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Quantity</p>
+          <div className="mt-2 flex items-center gap-2">
+            <button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="rounded-full bg-secondary p-2" aria-label="Decrease quantity"><Minus size={16} /></button>
+            <span className="w-8 text-center font-display text-xl font-bold text-foreground">{quantity}</span>
+            <button onClick={() => setQuantity((value) => value + 1)} className="rounded-full bg-primary p-2 text-primary-foreground" aria-label="Increase quantity"><Plus size={16} /></button>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Order total</p>
+          <p className="mt-2 font-display text-2xl font-bold text-foreground">{formatPrice(total)}</p>
+          <p className="text-xs text-accent">+{hpTotal} HP</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Delivery</p>
+          <div className="mt-2 space-y-1 text-sm text-foreground">
+            <p className="flex items-center gap-2"><Truck size={14} className="text-primary" /> 20–25 mins</p>
+            <p className="flex items-center gap-2"><Clock size={14} className="text-primary" /> Review for +10 HP</p>
+          </div>
+        </div>
+      </div>
+
+      <StatusStrip compact />
+
+      <div className="space-y-3">
+        <button onClick={handleAdd} disabled={!item.isAvailable} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-fire px-4 py-4 text-base font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40">
+          <ShoppingBag size={18} /> Add to cart — {formatPrice(total)}
+        </button>
+        <button onClick={handleFavourite} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary">
+          <Heart size={16} className={isSaved ? 'fill-primary text-primary' : ''} /> {isSaved ? 'Saved item' : 'Save for later'}
+        </button>
+        {existingQty ? <p className="text-center text-xs text-muted-foreground">{existingQty} matching item(s) already in your cart</p> : null}
+      </div>
+    </div>
+  );
+
+  return (
+    <main className="flex-1 pb-16 md:pt-16">
+      <div className="container mx-auto max-w-6xl px-4 py-6">
+        <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft size={16} /> Back to menu
+        </button>
+
+        {isDesktop === null ? (
+          <div className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
+            <div className="h-[420px] animate-pulse rounded-[2rem] bg-secondary" />
+            <div className="h-[420px] animate-pulse rounded-[2rem] bg-secondary" />
+          </div>
+        ) : isDesktop ? (
+          <div className="grid gap-8 lg:grid-cols-[1.05fr,0.95fr] lg:items-start">
+            <div className="sticky top-24 overflow-hidden rounded-[2rem] border border-border bg-card">
+              <img src={item.imageUrl} alt={item.name} className="h-[560px] w-full object-cover" />
+              <div className="space-y-3 p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">{item.category}</p>
+                <h1 className="font-display text-4xl font-extrabold text-foreground">{item.name}</h1>
+                {item.tagLine ? <p className="text-base italic text-muted-foreground">{item.tagLine}</p> : null}
+              </div>
+            </div>
+            {summaryPanel}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="overflow-hidden rounded-[2rem] border border-border bg-card">
+              <img src={item.imageUrl} alt={item.name} className="h-80 w-full object-cover" />
+              <div className="space-y-3 p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">{item.category}</p>
+                <h1 className="font-display text-3xl font-extrabold text-foreground">{item.name}</h1>
+                {item.tagLine ? <p className="text-sm italic text-muted-foreground">{item.tagLine}</p> : null}
+              </div>
+            </div>
+            {summaryPanel}
+          </div>
+        )}
+
+        <section className="mt-12 rounded-[2rem] border border-border bg-card p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Reviews</p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-foreground">What students are saying</h2>
+            </div>
+            <div className="rounded-full bg-accent/10 px-3 py-2 text-xs font-semibold text-accent">+10 HP per approved review</div>
+          </div>
+          {item.reviews?.length ? (
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {item.reviews.map((review) => (
+                <div key={review.id} className="rounded-3xl border border-border bg-background/70 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-foreground">{review.author}</p>
+                      <p className="text-xs text-muted-foreground">{review.createdAt}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-accent">
+                      {Array.from({ length: review.rating }).map((_, index) => <Star key={index} size={14} className="fill-current" />)}
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6">
+              <EmptyState icon={MessageSquare} title="No reviews yet" description="Be the first to drop feedback after your order lands and earn bonus HP." />
+            </div>
+          )}
+        </section>
+
+        {related.length ? (
+          <section className="mt-12">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-2xl font-bold text-foreground">You might also like</h2>
+              <button onClick={() => navigate('/menu')} className="text-sm font-semibold text-primary">Back to menu</button>
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((entry) => (
+                <FoodCard
+                  key={entry.id}
+                  {...entry}
+                  quantityInCart={getCartQuantityForMenuItem(items, entry.id)}
+                  onAddToCart={(id) => {
+                    const relatedItem = MOCK_MENU.find((menuEntry) => menuEntry.id === id);
+                    if (!relatedItem) return;
+                    addItem({ id: relatedItem.id, menuItemId: relatedItem.id, name: relatedItem.name, price: relatedItem.price, imageUrl: relatedItem.imageUrl, hpValue: relatedItem.hpValue });
+                    toast.success(`${relatedItem.name} added to cart`);
+                  }}
+                  onUpdateQuantity={(_, value) => updateQuantity(getPrimaryCartLineId(items, entry.id), value)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
     </main>
   );
 };

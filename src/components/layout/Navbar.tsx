@@ -1,37 +1,29 @@
-import { useState } from 'react';
 import { Link, useLocation } from '@/lib/router';
-import { Heart, ShoppingCart, User } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingCart, User, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
-import { useFavouritesStore } from '@/stores/favouritesStore';
-
-const NAV_LINKS = [
-  { to: '/', label: 'Home' },
-  { to: '/menu', label: 'Menu' },
-  { to: '/rewards', label: 'Rewards' },
-  { to: '/dashboard', label: 'My Orders' },
-];
+import { DESKTOP_NAV_LINKS } from '@/constants/navigation';
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const itemCount = useCartStore(selectItemCount);
-  const favCount = useFavouritesStore((s) => s.items.length);
 
   return (
-    <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+    <nav className="fixed left-0 right-0 top-0 z-50 hidden border-b border-border bg-background/85 backdrop-blur-xl md:block">
+      <div className="container mx-auto flex h-16 items-center justify-between gap-6 px-4">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="Holy Grills" className="h-9 w-auto" />
         </Link>
 
-        <div className="flex items-center gap-6">
-          {NAV_LINKS.map((link) => (
+        <div className="flex items-center gap-5">
+          {DESKTOP_NAV_LINKS.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               className={`text-sm font-semibold transition-colors ${
-                location.pathname === link.to ? 'text-primary' : 'text-brand-brown/70 hover:text-foreground'
+                location.pathname === link.to || location.pathname.startsWith(`${link.to}/`)
+                  ? 'text-primary'
+                  : 'text-brand-brown/70 hover:text-foreground'
               }`}
             >
               {link.label}
@@ -40,36 +32,24 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/favourites" className="relative p-2 text-brand-brown/70 hover:text-primary transition-colors" aria-label="Favourites">
-            <Heart size={20} />
-            {favCount > 0 && (
-              <motion.span
-                key={favCount}
-                initial={{ scale: 0.5 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center"
-              >
-                {favCount}
-              </motion.span>
-            )}
+          <Link to="/wallet" className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/30">
+            <Wallet size={16} className="text-primary" /> ₦8,400
           </Link>
-          <Link to="/cart" className="relative p-2 text-brand-brown/70 hover:text-foreground transition-colors">
+          <Link to="/cart" className="relative rounded-full p-2 text-brand-brown/70 transition-colors hover:text-foreground" aria-label="Cart">
             <ShoppingCart size={20} />
             {itemCount > 0 && (
               <motion.span
                 key={itemCount}
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center"
+                className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground"
               >
                 {itemCount}
               </motion.span>
             )}
           </Link>
-
-          <Link to="/login" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-cta text-primary-foreground text-sm font-bold shadow-glow hover:opacity-95 transition-opacity">
-            <User size={16} />
-            Login
+          <Link to="/dashboard" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20" aria-label="Profile">
+            <User size={18} />
           </Link>
         </div>
       </div>

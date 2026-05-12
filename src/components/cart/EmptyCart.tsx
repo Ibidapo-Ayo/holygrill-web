@@ -3,19 +3,16 @@ import { Link } from '@/lib/router';
 
 export function EmptyCart() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mb-6">
-        <ShoppingBag size={32} className="text-muted-foreground" />
+    <div className="rounded-3xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">
+      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+        <ShoppingBag size={28} className="text-muted-foreground" />
       </div>
-      <h2 className="font-display font-bold text-foreground text-xl mb-2">Your cart is empty</h2>
-      <p className="text-muted-foreground font-body text-sm mb-6 max-w-xs">
-        Looks like you haven't added anything yet. Browse our menu and find something you love!
+      <h2 className="font-display text-xl font-bold text-foreground">Your cart is empty</h2>
+      <p className="mx-auto mt-2 max-w-xs text-sm text-muted-foreground">
+        Browse the menu, save items for later, and come back when you&apos;re ready to check out.
       </p>
-      <Link
-        to="/menu"
-        className="px-6 py-3 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity"
-      >
-        Browse Menu
+      <Link to="/menu" className="mt-6 inline-flex rounded-2xl bg-gradient-fire px-6 py-3 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90">
+        Browse menu
       </Link>
     </div>
   );

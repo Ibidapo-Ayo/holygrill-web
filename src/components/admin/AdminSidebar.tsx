@@ -1,45 +1,39 @@
 import { Link, useLocation } from '@/lib/router';
-import { 
-  LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, 
-  Flame, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3,
-  CreditCard, MessageSquare, LayoutTemplate
-} from 'lucide-react';
+import { Bell, CalendarDays, ChevronLeft, ChevronRight, Clock3, Flame, LayoutDashboard, ListRestart, LogOut, Medal, ShoppingBag, Store, Truck, Users2, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const NAV_SECTIONS = [
   {
     label: 'Overview',
     items: [
       { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+      { to: '/admin/delivery-windows', label: 'Delivery Windows', icon: Clock3 },
+      { to: '/admin/operating-hours', label: 'Operating Hours', icon: Clock3 },
     ],
   },
   {
     label: 'Operations',
     items: [
-      { to: '/admin/orders', label: 'Orders', icon: ShoppingBag, badge: 4 },
-      { to: '/admin/payments', label: 'Payments', icon: CreditCard },
-      { to: '/admin/menu', label: 'Menu Items', icon: UtensilsCrossed },
+      { to: '/kitchen', label: 'Kitchen Dashboard', icon: UtensilsCrossed },
+      { to: '/admin/riders', label: 'Rider Management', icon: Truck },
+      { to: '/admin/abandoned-carts', label: 'Abandoned Carts', icon: ShoppingBag },
+      { to: '/admin/notifications', label: 'Notification Centre', icon: Bell },
     ],
   },
   {
-    label: 'People',
+    label: 'Growth',
     items: [
-      { to: '/admin/users', label: 'Users & HP', icon: Users },
-      { to: '/admin/support', label: 'Support', icon: MessageSquare, badge: 2 },
+      { to: '/admin/hp', label: 'HP Manager', icon: Flame },
+      { to: '/admin/challenges', label: 'Challenge Engine', icon: Medal },
+      { to: '/admin/leaderboard-controls', label: 'Leaderboard Controls', icon: Medal },
     ],
   },
   {
-    label: 'Content',
+    label: 'Expansion',
     items: [
-      { to: '/admin/hero', label: 'Hero Content', icon: LayoutTemplate },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
-      { to: '/admin/settings', label: 'Settings', icon: Settings },
+      { to: '/admin/events', label: 'Events Manager', icon: CalendarDays },
+      { to: '/admin/marketplace', label: 'Marketplace Manager', icon: Store },
     ],
   },
 ];
@@ -48,83 +42,28 @@ export function AdminSidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  const isActive = (path: string) => {
-    if (path === '/admin') return location.pathname === '/admin';
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) => path === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(path);
 
   return (
-    <aside className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-card border-r border-border transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
-      {/* Logo */}
-      <div className="h-16 flex items-center px-4 border-b border-border shrink-0">
+    <aside className={`fixed bottom-0 left-0 top-0 z-40 flex flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+      <div className="flex h-16 items-center border-b border-border px-4 shrink-0">
         <Link to="/admin" className="flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-gradient-fire flex items-center justify-center shrink-0">
-            <Flame size={18} className="text-primary-foreground" />
-          </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
-              >
-                <span className="font-display font-bold text-foreground text-sm whitespace-nowrap block">Holy Grills</span>
-                <span className="text-[9px] text-muted-foreground font-body whitespace-nowrap block">Admin Console</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-fire shrink-0"><Flame size={18} className="text-primary-foreground" /></div>
+          <AnimatePresence>{!collapsed ? <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="overflow-hidden"><span className="block whitespace-nowrap font-display text-sm font-bold text-foreground">Holy Grills</span><span className="block whitespace-nowrap text-[9px] text-muted-foreground">Ops Console</span></motion.div> : null}</AnimatePresence>
         </Link>
       </div>
 
-      {/* Nav sections */}
-      <nav className="flex-1 py-3 px-2 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 overflow-y-auto px-2 py-3">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label} className="mb-3">
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="px-3 py-1 text-[9px] font-body font-semibold text-muted-foreground/60 uppercase tracking-widest"
-                >
-                  {section.label}
-                </motion.p>
-              )}
-            </AnimatePresence>
-            <div className="space-y-0.5">
+            <AnimatePresence>{!collapsed ? <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">{section.label}</motion.p> : null}</AnimatePresence>
+            <div className="space-y-1">
               {section.items.map((item) => {
                 const active = isActive(item.to);
                 return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg font-body text-[13px] font-medium transition-all relative ${
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                    } ${collapsed ? 'justify-center' : ''}`}
-                    title={collapsed ? item.label : undefined}
-                  >
+                  <Link key={item.to} to={item.to} title={collapsed ? item.label : undefined} className={`flex items-center gap-2.5 rounded-2xl px-3 py-2 text-[13px] font-medium transition-colors ${active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'} ${collapsed ? 'justify-center' : ''}`}>
                     <item.icon size={16} className="shrink-0" />
-                    <AnimatePresence>
-                      {!collapsed && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex-1 whitespace-nowrap"
-                        >
-                          {item.label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    {'badge' in item && item.badge && item.badge > 0 && (
-                      <span className={`w-4 h-4 rounded-full bg-primary text-primary-foreground text-[8px] font-bold flex items-center justify-center ${collapsed ? 'absolute -top-0.5 -right-0.5' : ''}`}>
-                        {item.badge}
-                      </span>
-                    )}
+                    <AnimatePresence>{!collapsed ? <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap">{item.label}</motion.span> : null}</AnimatePresence>
                   </Link>
                 );
               })}
@@ -133,22 +72,14 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="border-t border-border p-2 space-y-0.5">
-        <Link
-          to="/"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg font-body text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all ${collapsed ? 'justify-center' : ''}`}
-          title={collapsed ? 'Back to Store' : undefined}
-        >
+      <div className="space-y-1 border-t border-border p-2">
+        <Link to="/" className={`flex items-center gap-2.5 rounded-2xl px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? 'justify-center' : ''}`} title={collapsed ? 'Back to store' : undefined}>
           <LogOut size={16} className="shrink-0" />
-          {!collapsed && <span>Back to Store</span>}
+          {!collapsed ? <span>Back to store</span> : null}
         </Link>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-body text-[13px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-all ${collapsed ? 'justify-center' : ''}`}
-        >
+        <button onClick={() => setCollapsed((value) => !value)} className={`flex w-full items-center gap-2.5 rounded-2xl px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground ${collapsed ? 'justify-center' : ''}`}>
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {!collapsed && <span>Collapse</span>}
+          {!collapsed ? <span>Collapse</span> : null}
         </button>
       </div>
     </aside>

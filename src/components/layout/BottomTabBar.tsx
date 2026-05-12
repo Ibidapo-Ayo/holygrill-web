@@ -1,74 +1,58 @@
 import { NavLink, useLocation } from '@/lib/router';
 import { motion } from 'framer-motion';
-import { UtensilsCrossed, House, ShoppingCart, Gift, Clock3, Heart } from 'lucide-react';
+import { House, ShoppingCart, Gift, UtensilsCrossed } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
-import { useFavouritesStore } from '@/stores/favouritesStore';
+import { MOBILE_TAB_LINKS } from '@/constants/navigation';
 
-const TABS = [
-  { to: '/', label: 'Home', Icon: House },
-  { to: '/menu', label: 'Menu', Icon: UtensilsCrossed },
-  { to: '/favourites', label: 'Saved', Icon: Heart, badgeKey: 'fav' as const },
-  { to: '/rewards', label: 'Rewards', Icon: Gift },
-  { to: '/cart', label: 'Cart', Icon: ShoppingCart, badgeKey: 'cart' as const },
-];
+const ICONS = {
+  home: House,
+  menu: UtensilsCrossed,
+  rewards: Gift,
+  cart: ShoppingCart,
+};
 
 export function BottomTabBar() {
   const location = useLocation();
   const cartCount = useCartStore(selectItemCount);
-  const favCount = useFavouritesStore((s) => s.items.length);
 
-  // Hide on admin routes
-  if (location.pathname.startsWith('/admin')) return null;
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen')) return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none">
-      <div className="px-3 pb-3 pointer-events-auto">
-        <nav
-          className="mx-auto max-w-md bg-card/95 backdrop-blur-xl border border-border rounded-3xl shadow-tab"
-          aria-label="Primary"
-        >
-          <ul className="grid grid-cols-5 px-2 py-2">
-            {TABS.map(({ to, label, Icon, badgeKey }) => (
-              <li key={to} className="flex">
-                <NavLink to={to} end={to === '/'} className="flex-1">
-                  {({ isActive }) => (
-                    <div className="relative flex flex-col items-center justify-center gap-1 py-1.5 px-1">
-                      {isActive && (
-                        <motion.div
-                          layoutId="tab-pill"
-                          className="absolute inset-0 rounded-2xl bg-primary/10"
-                          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                        />
-                      )}
-                      <div className="relative">
-                        <Icon
-                            className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`}
-                            strokeWidth={isActive ? 2.6 : 2.2}
+    <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 pb-safe md:hidden">
+      <div className="pointer-events-auto px-3 pb-3">
+        <nav className="mx-auto max-w-md rounded-3xl border border-border bg-card/95 shadow-tab backdrop-blur-xl" aria-label="Primary">
+          <ul className="grid grid-cols-4 px-2 py-2">
+            {MOBILE_TAB_LINKS.map(({ to, label, icon }) => {
+              const Icon = ICONS[icon];
+              return (
+                <li key={to} className="flex">
+                  <NavLink to={to} end={to === '/'} className="flex-1">
+                    {({ isActive }) => (
+                      <div className="relative flex flex-col items-center justify-center gap-1 px-1 py-1.5">
+                        {isActive && (
+                          <motion.div
+                            layoutId="tab-pill"
+                            className="absolute inset-0 rounded-2xl bg-primary/10"
+                            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                           />
-
-                        {badgeKey === 'cart' && cartCount > 0 && (
-                          <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                            {cartCount}
-                          </span>
                         )}
-                        {badgeKey === 'fav' && favCount > 0 && (
-                          <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                            {favCount}
-                          </span>
-                        )}
+                        <div className="relative">
+                          <Icon className={`h-6 w-6 transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/60'}`} strokeWidth={isActive ? 2.6 : 2.2} />
+                          {icon === 'cart' && cartCount > 0 ? (
+                            <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+                              {cartCount}
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className={`relative text-[10px] font-semibold transition-colors ${isActive ? 'text-primary' : 'text-brand-brown/70'}`}>
+                          {label}
+                        </span>
                       </div>
-                      <span
-                        className={`relative text-[10px] font-semibold transition-colors ${
-                          isActive ? 'text-primary' : 'text-brand-brown/70'
-                        }`}
-                      >
-                        {label}
-                      </span>
-                    </div>
-                  )}
-                </NavLink>
-              </li>
-            ))}
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>

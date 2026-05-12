@@ -1,18 +1,15 @@
-import { useState } from "react";
-import { Link } from "@/lib/router";
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { useState } from 'react';
+import { Link } from '@/lib/router';
+import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog';
+import { Menu, ChevronRight } from 'lucide-react';
 
 const LINKS = [
-  { label: "About HG", to: "/about" },
-  { label: "Terms of Service", to: "/terms" },
-  { label: "Your Trust", to: "/trust" },
-  { label: "Contact Us", to: "/contact" },
+  { label: 'Leaderboard', to: '/leaderboard' },
+  { label: 'Events & Catering', to: '/events' },
+  { label: 'Wallet', to: '/wallet' },
+  { label: 'Referrals', to: '/referrals' },
+  { label: 'Marketplace', to: '/marketplace' },
+  { label: 'Learn about HP', to: '/hp' },
 ];
 
 export function MobileSidebar() {
@@ -21,26 +18,22 @@ export function MobileSidebar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="md:hidden relative p-2 rounded-full hover:bg-secondary text-brand-brown/70">
+        <button className="relative rounded-full p-2 text-brand-brown/70 hover:bg-secondary md:hidden">
           <Menu size={20} />
         </button>
       </DialogTrigger>
-      <DialogOverlay className="" />
-      <DialogContent
-        className="md:hidden right-0 left-auto top-0 bottom-0 translate-x-0 translate-y-0 max-w-[270px] w-full rounded-none border-l
-                   data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full
-                   p-0 shadow-2xl bg-[#FFFAEF]"
-      >
-        <div className="flex px-5 py-3">
-          <p className="font-display font-bold text-foreground">Menu</p>
+      <DialogOverlay />
+      <DialogContent className="bottom-0 left-auto right-0 top-0 w-full max-w-[300px] translate-x-0 translate-y-0 rounded-none border-l bg-[#FFFAEF] p-0 shadow-2xl data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-right-full md:hidden">
+        <div className="border-b border-border px-5 py-4">
+          <p className="font-display font-bold text-foreground">Explore Holy Grills</p>
         </div>
-        <nav className="p-5 space-y-5">
+        <nav className="space-y-2 p-5">
           {LINKS.map((item) => (
             <Link
               key={item.label}
               to={item.to}
               onClick={() => setOpen(false)}
-              className="w-full inline-flex items-center justify-between px-3 py-2 text-[#341100] text-md border-b-[#DCC9A3] border-b-2 font-sans font-bold"
+              className="flex w-full items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground"
             >
               {item.label}
               <ChevronRight size={16} className="text-muted-foreground" />

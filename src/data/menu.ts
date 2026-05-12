@@ -17,10 +17,18 @@ export const MOCK_MENU: MenuItem[] = [
     category: 'Holy Stack',
     hpValue: 15,
     isAvailable: true,
-    sizes: ['S', 'M', 'L'],
+    sizes: [
+      { label: 'S', price: 1800, description: 'Quick solo fix' },
+      { label: 'M', price: 2300, description: 'Best value' },
+      { label: 'L', price: 2800, description: 'Squad energy' },
+    ],
     extras: [
       { title: 'Extra Chicken', price: 700, imageUrl: image('extra-chicken.png') },
       { title: 'Extra Sauce', price: 300, imageUrl: image('extra-sauce.png') },
+    ],
+    reviews: [
+      { id: 'review-1', author: 'Adewale J.', rating: 5, comment: 'Big portions and that BBQ finish always lands.', createdAt: '2 days ago', rewardHP: 10 },
+      { id: 'review-2', author: 'Amara N.', rating: 4, comment: 'Great for late lectures, especially the medium size.', createdAt: '6 days ago', rewardHP: 10 },
     ],
   },
   {
@@ -34,7 +42,11 @@ export const MOCK_MENU: MenuItem[] = [
     category: 'Holy Stack',
     hpValue: 16,
     isAvailable: true,
-    sizes: ['S', 'M'],
+    sizes: [
+      { label: 'S', price: 1900, description: 'Campus rush' },
+      { label: 'M', price: 2450, description: 'Extra heat' },
+    ],
+    reviews: [],
   },
   {
     id: '3',
@@ -47,7 +59,11 @@ export const MOCK_MENU: MenuItem[] = [
     category: 'Faith Bowl',
     hpValue: 18,
     isAvailable: true,
-    sizes: ['M', 'L'],
+    sizes: [
+      { label: 'M', price: 2000, description: 'Balanced bowl' },
+      { label: 'L', price: 2550, description: 'Post-class power' },
+    ],
+    reviews: [{ id: 'review-3', author: 'Funmi A.', rating: 5, comment: 'Fresh, bright and actually filling.', createdAt: 'Today', rewardHP: 10 }],
   },
   {
     id: '4',
@@ -55,14 +71,19 @@ export const MOCK_MENU: MenuItem[] = [
     tagLine: 'Simple crunch. Everyday comfort.',
     description:
       'Lightly salted grilled potatoes with hotdog slices, tomato & green pepper bits, choice of mayo ketchup or pepper cream sauce.',
-    price: 300,
+    price: 1300,
     imageUrl: image('coleslaw_bowl_menu1.png'),
     category: 'Faith Bowl',
-    hpValue: 5,
+    hpValue: 9,
     isAvailable: true,
-    sizes: ['S', 'M', 'L'],
-    slashedPrice: 500,
+    sizes: [
+      { label: 'S', price: 1300, description: 'Light bite' },
+      { label: 'M', price: 1650, description: 'Most popular' },
+      { label: 'L', price: 2100, description: 'Extra filling' },
+    ],
+    slashedPrice: 1500,
     percentageOff: 20,
+    reviews: [],
   },
   {
     id: '5',
@@ -70,12 +91,17 @@ export const MOCK_MENU: MenuItem[] = [
     tagLine: 'Light, fresh and built to keep you going.',
     description:
       'Salt & pepper grilled potatoes with flame-grilled chicken + hotdog mix, pineapple cubes, parsley flakes, Holy MayoKetchup swirl.',
-    price: 1000,
+    price: 1600,
     imageUrl: image('fruit_bowl_menu2.png'),
     category: 'Faith Bowl',
-    hpValue: 10,
+    hpValue: 12,
     isAvailable: true,
-    sizes: ['S', 'M', 'L'],
+    sizes: [
+      { label: 'S', price: 1600, description: 'Fresh start' },
+      { label: 'M', price: 2100, description: 'Daily driver' },
+      { label: 'L', price: 2650, description: 'Shared bowl' },
+    ],
+    reviews: [{ id: 'review-4', author: 'Blessing E.', rating: 4, comment: 'Super fresh and the sauce balance is nice.', createdAt: '3 days ago', rewardHP: 10 }],
   },
   {
     id: '6',
@@ -88,7 +114,11 @@ export const MOCK_MENU: MenuItem[] = [
     category: 'Faith Bowl',
     hpValue: 19,
     isAvailable: true,
-    sizes: ['M', 'L'],
+    sizes: [
+      { label: 'M', price: 2200, description: 'Default bowl' },
+      { label: 'L', price: 2750, description: 'Protein plus' },
+    ],
+    reviews: [],
   },
   {
     id: '7',
@@ -101,7 +131,11 @@ export const MOCK_MENU: MenuItem[] = [
     category: 'Faith Bowl',
     hpValue: 18,
     isAvailable: true,
-    sizes: ['M', 'L'],
+    sizes: [
+      { label: 'M', price: 2100, description: 'Good for one' },
+      { label: 'L', price: 2600, description: 'Big appetite' },
+    ],
+    reviews: [],
   },
 ];
 
