@@ -4,13 +4,24 @@ import { CountdownTimer } from '@/components/orders/CountdownTimer';
 import { StatusBar } from '@/components/orders/StatusBar';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { StatusStrip } from '@/components/shared/StatusStrip';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { MOCK_ORDERS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
 import type { OrderStatus } from '@/types';
 
 const OrderTrackingPage = () => {
   const { id } = useParams<{ id: string }>();
-  const order = MOCK_ORDERS.find((entry) => entry.id === id) ?? MOCK_ORDERS[1];
+  const order = MOCK_ORDERS.find((entry) => entry.id === id);
+
+  if (!order) {
+    return (
+      <main className="flex-1 pb-12 md:pt-24">
+        <div className="container mx-auto max-w-3xl px-4">
+          <EmptyState icon={MapPin} title="Order not found" description="We couldn't find that order tracking record. Try opening it again from your orders list." ctaLabel="Back to orders" ctaTo="/orders" />
+        </div>
+      </main>
+    );
+  }
   const timestamps = order.statusHistory.reduce((accumulator, event) => {
     accumulator[event.status] = event.timestamp;
     return accumulator;

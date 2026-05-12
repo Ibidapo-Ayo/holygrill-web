@@ -29,7 +29,7 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   const [appliedPromo, setAppliedPromo] = useState<number>(0);
   const [walletEnabled, setWalletEnabled] = useState(true);
   const [guestCheckout, setGuestCheckout] = useState(false);
-  const [notes, setNotes] = useState('No pepper on one bowl, please.');
+  const [notes, setNotes] = useState('');
   const [redeemHP, setRedeemHP] = useState(true);
   const { items, updateQuantity, removeItem, addItem } = useCartStore();
   const { items: savedItems, toggle } = useFavouritesStore();
@@ -41,7 +41,13 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   });
 
   const hpRedemption = redeemHP && items.length ? Math.min(600, data.availableHP * 2) : 0;
-  const walletApplied = walletEnabled && items.length ? Math.min(data.walletBalance, calculateCartTotals({ items, deliveryFee: DELIVERY_FEE, promoDiscount: appliedPromo, hpRedemption }).totalBeforeCredits) : 0;
+  const totalBeforeWallet = calculateCartTotals({
+    items,
+    deliveryFee: DELIVERY_FEE,
+    promoDiscount: appliedPromo,
+    hpRedemption,
+  }).totalBeforeCredits;
+  const walletApplied = walletEnabled && items.length ? Math.min(data.walletBalance, totalBeforeWallet) : 0;
   const totals = useMemo(
     () => calculateCartTotals({ items, deliveryFee: DELIVERY_FEE, promoDiscount: appliedPromo, hpRedemption, walletApplied }),
     [appliedPromo, hpRedemption, items, walletApplied]
@@ -58,9 +64,11 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   };
 
   const moveSavedToCart = (item: (typeof savedItems)[number]) => {
-    const sizeLabel = item.sizes?.[0]?.label;
+    const defaultSize = item.sizes?.[0];
+    const sizeLabel = defaultSize?.label;
+    const basePrice = defaultSize?.price ?? item.price;
     const lineId = createCartLineId(item.id, sizeLabel);
-    addItem({ id: lineId, menuItemId: item.id, name: item.name, price: sizeLabel ? item.sizes?.[0]?.price ?? item.price : item.price, imageUrl: item.imageUrl, hpValue: item.hpValue, sizeLabel });
+    addItem({ id: lineId, menuItemId: item.id, name: item.name, price: basePrice, imageUrl: item.imageUrl, hpValue: item.hpValue, sizeLabel });
     toggle(item);
     toast.success(`${item.name} moved to cart`);
   };
@@ -168,7 +176,7 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
 
             <div className="rounded-[2rem] border border-border bg-card p-5">
               <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><Gift size={16} className="text-primary" /> Order notes & fulfilment</div>
-              <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-4 min-h-28" aria-label="Order notes" />
+              <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-4 min-h-28" aria-label="Order notes" placeholder="Add delivery notes, spice preferences, or gate instructions" />
               <p className="mt-2 text-xs text-muted-foreground">Form structure is ready for future validation and backend submission.</p>
             </div>
           </div>

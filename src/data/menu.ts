@@ -71,13 +71,13 @@ export const MOCK_MENU: MenuItem[] = [
     tagLine: 'Simple crunch. Everyday comfort.',
     description:
       'Lightly salted grilled potatoes with hotdog slices, tomato & green pepper bits, choice of mayo ketchup or pepper cream sauce.',
-    price: 1300,
+    price: 1200,
     imageUrl: image('coleslaw_bowl_menu1.png'),
     category: 'Faith Bowl',
     hpValue: 9,
     isAvailable: true,
     sizes: [
-      { label: 'S', price: 1300, description: 'Light bite' },
+      { label: 'S', price: 1200, description: 'Light bite' },
       { label: 'M', price: 1650, description: 'Most popular' },
       { label: 'L', price: 2100, description: 'Extra filling' },
     ],

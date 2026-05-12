@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Clock, Flame, Heart, MessageSquare, Minus, Plus, ShoppingBag, Star, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from '@/lib/router';
@@ -18,7 +18,9 @@ const MenuItemDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
-  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false
+  );
   const { items, addItem, updateQuantity } = useCartStore();
   const { toggle: toggleFavourite, isFavourite } = useFavouritesStore();
 
@@ -33,7 +35,7 @@ const MenuItemDetail = () => {
     setQuantity(1);
   }, [item]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const query = window.matchMedia('(min-width: 1024px)');
     const sync = () => setIsDesktop(query.matches);
     sync();
@@ -199,12 +201,7 @@ const MenuItemDetail = () => {
           <ArrowLeft size={16} /> Back to menu
         </button>
 
-        {isDesktop === null ? (
-          <div className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-            <div className="h-[420px] animate-pulse rounded-[2rem] bg-secondary" />
-            <div className="h-[420px] animate-pulse rounded-[2rem] bg-secondary" />
-          </div>
-        ) : isDesktop ? (
+        {isDesktop ? (
           <div className="grid gap-8 lg:grid-cols-[1.05fr,0.95fr] lg:items-start">
             <div className="sticky top-24 overflow-hidden rounded-[2rem] border border-border bg-card">
               <img src={item.imageUrl} alt={item.name} className="h-[560px] w-full object-cover" />
