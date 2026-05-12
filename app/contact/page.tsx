@@ -1,16 +1,19 @@
 "use client";
 
 import { SiteLayout } from "@/app/layouts/SiteLayout";
+import { CONTACT_PAGE_CONTENT } from '@/content/staticPagesContent';
 
 export default function ContactPage() {
   return (
-    <SiteLayout title="Contact Us">
+    <SiteLayout title={CONTACT_PAGE_CONTENT.title}>
       <main className="flex-1 md:pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-3xl space-y-4">
-          <h1 className="font-display font-bold text-foreground text-2xl">Contact Us</h1>
-          <p className="text-muted-foreground font-body">Email: grillthevibe@gmail.com</p>
-          <p className="text-muted-foreground font-body">Phone: 07053263931</p>
-          <p className="text-muted-foreground font-body">Address: Yeolab Lodge, Asude, FUTA Westgate, Akure, Nigeria.</p>
+          <h1 className="font-display font-bold text-foreground text-2xl">{CONTACT_PAGE_CONTENT.title}</h1>
+          {CONTACT_PAGE_CONTENT.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-muted-foreground font-body">
+              {paragraph}
+            </p>
+          ))}
         </div>
       </main>
     </SiteLayout>

@@ -11,6 +11,9 @@ const LINKS = [
   { label: 'Referrals', to: '/referrals' },
   { label: 'Marketplace', to: '/marketplace' },
   { label: 'Learn about HP', to: '/hp' },
+  { label: 'Our Story 🔥', to: '/about' },
+  { label: "Questions? We've Got You.", to: '/support' },
+  { label: 'Your Trust — Terms & Privacy', to: '/trust' },
 ];
 
 export function MobileSidebar() {

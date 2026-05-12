@@ -54,12 +54,12 @@ const MenuPage = ({ initialMenu }: { initialMenu: MenuItem[] }) => {
           <StatusStrip compact />
           <div className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Squad order</p>
-              <h1 className="mt-1 font-display text-2xl font-bold text-foreground">Server-rendered menu, instant filtering.</h1>
-              <p className="mt-1 text-sm text-muted-foreground">Browse first, filter fast, and keep slow networks from blocking the first paint.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Selar-aligned menu</p>
+              <h1 className="mt-1 font-display text-2xl font-bold text-foreground">Your plate starts here. 😋🔥</h1>
+              <p className="mt-1 text-sm text-muted-foreground">Real flame. Your choice. Pick what calls to you.</p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
-              <Users size={16} /> Group delivery slots open
+              <Users size={16} /> Delivery 6:30–8:30PM, Mon–Sat
             </div>
           </div>
         </div>
@@ -75,12 +75,15 @@ const MenuPage = ({ initialMenu }: { initialMenu: MenuItem[] }) => {
       <div className="container mx-auto px-4 py-8">
         {isError ? <p className="mb-4 text-sm text-destructive">Unable to refresh the latest menu right now. Showing the server-rendered menu instead.</p> : null}
         {isFetching && !menuItems.length ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, index) => <FoodCardSkeleton key={index} />)}
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-primary">Firing up the menu… 🔥</p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, index) => <FoodCardSkeleton key={index} />)}
+            </div>
           </div>
         ) : filtered.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card/60 px-6 py-14 text-center text-sm text-muted-foreground">
-            No menu items matched “{search || category}”. Try another filter.
+            Nothing matched “{search || category}”. Try another flavour lane.
           </div>
         ) : (
           <motion.div layout className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

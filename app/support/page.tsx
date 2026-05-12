@@ -1,14 +1,19 @@
 "use client";
 
 import { SiteLayout } from "@/app/layouts/SiteLayout";
+import { SUPPORT_PAGE_CONTENT } from '@/content/staticPagesContent';
 
 export default function SupportPage() {
   return (
-    <SiteLayout title="Support">
+    <SiteLayout title={SUPPORT_PAGE_CONTENT.title}>
       <main className="flex-1 md:pt-24 pb-12">
         <div className="container mx-auto px-4 max-w-3xl space-y-4">
-          <h1 className="font-display font-bold text-foreground text-2xl">Support</h1>
-          <p className="text-muted-foreground font-body">Need help with an order? Reach us via contact channels and we’ll respond quickly.</p>
+          <h1 className="font-display font-bold text-foreground text-2xl">{SUPPORT_PAGE_CONTENT.title}</h1>
+          {SUPPORT_PAGE_CONTENT.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-muted-foreground font-body">
+              {paragraph}
+            </p>
+          ))}
         </div>
       </main>
     </SiteLayout>
