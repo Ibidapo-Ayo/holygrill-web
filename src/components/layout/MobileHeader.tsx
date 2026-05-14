@@ -4,24 +4,25 @@ import { MobileSidebar } from './MobileSidebar';
 
 interface MobileHeaderProps {
   title?: string;
-  showBack?: boolean;
 }
 
 export function MobileHeader({ title }: MobileHeaderProps) {
   const location = useLocation();
-  if (location.pathname.startsWith('/admin')) return null;
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/kitchen')) return null;
 
   return (
-    <header className="md:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-xl border-b border-border">
-      <div className="flex items-center justify-between px-4 h-14">
-        <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="Holy Grills" className="h-8 w-auto" />
-        </Link>
-        {/* {title && <h1 className="text-base font-extrabold text-foreground truncate">{title}</h1>} */}
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl md:hidden">
+      <div className="flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center">
+            <img src="/logo.png" alt="Holy Grills" className="h-8 w-auto" />
+          </Link>
+          {title ? <p className="max-w-[110px] truncate text-sm font-semibold text-foreground">{title}</p> : null}
+        </div>
         <div className="flex items-center gap-2">
-          <button className="relative p-2 text-brand-brown/70 rounded-full hover:bg-secondary">
+          <button className="relative rounded-full p-2 text-brand-brown/70 hover:bg-secondary" aria-label="Notifications">
             <Bell size={20} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
           </button>
           <MobileSidebar />
         </div>

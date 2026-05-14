@@ -1,8 +1,10 @@
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+
 export function setCookie(name: string, value: string, days = 7) {
   if (typeof document === 'undefined') return;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  const secure = location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`;
+  const expires = new Date(Date.now() + days * MILLISECONDS_PER_DAY).toUTCString();
+  const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict${secure}`;
 }
 
 export function getCookie(name: string): string | null {

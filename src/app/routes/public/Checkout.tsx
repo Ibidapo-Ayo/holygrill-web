@@ -37,8 +37,6 @@ const CheckoutPage = () => {
 
   const canPay = method === 'delivery' ? deliveryReady : pickupReady;
 
-  const guestContactValid = isAuthenticated || guestEmail.trim() || guestPhone.trim();
-
   const handlePay = async () => {
     if (!isAuthenticated) {
       if (!guestEmail.trim() && !guestPhone.trim()) {
@@ -97,11 +95,11 @@ const CheckoutPage = () => {
                 <div>
                   <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Guest Checkout</p>
                   <h3 className="font-display font-bold text-foreground text-base">Contact Info</h3>
-                  <p className="text-xs text-muted-foreground font-body mt-1">
-                    Provide your email or phone so we can track your order.{' '}
-                  <Link to="/signup" className="text-primary hover:underline">Create an account</Link>{' '}
-                  for full order history.
-                  </p>
+                   <p className="text-xs text-muted-foreground font-body mt-1">
+                     Provide your email or phone so we can track your order.{' '}
+                     <Link to="/signup" className="text-primary hover:underline">Create an account</Link>{' '}
+                     for full order history.
+                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>

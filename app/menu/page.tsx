@@ -1,8 +1,13 @@
-"use client";
+import MenuPage from '@/app/routes/public/Menu';
+import { SiteLayout } from '@/app/layouts/SiteLayout';
+import { getMenuItems } from '@/services/api/menu.service';
 
-import MenuPage from "@/app/routes/public/Menu";
-import { SiteLayout } from "@/app/layouts/SiteLayout";
+export default async function Page() {
+  const initialMenu = await getMenuItems();
 
-export default function Page() {
-  return <SiteLayout title="Menu"><MenuPage /></SiteLayout>;
+  return (
+    <SiteLayout title="Menu">
+      <MenuPage initialMenu={initialMenu} />
+    </SiteLayout>
+  );
 }

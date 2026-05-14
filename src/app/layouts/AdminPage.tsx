@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { AdminGuard } from '@/components/admin/AdminGuard';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 
 interface AdminPageProps {
@@ -9,8 +10,8 @@ interface AdminPageProps {
 
 export function AdminPage({ title, subtitle, children }: AdminPageProps) {
   return (
-    <AdminLayout title={title} subtitle={subtitle}>
-      {children}
-    </AdminLayout>
+    <AdminGuard>
+      <AdminLayout title={title} subtitle={subtitle}>{children}</AdminLayout>
+    </AdminGuard>
   );
 }

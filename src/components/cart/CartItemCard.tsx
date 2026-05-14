@@ -1,33 +1,71 @@
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Heart, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { formatPrice } from '@/data/menu';
-import type { CartItem as CartItemType } from '@/types';
+import type { CartItem, MenuItem } from '@/types';
 
-interface CartItemProps extends CartItemType {
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onRemove: () => void;
+interface CartLineCardProps {
+  mode: 'cart' | 'saved';
+  item: CartItem | MenuItem;
+  quantity?: number;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
+  onRemove?: () => void;
+  onMoveToCart?: () => void;
+  onMoveToSaved?: () => void;
 }
 
-export function CartItemCard({ name, price, quantity, imageUrl, onIncrement, onDecrement, onRemove }: CartItemProps) {
+export function CartItemCard({ mode, item, quantity = 0, onIncrement, onDecrement, onRemove, onMoveToCart, onMoveToSaved }: CartLineCardProps) {
+  const cartItem = item as CartItem;
+  const menuItem = item as MenuItem;
+  const detailText = cartItem.sizeLabel
+    ? `${cartItem.sizeLabel}${cartItem.extras?.length ? ` · ${cartItem.extras.join(', ')}` : ''}`
+    : menuItem.tagLine || menuItem.category;
+
   return (
-    <div className="flex gap-4 p-4 bg-card rounded-lg border border-border">
-      <img src={imageUrl} alt={name} className="w-20 h-20 rounded-md object-cover shrink-0" />
-      <div className="flex-1 min-w-0">
-        <h4 className="font-display font-bold text-foreground text-sm truncate">{name}</h4>
-        <p className="text-primary font-bold font-body text-sm mt-1">{formatPrice(price * quantity)}</p>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2">
-            <button onClick={onDecrement} className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center text-foreground hover:bg-border transition-colors">
-              <Minus size={14} />
-            </button>
-            <span className="text-sm font-bold font-body w-5 text-center text-foreground">{quantity}</span>
-            <button onClick={onIncrement} className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-primary-foreground hover:bg-primary-hover transition-colors">
-              <Plus size={14} />
+    <div className="flex gap-4 rounded-3xl border border-border bg-card p-4">
+      <img src={item.imageUrl} alt={item.name} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className="font-display text-base font-bold text-foreground">{item.name}</h4>
+              <p className="mt-1 text-xs text-muted-foreground">{detailText}</p>
+            </div>
+            <button onClick={onRemove} className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive" aria-label={`Remove ${item.name}`}>
+              <Trash2 size={16} />
             </button>
           </div>
-          <button onClick={onRemove} className="text-muted-foreground hover:text-destructive transition-colors">
-            <Trash2 size={16} />
-          </button>
+          <p className="mt-2 text-sm font-semibold text-primary">{formatPrice(item.price)}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {mode === 'cart' ? (
+            <div className="flex items-center gap-2 rounded-full bg-secondary px-2 py-1">
+              <button onClick={onDecrement} className="rounded-full p-1.5 text-foreground transition-colors hover:bg-background" aria-label="Decrease quantity">
+                <Minus size={14} />
+              </button>
+              <span className="w-6 text-center text-sm font-bold text-foreground">{quantity}</span>
+              <button onClick={onIncrement} className="rounded-full bg-primary p-1.5 text-primary-foreground transition-colors hover:bg-primary-hover" aria-label="Increase quantity">
+                <Plus size={14} />
+              </button>
+            </div>
+          ) : (
+            <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+              <Heart size={14} className="text-primary" /> Saved for later
+            </span>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            {mode === 'cart' ? (
+              <button onClick={onMoveToSaved} className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary">
+                <Heart size={14} /> Move to saved
+              </button>
+            ) : null}
+            {mode === 'saved' ? (
+              <button onClick={onMoveToCart} className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
+                <ShoppingCart size={14} /> Move to cart
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

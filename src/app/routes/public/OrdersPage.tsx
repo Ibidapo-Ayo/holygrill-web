@@ -37,7 +37,7 @@ const GuestOrderLookup = () => {
               type="text"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
-              placeholder="e.g. ord-1234567890"
+                  placeholder="e.g. ORD-002"
               required
               className="w-full px-4 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />

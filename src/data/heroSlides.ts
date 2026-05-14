@@ -29,41 +29,50 @@ const IMG_BASE =
 export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 'slide-1',
-    tag: "FUTA's #1 Food Platform",
-    title: "Every Meal,\nEvery Point,\nEvery Moment.",
+    tag: "FUTA's Only Flame Grill 🔥",
+    title: 'Grill the Vibe.\nFeel Alive.',
     description:
-      'Order delicious grills, earn Holy Points, and join the most vibrant food community on campus.',
+      "Real flame-grilled chicken, wings, kebabs + crispy sides — crafted the way others won't. Delivered to you.",
     ctaButtons: [
-      { label: 'Order Now', href: '/menu', variant: 'primary' },
-      { label: 'Join for Free', href: '/signup', variant: 'secondary' },
+      { label: 'Order Now →', href: '/menu', variant: 'primary' },
     ],
     imageUrl: `${IMG_BASE}/campus_menu1.jpg`,
     isActive: true,
   },
   {
     id: 'slide-2',
-    tag: 'New on the Menu',
-    title: "Mediterranean\nFlavours,\nCampus Vibes.",
+    tag: 'Faith in Every Flame 🙏🔥',
+    title: 'Grilled with Faith.\nServed with Love.',
     description:
-      'Herb-marinated turkey, lemon-zest grilled potatoes and a cool yogurt drizzle — your midday escape is here.',
+      'Every plate is made with open flame and genuine care. Not a shortcut in sight — just the Holy Flame Method, every time.',
     ctaButtons: [
-      { label: 'Explore Menu', href: '/menu', variant: 'primary' },
-      { label: 'Learn More', href: '/about', variant: 'secondary' },
+      { label: 'Feel the Difference →', href: '/menu', variant: 'primary' },
     ],
     imageUrl: `${IMG_BASE}/mediterranean_menu3.jpg`,
     isActive: true,
   },
   {
     id: 'slide-3',
-    tag: 'Fan Favourite',
-    title: "Turn Up\nThe Heat,\nFeed Your Street.",
+    tag: 'Built for FUTA. Built Together. ❤️‍🔥',
+    title: 'From one grill,\nto a million thrills.',
     description:
-      'Spicy chili-marinated beef, chipotle mayo, Holy hot sauce — the Spicy Campus Fusion is calling your name.',
+      'From the post-exam plate to the Friday night squad order — Holy Grills is always somewhere in the middle of the best campus moments.',
     ctaButtons: [
-      { label: 'Order Now', href: '/menu', variant: 'primary' },
-      { label: 'Earn Holy Points', href: '/signup', variant: 'secondary' },
+      { label: 'Join the Vibe →', href: '/signup', variant: 'primary' },
     ],
     imageUrl: `${IMG_BASE}/campus_menu2.jpg`,
+    isActive: true,
+  },
+  {
+    id: 'slide-4',
+    tag: 'Only Flame. No Shortcuts. 🔥',
+    title: 'Faith. Love.\nEnergy. Flavor.',
+    description:
+      'The four pillars behind every marinade, every baste, every flame-grilled order that arrives at your door.',
+    ctaButtons: [
+      { label: 'Experience Holy Grills →', href: '/menu', variant: 'primary' },
+    ],
+    imageUrl: `${IMG_BASE}/mediterranean_menu2.jpg`,
     isActive: true,
   },
 ];

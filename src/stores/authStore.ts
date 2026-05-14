@@ -8,7 +8,7 @@ export interface AuthUser {
   email: string;
   name: string;
   avatarUrl?: string | null;
-  role: 'customer' | 'admin';
+  role: 'customer' | 'admin' | 'kitchen';
 }
 
 interface AuthState {
@@ -40,7 +40,7 @@ export function getInitials(name: string): string {
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
+    .map((word) => word[0]?.toUpperCase() ?? '')
     .join('');
 }
 
