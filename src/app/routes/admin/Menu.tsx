@@ -54,7 +54,7 @@ const AdminMenu = () => {
     setShowForm(true);
   };
 
-  const handleSave = (formData: Partial<MenuItem>) => {
+  const handleSave = (formData: Partial<ManagedMenuItem>) => {
     if (editingItem) {
       setItems((prev) => prev.map((i) => (i.id === editingItem.id ? { ...i, ...formData } : i)));
       toast.success('Item updated');
