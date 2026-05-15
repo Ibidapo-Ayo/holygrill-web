@@ -11,15 +11,15 @@ export default function Page() {
   const events = useMemo(() => EVENT_DISCOVERY_ITEMS, []);
 
   return (
-    <SiteLayout title="Events">
+    <SiteLayout title="Catering">
       <main className="flex-1 pb-12 pt-4 md:pt-24">
         <div className="container mx-auto max-w-5xl space-y-6 px-4">
           <section className="rounded-[2rem] border border-border bg-card p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Events</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Catering</p>
             <h1 className="mt-2 font-display text-3xl font-bold text-foreground">Discover campus events or request catering.</h1>
             <div className="mt-4 inline-flex rounded-full border border-border bg-background p-1">
               {(['discover', 'catering'] as const).map((value) => (
-                <button key={value} onClick={() => setTab(value)} className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{value === 'discover' ? 'Events discovery' : 'Catering request'}</button>
+                <button key={value} onClick={() => setTab(value)} className={`rounded-full px-4 py-2 text-sm font-semibold ${tab === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{value === 'discover' ? 'Events' : 'Catering request'}</button>
               ))}
             </div>
           </section>
@@ -29,13 +29,19 @@ export default function Page() {
               <div className="grid gap-4 md:grid-cols-2">
                 {events.map((event) => (
                   <div key={event.id} className="rounded-[2rem] border border-border bg-card p-5">
-                    <p className="text-sm font-semibold text-foreground">{event.title}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-semibold text-foreground">{event.title}</p>
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">+25 HP</span>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">{event.description}</p>
                     <div className="mt-4 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
                       <span>{event.date}</span>
                       <span>{event.location}</span>
                       <span>{event.capacity}</span>
                     </div>
+                    <button className="mt-4 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
+                      {event.title.toLowerCase().includes('run') ? 'Get Ticket' : 'RSVP'}
+                    </button>
                   </div>
                 ))}
               </div>

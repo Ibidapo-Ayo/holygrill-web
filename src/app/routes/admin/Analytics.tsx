@@ -173,6 +173,61 @@ const AdminAnalytics = () => {
           </div>
         </div>
       </div>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="font-display font-bold text-foreground text-sm mb-4">HP issued vs redeemed</h3>
+          <div className="space-y-3">
+            {[
+              { label: 'Issued', value: 1840, color: 'bg-primary' },
+              { label: 'Redeemed', value: 1260, color: 'bg-accent' },
+            ].map((item) => (
+              <div key={item.label}>
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                  <span>{item.label}</span>
+                  <span>{item.value} HP</span>
+                </div>
+                <div className="h-2 rounded-full bg-secondary">
+                  <div className={`h-full rounded-full ${item.color}`} style={{ width: `${(item.value / 2000) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="font-display font-bold text-foreground text-sm mb-4">Tier distribution breakdown</h3>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {[
+              'Rookie — 38%',
+              'Hungry — 34%',
+              'Holy Eater — 21%',
+              'Grill Master — 7%',
+            ].map((row) => <div key={row} className="rounded-lg bg-secondary/60 px-3 py-2">{row}</div>)}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="font-display font-bold text-foreground text-sm mb-4">Referral funnel</h3>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {[
+              'Invites sent — 420',
+              'Invites opened — 279',
+              'Signups completed — 114',
+              'First orders — 67',
+            ].map((row) => <div key={row} className="rounded-lg bg-secondary/60 px-3 py-2">{row}</div>)}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="font-display font-bold text-foreground text-sm mb-4">Challenge completion rate</h3>
+          <div className="rounded-2xl bg-secondary/60 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Current rate</p>
+            <p className="mt-2 font-display text-3xl font-bold text-foreground">62%</p>
+            <p className="mt-1 text-sm text-muted-foreground">+8% vs last cycle</p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

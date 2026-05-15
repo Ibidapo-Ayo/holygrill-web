@@ -5,8 +5,10 @@ import { ChevronRight, LogOut, Menu, User } from 'lucide-react';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const LINKS = [
+  { label: 'Dashboard', to: '/dashboard' },
+  { label: 'My Orders', to: '/orders' },
   { label: 'Leaderboard', to: '/leaderboard' },
-  { label: 'Events & Catering', to: '/events' },
+  { label: 'Catering', to: '/events' },
   { label: 'Wallet', to: '/wallet' },
   { label: 'Referrals', to: '/referrals' },
   { label: 'Marketplace', to: '/marketplace' },

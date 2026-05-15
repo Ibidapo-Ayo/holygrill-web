@@ -5,10 +5,8 @@ import { useNavigate } from '@/lib/router';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { CartSummary } from '@/components/cart/CartSummary';
 import { EmptyCart } from '@/components/cart/EmptyCart';
-import { StatusStrip } from '@/components/shared/StatusStrip';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { calculateCartTotals, createCartLineId } from '@/utils/pricing';
 import { DELIVERY_FEE } from '@/data/menu';
 import { MOCK_MENU } from '@/data/menu';
@@ -29,7 +27,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   const [appliedPromo, setAppliedPromo] = useState<number>(0);
   const [walletEnabled, setWalletEnabled] = useState(true);
   const [guestCheckout, setGuestCheckout] = useState(false);
-  const [notes, setNotes] = useState('');
   const [redeemHP, setRedeemHP] = useState(true);
   const { items, updateQuantity, removeItem, addItem } = useCartStore();
   const { items: savedItems, toggle } = useFavouritesStore();
@@ -76,20 +73,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   return (
     <main className="flex-1 pb-12 md:pt-24">
       <div className="container mx-auto space-y-6 px-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Checkout hub</p>
-            <h1 className="mt-1 font-display text-3xl font-bold text-foreground">Cart & saved items</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Manage active checkout, saved dishes, wallet spend, promo codes, and guest checkout in one place.</p>
-          </div>
-          <div className="rounded-3xl border border-border bg-card px-4 py-3 text-sm">
-            <p className="font-semibold text-foreground">HP earning preview</p>
-            <p className="mt-1 text-muted-foreground">This basket projects +{totals.hpToEarn} HP before redemptions.</p>
-          </div>
-        </div>
-
-        <StatusStrip compact />
-
         <div className="inline-flex rounded-full border border-border bg-card p-1">
           {[
             { key: 'cart', label: `My cart (${items.length})` },
@@ -174,11 +157,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-border bg-card p-5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><Gift size={16} className="text-primary" /> Order notes & fulfilment</div>
-              <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-4 min-h-28" aria-label="Order notes" placeholder="Add delivery notes, spice preferences, or gate instructions" />
-              <p className="mt-2 text-xs text-muted-foreground">Form structure is ready for future validation and backend submission.</p>
-            </div>
           </div>
 
           <CartSummary

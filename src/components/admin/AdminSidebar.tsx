@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@/lib/router';
-import { Bell, CalendarDays, ChevronLeft, ChevronRight, Clock3, Flame, LayoutDashboard, ListRestart, LogOut, Medal, ShoppingBag, Store, Truck, Users2, UtensilsCrossed } from 'lucide-react';
+import { Bell, CalendarDays, ChevronLeft, ChevronRight, Clock3, Flame, Gift, LayoutDashboard, ListRestart, LogOut, Medal, ShoppingBag, Store, Truck, Users2, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -25,6 +25,7 @@ const NAV_SECTIONS = [
     label: 'Growth',
     items: [
       { to: '/admin/hp', label: 'HP Manager', icon: Flame },
+      { to: '/admin/rewards', label: 'Rewards Manager', icon: Gift },
       { to: '/admin/challenges', label: 'Challenge Engine', icon: Medal },
       { to: '/admin/leaderboard-controls', label: 'Leaderboard Controls', icon: Medal },
     ],

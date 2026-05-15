@@ -2,12 +2,15 @@ import { Gift, Lock, Trophy } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { SectionHeader } from '@/components/shared/SectionHeader';
-import { REWARD_CHALLENGES, REWARD_REDEMPTIONS } from '@/services/mocks/platform';
+import { MARKETPLACE_VENDORS, REWARD_CHALLENGES, REWARD_REDEMPTIONS } from '@/services/mocks/platform';
 import { useAuthStore } from '@/stores/authStore';
+import { useState } from 'react';
+import { formatPrice } from '@/data/menu';
 
 const RewardsPage = () => {
   const { isAuthenticated } = useAuthStore();
   const currentHP = 248;
+  const [activeTab, setActiveTab] = useState<'rewards' | 'marketplace'>('rewards');
 
   if (!isAuthenticated) {
     return (
@@ -61,34 +64,61 @@ const RewardsPage = () => {
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
           <div className="space-y-4">
+            <div className="inline-flex rounded-full border border-border bg-card p-1">
+              <button
+                onClick={() => setActiveTab('rewards')}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${activeTab === 'rewards' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+              >
+                Rewards
+              </button>
+              <button
+                onClick={() => setActiveTab('marketplace')}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${activeTab === 'marketplace' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+              >
+                Marketplace
+              </button>
+            </div>
             <SectionHeader
-              eyebrow="Redeem"
-              title="Spend HP on perks"
-              description="Every card has visible HP pricing and lock states."
+              eyebrow={activeTab === 'rewards' ? 'Redeem' : 'Marketplace'}
+              title={activeTab === 'rewards' ? 'Spend HP on perks' : 'Spend HP on drops'}
+              description="Square cards keep comparison quick."
             />
-            {REWARD_REDEMPTIONS.map((reward) => {
-              const canRedeem = currentHP >= reward.hpCost && !reward.locked;
+            {activeTab === 'rewards' ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {REWARD_REDEMPTIONS.map((reward) => {
+                  const canRedeem = currentHP >= reward.hpCost && !reward.locked;
 
-              return (
-                <div key={reward.id} className="flex items-center gap-4 rounded-[2rem] border border-border bg-card p-5">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Gift size={24} />
+                  return (
+                    <div key={reward.id} className="rounded-[2rem] border border-border bg-card p-5">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                        <Gift size={20} />
+                      </div>
+                      <p className="mt-4 font-display text-lg font-bold text-foreground">{reward.title}</p>
+                      <p className="mt-2 text-sm text-muted-foreground">{reward.description}</p>
+                      <button
+                        className={`mt-4 rounded-full px-4 py-2 text-xs font-bold ${canRedeem ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                        disabled={!canRedeem}
+                      >
+                        {reward.locked ? 'Locked' : `${reward.hpCost} HP`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {MARKETPLACE_VENDORS.map((vendor) => (
+                  <div key={vendor.id} className="rounded-[2rem] border border-border bg-card p-5">
+                    <p className="font-display text-lg font-bold text-foreground">{vendor.name}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{vendor.description}</p>
+                    <div className="mt-4 flex items-center justify-between text-sm">
+                      <span className="font-semibold text-primary">{vendor.hpPrice} HP</span>
+                      {vendor.cashPrice ? <span className="text-muted-foreground">{formatPrice(vendor.cashPrice)}</span> : null}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-display text-lg font-bold text-foreground">{reward.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{reward.description}</p>
-                  </div>
-                  <button
-                    className={`rounded-full px-4 py-2 text-xs font-bold ${
-                      canRedeem ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
-                    }`}
-                    disabled={!canRedeem}
-                  >
-                    {reward.locked ? 'Locked' : `${reward.hpCost} HP`}
-                  </button>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 rounded-[2rem] border border-border bg-card p-6">

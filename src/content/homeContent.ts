@@ -26,15 +26,15 @@ export interface HomeTestimonial {
 }
 
 export const HOME_STATS: HomeStat[] = [
-  { label: 'Scale signal', value: 'Every Order, Flame-Grilled 🔥', helper: 'Craft first. No shortcuts.' },
+  { label: '', value: 'Every Order, Flame-Grilled 🔥', helper: 'Craft first. No shortcuts.' },
   { label: 'Community', value: "FUTA's Grilled Meal Community ❤️‍🔥", helper: 'Built for students, built together.' },
   { label: 'Rewards', value: 'Holy Points — Earn With Every Bite 💯', helper: 'Stack points on every order.' },
-  { label: 'Delivery', value: 'HG Time — Delivered 6:30–8:30pm 🚚', helper: 'Mon–Sat delivery window.' },
+  { label: 'Delivery', value: 'Campus evening delivery drop 🚚', helper: 'Mon–Sat delivery window.' },
 ];
 
 export const HOME_EXPERIENCES: HomeExperience[] = [
   {
-    title: 'Events & catering',
+    title: 'Catering',
     description: 'Host faculty hangs, birthday drops, and late-night study feasts with Holy Grills flavour.',
     cta: '/events',
   },

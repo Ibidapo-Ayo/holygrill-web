@@ -6,8 +6,21 @@ import { HPBadge } from '@/components/hp/HPBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
+interface ManagedMenuItem extends MenuItem {
+  addOnEditor?: string;
+  itemOrderCap?: number;
+  dailyOrderCap?: number;
+}
+
 const AdminMenu = () => {
-  const [items, setItems] = useState<MenuItem[]>(MOCK_MENU);
+  const [items, setItems] = useState<ManagedMenuItem[]>(() =>
+    MOCK_MENU.map((item) => ({
+      ...item,
+      addOnEditor: item.extras?.map((extra) => extra.title).join(', ') ?? '',
+      itemOrderCap: 40,
+      dailyOrderCap: 200,
+    }))
+  );
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -46,7 +59,7 @@ const AdminMenu = () => {
       setItems((prev) => prev.map((i) => (i.id === editingItem.id ? { ...i, ...formData } : i)));
       toast.success('Item updated');
     } else {
-      const newItem: MenuItem = {
+      const newItem: ManagedMenuItem = {
         id: `new-${Date.now()}`,
         name: formData.name || 'New Item',
         description: formData.description || '',
@@ -55,6 +68,9 @@ const AdminMenu = () => {
         category: formData.category || 'Burgers',
         hpValue: formData.hpValue || 10,
         isAvailable: true,
+        addOnEditor: formData.addOnEditor || '',
+        itemOrderCap: formData.itemOrderCap || 0,
+        dailyOrderCap: formData.dailyOrderCap || 0,
       };
       setItems((prev) => [...prev, newItem]);
       toast.success('Item created');
@@ -144,6 +160,7 @@ const AdminMenu = () => {
                   {item.isAvailable ? 'Available' : 'Hidden'}
                 </span>
               </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">Cap: {item.itemOrderCap ?? 0}/item • {item.dailyOrderCap ?? 0}/day</p>
             </div>
           </motion.div>
         ))}
@@ -168,8 +185,8 @@ function MenuItemForm({
   onSave,
   onClose,
 }: {
-  item: MenuItem | null;
-  onSave: (data: Partial<MenuItem>) => void;
+  item: ManagedMenuItem | null;
+  onSave: (data: Partial<ManagedMenuItem>) => void;
   onClose: () => void;
 }) {
   const [form, setForm] = useState({
@@ -179,6 +196,9 @@ function MenuItemForm({
     category: item?.category || 'Burgers',
     hpValue: item?.hpValue?.toString() || '10',
     imageUrl: item?.imageUrl || '',
+    addOnEditor: item?.addOnEditor || '',
+    itemOrderCap: item?.itemOrderCap?.toString() || '40',
+    dailyOrderCap: item?.dailyOrderCap?.toString() || '200',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -190,6 +210,9 @@ function MenuItemForm({
       category: form.category,
       hpValue: parseInt(form.hpValue) || 10,
       imageUrl: form.imageUrl,
+      addOnEditor: form.addOnEditor,
+      itemOrderCap: parseInt(form.itemOrderCap) || 0,
+      dailyOrderCap: parseInt(form.dailyOrderCap) || 0,
     });
   };
 
@@ -211,13 +234,16 @@ function MenuItemForm({
           {item ? 'Edit Item' : 'New Menu Item'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            { key: 'name', label: 'Name', type: 'text', placeholder: 'Holy Smash Burger' },
-            { key: 'description', label: 'Description', type: 'text', placeholder: 'Describe the item...' },
-            { key: 'price', label: 'Price (₦)', type: 'number', placeholder: '3500' },
-            { key: 'hpValue', label: 'HP Value', type: 'number', placeholder: '15' },
-            { key: 'imageUrl', label: 'Image URL', type: 'text', placeholder: 'https://...' },
-          ].map((field) => (
+            {[
+              { key: 'name', label: 'Name', type: 'text', placeholder: 'Holy Smash Burger' },
+              { key: 'description', label: 'Description', type: 'text', placeholder: 'Describe the item...' },
+              { key: 'price', label: 'Price (₦)', type: 'number', placeholder: '3500' },
+              { key: 'hpValue', label: 'HP Value', type: 'number', placeholder: '15' },
+              { key: 'addOnEditor', label: 'Add-on editor', type: 'text', placeholder: 'Sauce, extra spice...' },
+              { key: 'itemOrderCap', label: 'Per-item order cap', type: 'number', placeholder: '40' },
+              { key: 'dailyOrderCap', label: 'Total daily order cap', type: 'number', placeholder: '200' },
+              { key: 'imageUrl', label: 'Image URL', type: 'text', placeholder: 'https://...' },
+            ].map((field) => (
             <div key={field.key}>
               <label className="block text-xs text-muted-foreground font-body mb-1">{field.label}</label>
               <input

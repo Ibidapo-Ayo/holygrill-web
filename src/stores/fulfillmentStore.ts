@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type DeliveryInfo = {
+  zone: string;
+  area: string;
   streetAddress: string;
   city: string;
   landmark?: string;
@@ -46,7 +48,7 @@ export const useFulfillmentStore = create<FulfillmentState>()(
 );
 
 export const hasDeliveryInfo = (state: FulfillmentState) =>
-  Boolean(state.deliveryInfo?.streetAddress && state.deliveryInfo?.city && state.deliveryInfo?.phone);
+  Boolean(state.deliveryInfo?.zone && state.deliveryInfo?.area && state.deliveryInfo?.streetAddress && state.deliveryInfo?.city && state.deliveryInfo?.phone);
 
 export const hasPickupInfo = (state: FulfillmentState) =>
   Boolean(

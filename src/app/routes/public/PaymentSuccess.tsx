@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from '@/lib/router';
 import { CheckCircle2, ArrowRight, Flame } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+import { playUiTone } from '@/utils/sound';
 
 type PaymentState = {
   total: number;
@@ -21,6 +22,7 @@ const PaymentSuccessPage = () => {
       return;
     }
     clearCart();
+    playUiTone('checkout');
   }, [state, clearCart, navigate]);
 
   if (!state) return null;
@@ -64,7 +66,10 @@ const PaymentSuccessPage = () => {
               <ArrowRight size={16} />
             </button>
             <button
-              onClick={() => navigate('/menu')}
+              onClick={() => {
+                playUiTone('navigate');
+                navigate('/menu');
+              }}
               className="inline-flex items-center justify-center px-5 py-3 rounded-lg bg-secondary text-foreground font-display font-bold text-sm hover:bg-border transition-colors"
             >
               Back to Menu

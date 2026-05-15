@@ -209,4 +209,9 @@
            cursor-pointer select-none
            peer-disabled:cursor-not-allowed peer-disabled:opacity-50;
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 }

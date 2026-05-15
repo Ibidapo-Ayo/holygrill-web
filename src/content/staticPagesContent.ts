@@ -17,7 +17,7 @@ export const SUPPORT_PAGE_CONTENT: StaticPageContent = {
   title: "Questions? We've Got You.",
   paragraphs: [
     "Need help with an order, payment, or delivery timing? We're here — and we actually reply.",
-    'WhatsApp: 07053263931',
+    'WhatsApp support',
     'Email: grillthevibe@gmail.com',
     'Instagram & TikTok: @grillthevibe',
   ],

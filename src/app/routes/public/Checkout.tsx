@@ -59,6 +59,7 @@ const CheckoutPage = () => {
 
   const renderDeliverySummary = () => (
     <div className="space-y-1 text-sm font-body">
+      <p className="text-muted-foreground">{deliveryInfo?.zone || 'Zone not set'}{deliveryInfo?.area ? ` • ${deliveryInfo.area}` : ''}</p>
       <p className="text-foreground">{deliveryInfo?.streetAddress || 'Not set'}</p>
       <p className="text-muted-foreground">{deliveryInfo?.city || 'City not set'}</p>
       {deliveryInfo?.landmark && <p className="text-muted-foreground">Landmark: {deliveryInfo.landmark}</p>}

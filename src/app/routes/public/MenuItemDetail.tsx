@@ -5,19 +5,18 @@ import { useNavigate, useParams } from '@/lib/router';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { StatusStrip } from '@/components/shared/StatusStrip';
 import { MOCK_MENU, formatPrice } from '@/data/menu';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
 import { createCartLineId, getCartQuantityForMenuItem, getConfiguredMenuPrice, getPrimaryCartLineId } from '@/utils/pricing';
+import { playUiTone } from '@/utils/sound';
 import { toast } from 'sonner';
 
 const MenuItemDetail = () => {
   const { menuId } = useParams<{ menuId: string }>();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [extraQuantities, setExtraQuantities] = useState<Record<string, number>>({});
   const [isDesktop, setIsDesktop] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false
   );
@@ -31,8 +30,7 @@ const MenuItemDetail = () => {
   useEffect(() => {
     if (!item) return;
     setSelectedSize(item.sizes?.[0]?.label ?? null);
-    setSelectedExtras([]);
-    setQuantity(1);
+    setExtraQuantities({});
   }, [item]);
 
   useLayoutEffect(() => {
@@ -53,17 +51,34 @@ const MenuItemDetail = () => {
     );
   }
 
+  const selectedExtras = Object.entries(extraQuantities).flatMap(([title, qty]) =>
+    Array.from({ length: qty }).map(() => title)
+  );
   const unitPrice = getConfiguredMenuPrice(item, selectedSize, selectedExtras);
-  const total = unitPrice * quantity;
-  const hpTotal = item.hpValue * quantity;
+  const total = unitPrice;
+  const hpTotal = item.hpValue;
   const existingQty = getCartQuantityForMenuItem(items, item.id);
 
-  const toggleExtra = (title: string) => setSelectedExtras((current) => current.includes(title) ? current.filter((entry) => entry !== title) : [...current, title]);
+  const updateExtraQuantity = (title: string, delta: number) => {
+    setExtraQuantities((current) => {
+      const next = Math.max((current[title] ?? 0) + delta, 0);
+      if (!next) {
+        const clone = { ...current };
+        delete clone[title];
+        return clone;
+      }
+      return { ...current, [title]: next };
+    });
+  };
 
   const handleAdd = () => {
     if (!item.isAvailable) return;
     const lineId = createCartLineId(item.id, selectedSize, selectedExtras);
     const existingLine = items.find((entry) => entry.id === lineId);
+    const extrasForCart = Object.entries(extraQuantities)
+      .filter(([, qty]) => qty > 0)
+      .map(([title, qty]) => (qty > 1 ? `${title} ×${qty}` : title));
+
     if (!existingLine) {
       addItem({
         id: lineId,
@@ -73,13 +88,13 @@ const MenuItemDetail = () => {
         imageUrl: item.imageUrl,
         hpValue: item.hpValue,
         sizeLabel: selectedSize ?? undefined,
-        extras: selectedExtras,
+        extras: extrasForCart,
       });
-      if (quantity > 1) updateQuantity(lineId, quantity);
     } else {
-      updateQuantity(lineId, existingLine.quantity + quantity);
+      updateQuantity(lineId, existingLine.quantity + 1);
     }
-    toast.success(`${item.name} added to cart`, { description: `${quantity} × ${formatPrice(unitPrice)} • +${hpTotal} HP` });
+    playUiTone('add');
+    toast.success(`${item.name} added to cart`, { description: `${formatPrice(unitPrice)} • +${hpTotal} HP` });
   };
 
   const handleFavourite = () => {
@@ -115,11 +130,11 @@ const MenuItemDetail = () => {
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Add extras</p>
           <div className="space-y-2">
             {item.extras.map((extra) => {
-              const selected = selectedExtras.includes(extra.title);
+              const selected = Boolean(extraQuantities[extra.title]);
               return (
                 <button
                   key={extra.title}
-                  onClick={() => toggleExtra(extra.title)}
+                  onClick={() => updateExtraQuantity(extra.title, 1)}
                   className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-3 text-left transition-colors ${selected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/30'}`}
                 >
                   <div className="flex items-center gap-3">
@@ -129,7 +144,36 @@ const MenuItemDetail = () => {
                       <p className="text-xs text-muted-foreground">+{formatPrice(extra.price)}</p>
                     </div>
                   </div>
-                  {selected ? <CheckCircle2 size={18} className="text-primary" /> : null}
+                  <div className="flex items-center gap-2">
+                    {selected ? (
+                      <div className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            updateExtraQuantity(extra.title, -1);
+                          }}
+                          className="rounded-full p-1 hover:bg-background"
+                          aria-label={`Decrease ${extra.title}`}
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="w-4 text-center text-xs font-bold">{extraQuantities[extra.title]}</span>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            updateExtraQuantity(extra.title, 1);
+                          }}
+                          className="rounded-full p-1 hover:bg-background"
+                          aria-label={`Increase ${extra.title}`}
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    ) : null}
+                    {selected ? <CheckCircle2 size={18} className="text-primary" /> : null}
+                  </div>
                 </button>
               );
             })}
@@ -148,24 +192,12 @@ const MenuItemDetail = () => {
             {item.isAvailable ? 'Available now' : 'Currently unavailable'}
           </span>
         </div>
-        <div className="flex items-end gap-3">
-          <span className="font-display text-4xl font-extrabold text-primary">{formatPrice(unitPrice)}</span>
-          {item.slashedPrice ? <span className="text-sm text-muted-foreground line-through">{formatPrice(item.slashedPrice)}</span> : null}
-        </div>
         <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
       </div>
 
       {optionBlocks}
 
-      <div className="grid gap-4 rounded-3xl border border-border bg-card p-4 sm:grid-cols-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Quantity</p>
-          <div className="mt-2 flex items-center gap-2">
-            <button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="rounded-full bg-secondary p-2" aria-label="Decrease quantity"><Minus size={16} /></button>
-            <span className="w-8 text-center font-display text-xl font-bold text-foreground">{quantity}</span>
-            <button onClick={() => setQuantity((value) => value + 1)} className="rounded-full bg-primary p-2 text-primary-foreground" aria-label="Increase quantity"><Plus size={16} /></button>
-          </div>
-        </div>
+      <div className="grid gap-4 rounded-3xl border border-border bg-card p-4 sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Order total</p>
           <p className="mt-2 font-display text-2xl font-bold text-foreground">{formatPrice(total)}</p>
@@ -179,8 +211,6 @@ const MenuItemDetail = () => {
           </div>
         </div>
       </div>
-
-      <StatusStrip compact />
 
       <div className="space-y-3">
         <button onClick={handleAdd} disabled={!item.isAvailable} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-fire px-4 py-4 text-base font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40">

@@ -72,8 +72,8 @@ export const WALLET_TRANSACTIONS: WalletTransaction[] = [
 ];
 
 export const EVENT_DISCOVERY_ITEMS: EventDiscoveryItem[] = [
-  { id: 'event-1', title: 'Midnight Grill Run', description: 'Late-night pickup collab for exam week.', date: 'Fri · 9:00 PM', location: 'FUTA South Gate', capacity: '40 seats' },
-  { id: 'event-2', title: 'Squad Feast Friday', description: 'Curated combo menu for hostel squads.', date: 'Sat · 6:00 PM', location: 'Aule Common Room', capacity: 'Limited catering slots' },
+  { id: 'event-1', title: 'Midnight Grill Run', description: 'Late-night pickup collab for exam week.', date: 'Friday, May 22, 2026 · 9:00 PM', location: 'FUTA South Gate', capacity: '40 seats' },
+  { id: 'event-2', title: 'Squad Feast Friday', description: 'Curated combo menu for hostel squads.', date: 'Saturday, May 23, 2026 · 6:00 PM', location: 'Aule Common Room', capacity: 'Limited catering slots' },
 ];
 
 export const REFERRAL_MILESTONES: ReferralMilestone[] = [
@@ -104,6 +104,10 @@ export const ADMIN_MODULE_ROWS: Record<string, AdminTableRow[]> = {
   hp: [
     { id: 'hp-1', name: 'Review reward rule', status: 'Active', owner: 'Loyalty', updatedAt: 'Today' },
     { id: 'hp-2', name: 'Referral multiplier', status: 'Draft', owner: 'Loyalty', updatedAt: 'Mon' },
+  ],
+  rewards: [
+    { id: 'rw-1', name: 'Free zobo add-on', status: 'Live', owner: 'Loyalty', updatedAt: 'Today' },
+    { id: 'rw-2', name: 'Campus VIP drop', status: 'Locked', owner: 'Loyalty', updatedAt: 'Today' },
   ],
   riders: [
     { id: 'rd-1', name: 'Tobi Rider', status: 'Online', owner: 'Dispatch', updatedAt: '2 mins ago' },
