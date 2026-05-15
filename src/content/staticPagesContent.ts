@@ -3,6 +3,8 @@ export interface StaticPageContent {
   paragraphs: string[];
 }
 
+export const SUPPORT_WHATSAPP_URL = 'https://wa.me/2347053263931';
+
 export const ABOUT_PAGE_CONTENT: StaticPageContent = {
   title: 'About Holy Grills',
   paragraphs: [

@@ -11,6 +11,7 @@ export function MenuBrowseCard({ item }: MenuBrowseCardProps) {
   return (
     <Link
       to={`/menu/${item.id}`}
+      aria-label={`Customize ${item.name}`}
       className={`flex gap-4 rounded-3xl border border-border bg-card p-4 transition-colors hover:border-primary/40 ${!item.isAvailable ? 'opacity-55' : ''}`}
     >
       <img src={item.imageUrl} alt={item.name} className="h-24 w-28 shrink-0 rounded-2xl object-cover sm:h-28 sm:w-36" />

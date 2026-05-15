@@ -45,7 +45,7 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const rotatingFeatured = [...FEATURED, ...FEATURED];
+  const marqueeItems = [...FEATURED, ...FEATURED];
 
   return (
     <main className="flex flex-1 flex-col">
@@ -100,7 +100,7 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-background to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent" />
           <div className="animate-[marquee_24s_linear_infinite] flex w-max gap-5">
-            {rotatingFeatured.map((item, index) => (
+            {marqueeItems.map((item, index) => (
               <div key={`${item.id}-${index}`} className="w-[280px] shrink-0">
                 <FoodCard
                   {...item}

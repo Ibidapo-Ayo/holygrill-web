@@ -214,4 +214,11 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-\[marquee_24s_linear_infinite\] {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { SiteLayout } from "@/app/layouts/SiteLayout";
-import { SUPPORT_PAGE_CONTENT } from '@/content/staticPagesContent';
+import { SUPPORT_PAGE_CONTENT, SUPPORT_WHATSAPP_URL } from '@/content/staticPagesContent';
 
 export default function SupportPage() {
   return (
@@ -13,7 +13,7 @@ export default function SupportPage() {
             paragraph.toLowerCase().includes('whatsapp') ? (
               <a
                 key={paragraph}
-                href="https://wa.me/2347053263931"
+                href={SUPPORT_WHATSAPP_URL}
                 className="inline-flex text-muted-foreground font-body hover:text-primary"
                 target="_blank"
                 rel="noreferrer"
