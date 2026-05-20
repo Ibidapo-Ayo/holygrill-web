@@ -9,6 +9,7 @@ import CustomFormField from "@/components/CustomFormField";
 import { FormFieldTypes } from "@/lib/form-field-type";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
 import { useAuthStore } from "@/stores/authStore";
+import Divider from "@/components/Divider";
 
 const SignupPage = () => {
   const signup = useAuthStore((s) => s.signup);
@@ -135,19 +136,6 @@ const SignupPage = () => {
             </button>
           </form>
         </Form>
-
-        {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-background px-3 text-muted-foreground font-body">or</span>
-          </div>
-        </div>
-
-        {/* Google */}
-        <GoogleAuthButton type="signup" />
 
         <p className="text-center text-sm text-muted-foreground font-body mt-6">
           Already have an account?{" "}

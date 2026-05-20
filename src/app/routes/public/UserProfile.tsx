@@ -5,31 +5,19 @@ import { toast } from 'sonner';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 
 const UserProfilePage = () => {
-  const { user, setUser, isAuthenticated } = useAuthStore();
+  const { user, setUser, hasHydrated } = useAuthStore();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name ?? '');
+  const [name, setName] = useState(user.full_name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.photo_url ?? '');
   const [saving, setSaving] = useState(false);
 
   /** Only allow http/https URLs to avoid javascript: URI injection. */
   const safeAvatarUrl = safeImageUrl(avatarUrl);
 
-  if (!isAuthenticated || !user) {
-    return (
-      <main className="flex-1 md:pt-24 pb-12 flex items-center justify-center">
-        <div className="text-center space-y-4 px-4">
-          <p className="text-muted-foreground font-body">You must be signed in to view your profile.</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2 rounded-full bg-gradient-cta text-primary-foreground font-bold text-sm"
-          >
-            Sign In
-          </button>
-        </div>
-      </main>
-    );
+  if (!hasHydrated || !user) {
+    return null;
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -41,12 +29,17 @@ const UserProfilePage = () => {
     setSaving(true);
     // Simulate API call
     await new Promise((r) => setTimeout(r, 800));
-    setUser({ ...user, name: name.trim(), email: email.trim(), avatarUrl: avatarUrl.trim() || null });
+    setUser({
+      ...user,
+      email: email.trim(),
+      full_name: name.trim(),
+      photo_url: avatarUrl.trim() || null,
+    });
     toast.success('Profile updated!');
     setSaving(false);
   };
 
-  const initials = getInitials(name || user.name);
+  const initials = getInitials(name || user.full_name);
 
   return (
     <main className="flex-1 md:pt-24 pb-12">

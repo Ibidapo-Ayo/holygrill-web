@@ -7,6 +7,7 @@ import { MenuBrowseCard } from '@/components/menu/MenuBrowseCard';
 import { CategoryTabs } from '@/components/menu/CategoryTabs';
 import { SearchBar } from '@/components/menu/SearchBar';
 import { FoodCardSkeleton } from '@/components/menu/FoodCardSkeleton';
+import { KitchenCountdownCard } from '@/components/shared/KitchenCountdownCard';
 import { getMenuItems } from '@/services/api/menu.service';
 import type { MenuItem } from '@/types';
 
@@ -44,6 +45,7 @@ const MenuPage = ({ initialMenu }: { initialMenu: MenuItem[] }) => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        <KitchenCountdownCard className="px-0 pb-6" showOrderHint ctaLabel="Build your plate" />
         {isError ? <p className="mb-4 text-sm text-destructive">Unable to refresh the latest menu right now. Showing the server-rendered menu instead.</p> : null}
         {isFetching && !menuItems.length ? (
           <div className="space-y-4">

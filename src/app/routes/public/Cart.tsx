@@ -25,7 +25,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   const [activeTab, setActiveTab] = useState<'cart' | 'saved'>(initialTab);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<number>(0);
-  const [walletEnabled, setWalletEnabled] = useState(true);
   const [guestCheckout, setGuestCheckout] = useState(false);
   const [redeemHP, setRedeemHP] = useState(true);
   const { items, updateQuantity, removeItem, addItem } = useCartStore();
@@ -38,16 +37,9 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   });
 
   const hpRedemption = redeemHP && items.length ? Math.min(600, data.availableHP * 2) : 0;
-  const totalBeforeWallet = calculateCartTotals({
-    items,
-    deliveryFee: DELIVERY_FEE,
-    promoDiscount: appliedPromo,
-    hpRedemption,
-  }).totalBeforeCredits;
-  const walletApplied = walletEnabled && items.length ? Math.min(data.walletBalance, totalBeforeWallet) : 0;
   const totals = useMemo(
-    () => calculateCartTotals({ items, deliveryFee: DELIVERY_FEE, promoDiscount: appliedPromo, hpRedemption, walletApplied }),
-    [appliedPromo, hpRedemption, items, walletApplied]
+    () => calculateCartTotals({ items, deliveryFee: DELIVERY_FEE, promoDiscount: appliedPromo, hpRedemption }),
+    [appliedPromo, hpRedemption, items]
   );
 
   const applyPromo = () => {
@@ -68,6 +60,18 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
     addItem({ id: lineId, menuItemId: item.id, name: item.name, price: basePrice, imageUrl: item.imageUrl, hpValue: item.hpValue, sizeLabel });
     toggle(item);
     toast.success(`${item.name} moved to cart`);
+  };
+
+  const saveCartItemToFavourites = (item: (typeof items)[number]) => {
+    const menuItem = MOCK_MENU.find((entry) => entry.id === (item.menuItemId ?? item.id));
+    if (menuItem && !savedItems.some((entry) => entry.id === menuItem.id)) {
+      toggle(menuItem);
+      toast.success('Saved to favourites');
+    } else {
+      toast.success('Removed from cart');
+    }
+
+    removeItem(item.id);
   };
 
   return (
@@ -102,14 +106,7 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
                       onIncrement={() => updateQuantity(item.id, item.quantity + 1)}
                       onDecrement={() => updateQuantity(item.id, item.quantity - 1)}
                       onRemove={() => removeItem(item.id)}
-                      onMoveToSaved={() => {
-                        const menuItem = MOCK_MENU.find((entry) => entry.id === (item.menuItemId ?? item.id));
-                        if (menuItem && !savedItems.some((entry) => entry.id === menuItem.id)) {
-                          toggle(menuItem);
-                        }
-                        removeItem(item.id);
-                        toast.success('Moved to saved items');
-                      }}
+                      onMoveToSaved={() => saveCartItemToFavourites(item)}
                     />
                   ))}
                 </div>
@@ -137,12 +134,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
               </div>
               <div className="space-y-3 rounded-3xl bg-secondary/60 p-4 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Wallet payment</span>
-                  <button onClick={() => setWalletEnabled((value) => !value)} className={`rounded-full px-3 py-1 text-xs font-semibold ${walletEnabled ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground'}`}>
-                    {walletEnabled ? 'Enabled' : 'Disabled'}
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Redeem HP</span>
                   <button onClick={() => setRedeemHP((value) => !value)} className={`rounded-full px-3 py-1 text-xs font-semibold ${redeemHP ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground'}`}>
                     {redeemHP ? 'Enabled' : 'Disabled'}
@@ -164,7 +155,6 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
             deliveryFee={items.length ? DELIVERY_FEE : 0}
             promoDiscount={appliedPromo}
             hpRedemption={hpRedemption}
-            walletApplied={walletApplied}
             total={totals.payableTotal}
             hpToEarn={totals.hpToEarn}
             checkoutLabel={guestCheckout ? 'Guest checkout' : 'Checkout'}

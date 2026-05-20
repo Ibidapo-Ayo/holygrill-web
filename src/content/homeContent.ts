@@ -33,16 +33,6 @@ export const HOME_STATS: HomeStat[] = [
 ];
 
 export const HOME_EXPERIENCES: HomeExperience[] = [
-  {
-    title: 'Catering',
-    description: 'Host faculty hangs, birthday drops, and late-night study feasts with Holy Grills flavour.',
-    cta: '/events',
-  },
-  {
-    title: 'Marketplace preview',
-    description: 'A new HP-powered drop zone for merch, bundles, and surprise campus activations.',
-    cta: '/marketplace',
-  },
 ];
 
 export const HOME_HOW_IT_WORKS: HomeHowItWorksStep[] = [

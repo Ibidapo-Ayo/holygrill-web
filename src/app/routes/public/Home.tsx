@@ -1,21 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarDays, Flame, Mail, ShoppingBag, Store, Trophy } from 'lucide-react';
+import { ArrowRight, Flame, Mail, ShoppingBag } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HeroCarousel } from '@/components/hero/HeroCarousel';
 import { FoodCard } from '@/components/menu/FoodCard';
+import { KitchenCountdownCard } from '@/components/shared/KitchenCountdownCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { StoreClosedDialog } from '@/components/shared/StoreClosedDialog';
 import { useCartStore } from '@/stores/cartStore';
 import { MOCK_MENU } from '@/data/menu';
-import { LEADERBOARD_ENTRIES } from '@/services/mocks/platform';
 import { getCartQuantityForMenuItem, getPrimaryCartLineId } from '@/utils/pricing';
 import { playUiTone } from '@/utils/sound';
 import type { HeroSlide } from '@/types';
 import { toast } from 'sonner';
 import {
-  HOME_EXPERIENCES,
   HOME_HOLY_POINTS_FEATURES,
   HOME_STATS,
   HOME_TESTIMONIALS,
@@ -23,8 +22,7 @@ import {
 
 const FEATURED = MOCK_MENU.filter((item) => item.isAvailable).slice(0, 4);
 
-const EXPERIENCE_ICONS = [CalendarDays, Store] as const;
-const HP_ICONS = [Flame, Trophy, ShoppingBag, Flame] as const;
+const HP_ICONS = [Flame, ShoppingBag, Flame] as const;
 
 const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
   const { items, addItem, updateQuantity } = useCartStore();
@@ -52,42 +50,7 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
       <StoreClosedDialog />
       <HeroCarousel slides={heroSlides} />
 
-      <section className="container mx-auto grid gap-4 px-4 py-8 md:grid-cols-[1.5fr,1fr]">
-        <div className="relative rounded-3xl border border-border bg-card p-6">
-          <span className="pointer-events-none absolute -right-2 -top-3 text-2xl">🔥</span>
-          <span className="pointer-events-none absolute -bottom-2 left-4 text-xl">🍗</span>
-          <h2 className="font-display text-3xl font-bold text-foreground">Real flame. Real flavour.</h2>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            Built for students who care about flavour, consistency, and delivery that keeps to schedule.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {HOME_STATS.slice(0, 4).map((stat) => (
-              <div key={stat.value} className="rounded-2xl border border-border bg-background/70 px-4 py-3">
-                <p className="text-sm font-semibold text-foreground">{stat.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link to="/leaderboard" className="rounded-3xl border border-primary/20 bg-primary/10 p-6 transition-colors hover:bg-primary/15">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Leaderboard teaser</p>
-              <h3 className="mt-2 font-display text-2xl font-bold text-foreground">You&apos;re #3 this week</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Catch Funmilayo before the weekly prize drop closes.</p>
-            </div>
-            <Trophy className="text-primary" />
-          </div>
-          <div className="mt-4 space-y-2">
-            {LEADERBOARD_ENTRIES.slice(0, 3).map((entry, index) => (
-              <div key={entry.id} className="flex items-center justify-between rounded-2xl bg-background/80 px-3 py-2 text-sm">
-                <span className="font-semibold text-foreground">#{index + 1} {entry.name}</span>
-                <span className="text-primary">{entry.hp} HP</span>
-              </div>
-            ))}
-          </div>
-        </Link>
-      </section>
+      <KitchenCountdownCard className="pt-8" />
 
       <section className="container mx-auto overflow-hidden px-4 py-8">
         <SectionHeader
@@ -111,24 +74,6 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="container mx-auto px-4 py-8">
-        <SectionHeader eyebrow="Explore" title="Beyond the menu" description="Campus-first drops and experiences around the Holy Grills community." />
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {HOME_EXPERIENCES.map((card, index) => {
-            const Icon = EXPERIENCE_ICONS[index % EXPERIENCE_ICONS.length];
-
-            return (
-            <Link key={card.title} to={card.cta} className="rounded-3xl border border-border bg-card p-6 transition-transform hover:-translate-y-0.5">
-              <Icon className="text-primary" />
-              <h3 className="mt-4 font-display text-xl font-bold text-foreground">{card.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{card.description}</p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">Open <ArrowRight size={14} /></span>
-            </Link>
-            );
-          })}
         </div>
       </section>
 
@@ -186,18 +131,6 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
                 aria-label={`Open testimonial ${index + 1}`}
               />
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="container mx-auto px-4 pb-14 pt-4">
-        <div className="relative rounded-3xl border border-primary/20 bg-primary/10 p-8">
-          <span className="pointer-events-none absolute right-5 top-4 text-2xl">🐔</span>
-          <h2 className="font-display text-3xl font-bold text-foreground">Order by 4PM — delivered 6:30–8:30PM.</h2>
-          <div className="mt-6">
-            <Link to="/menu" onClick={() => playUiTone('navigate')} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
-              Build My Plate
-            </Link>
           </div>
         </div>
       </section>

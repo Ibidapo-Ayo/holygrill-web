@@ -8,10 +8,7 @@ const LINKS = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'My Orders', to: '/orders' },
   { label: 'Leaderboard', to: '/leaderboard' },
-  { label: 'Catering', to: '/events' },
-  { label: 'Wallet', to: '/wallet' },
   { label: 'Referrals', to: '/referrals' },
-  { label: 'Marketplace', to: '/marketplace' },
   { label: 'Learn about HP', to: '/hp' },
   { label: 'Our Story 🔥', to: '/about' },
   { label: "Questions? We've Got You.", to: '/support' },
@@ -45,19 +42,19 @@ export function MobileSidebar() {
         {isAuthenticated && user ? (
           <div className="border-b border-border px-5 pb-4">
             <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3">
-              {safeImageUrl(user.avatarUrl) ? (
+              {safeImageUrl(user.photo_url) ? (
                 <img
-                  src={safeImageUrl(user.avatarUrl)!}
-                  alt={user.name}
+                  src={safeImageUrl(user.photo_url)!}
+                  alt={user.full_name}
                   className="h-10 w-10 rounded-full border-2 border-primary object-cover"
                 />
               ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-fire text-sm font-bold text-primary-foreground">
-                  {getInitials(user.name)}
+                  {getInitials(user.full_name)}
                 </div>
               )}
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-foreground">{user.name}</p>
+                <p className="truncate text-sm font-bold text-foreground">{user.full_name}</p>
                 <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
             </Link>

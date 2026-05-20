@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import CustomFormField from '@/components/CustomFormField';
 import { FormFieldTypes } from '@/lib/form-field-type';
-import GoogleAuthButton from '@/components/GoogleAuthButton';
 import { useAuthStore } from '@/stores/authStore';
 
 const LoginPage = () => {
@@ -65,6 +64,15 @@ const LoginPage = () => {
               iconSrc={Lock}
             />
 
+            <div className="flex justify-end -mt-1">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             {form.formState.errors.root && (
               <p className="text-sm text-destructive font-body text-center">{form.formState.errors.root.message}</p>
             )}
@@ -82,23 +90,6 @@ const LoginPage = () => {
             </button>
           </form>
         </Form>
-
-        <p className="text-center text-xs text-muted-foreground font-body mt-3">
-          Demo: <span className="font-medium">demo@futa.edu.ng</span> / <span className="font-medium">password</span>
-        </p>
-
-        {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-background px-3 text-muted-foreground font-body">or</span>
-          </div>
-        </div>
-
-        {/* Google */}
-        <GoogleAuthButton type="login" />
 
         <p className="text-center text-sm text-muted-foreground font-body mt-6">
           Don't have an account?{' '}

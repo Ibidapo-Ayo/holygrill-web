@@ -20,7 +20,7 @@ export default function Page() {
             {[
               { icon: Flame, title: 'What is HP?', text: 'A loyalty score earned from orders, reviews, referrals, and challenge completions.' },
               { icon: Gift, title: 'How to earn', text: 'Checkout orders, review meals, join streaks, and invite friends into the ecosystem.' },
-              { icon: ShieldCheck, title: 'Rewards & perks', text: 'Redeem food perks, delivery boosts, wallet bonuses, and unlock premium drops.' },
+              { icon: ShieldCheck, title: 'Rewards & perks', text: 'Redeem food perks, delivery boosts, and unlock stronger tier benefits.' },
             ].map((item) => (
               <div key={item.title} className="rounded-[2rem] border border-border bg-card p-5">
                 <item.icon className="text-primary" />
