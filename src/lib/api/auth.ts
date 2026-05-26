@@ -61,6 +61,11 @@ export interface ForgotPasswordResponse {
   success: boolean;
 }
 
+export interface ResetPasswordResponse {
+  message: string;
+  success: boolean;
+}
+
 export async function loginApi(
   email: string,
   password: string,
@@ -103,5 +108,24 @@ export async function requestPasswordResetApi(
   const { data } = await apiClient.post<ForgotPasswordResponse>("/auth/forgot-password", {
     email,
   });
+  return data;
+}
+
+export async function resetPasswordApi(
+  accessToken: string,
+  password: string,
+): Promise<ResetPasswordResponse> {
+  const { data } = await apiClient.post<ResetPasswordResponse>("/auth/reset-password", {
+    access_token: accessToken,
+    password,
+  });
+  return data;
+}
+
+
+export async function updateUserProfileApi(
+  profileData: Partial<AuthUserProfileResponse>,
+): Promise<UserResponse> {  
+  const { data } = await apiClient.put<UserResponse>("/user/profile", profileData);
   return data;
 }
