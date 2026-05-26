@@ -39,9 +39,15 @@ const ForgotPasswordPage = () => {
 
       if (response.success) {
         toast.success("Verification email sent. Check your inbox.");
+        forgotForm.reset();
+        navigate("/login");
+        return;
       }
-      forgotForm.reset();
-      navigate("/login");
+
+      forgotForm.setError("root", {
+        message: "We could not verify that email. Please try again.",
+      });
+      toast.error("Email verification failed. Please try again.");
     } catch {
       forgotForm.setError("root", {
         message: "We could not verify that email. Please try again.",
