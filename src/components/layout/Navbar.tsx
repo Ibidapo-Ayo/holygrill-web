@@ -1,5 +1,5 @@
-import { Link, useLocation } from '@/lib/router';
-import { LogOut, ShoppingCart, User, Wallet } from 'lucide-react';
+import { Link, useLocation, useNavigate } from '@/lib/router';
+import { LogOut, ShoppingCart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
@@ -7,8 +7,18 @@ import { DESKTOP_NAV_LINKS } from '@/constants/navigation';
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const itemCount = useCartStore(selectItemCount);
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, hasHydrated } = useAuthStore();
+
+  if (!hasHydrated) {
+    return null;
+  }
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 hidden border-b border-border bg-background/85 backdrop-blur-xl md:block">
@@ -35,12 +45,6 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <Link
-            to="/wallet"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/30"
-          >
-            <Wallet size={16} className="text-primary" /> ₦8,400
-          </Link>
-          <Link
             to="/cart"
             className="relative rounded-full p-2 text-brand-brown/70 transition-colors hover:text-foreground"
             aria-label="Cart"
@@ -65,23 +69,23 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-1.5 text-primary transition-colors hover:bg-primary/20"
                 aria-label="Profile"
               >
-                {safeImageUrl(user.avatarUrl) ? (
+                {safeImageUrl(user.photo_url) ? (
                   <img
-                    src={safeImageUrl(user.avatarUrl)!}
-                    alt={user.name}
+                    src={safeImageUrl(user.photo_url)!}
+                    alt={user.full_name}
                     className="h-7 w-7 rounded-full object-cover"
                   />
                 ) : (
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-fire text-xs font-bold text-primary-foreground">
-                    {getInitials(user.name)}
+                    {getInitials(user.full_name)}
                   </span>
                 )}
                 <span className="hidden text-sm font-semibold text-foreground lg:block">
-                  {user.name.split(' ')[0]}
+                  {user.full_name?.split(' ')[0]}
                 </span>
               </Link>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="rounded-full p-2 text-brand-brown/70 transition-colors hover:text-destructive"
                 aria-label="Logout"
               >

@@ -23,7 +23,7 @@ export function StoreClosedDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="rounded-2xl bg-secondary/70 p-4 text-sm text-muted-foreground">
-          Plan ahead with saved items, wallet top-up, or schedule your next order once the window reopens.
+          Plan ahead with saved items or schedule your next order once the window reopens.
         </div>
       </DialogContent>
     </Dialog>

@@ -126,7 +126,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                 cta.variant === 'primary' ? (
                   <Link
                     key={cta.label}
-                    to={cta.href}
+                    to="/menu"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity shadow-glow"
                   >
                     {cta.label}
@@ -135,7 +135,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                 ) : (
                   <Link
                     key={cta.label}
-                    to={cta.href}
+                    to="/menu"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-secondary text-foreground font-display font-bold text-sm hover:bg-border transition-colors"
                   >
                     {cta.label}

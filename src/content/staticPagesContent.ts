@@ -3,6 +3,8 @@ export interface StaticPageContent {
   paragraphs: string[];
 }
 
+export const SUPPORT_WHATSAPP_URL = 'https://wa.me/2347053263931';
+
 export const ABOUT_PAGE_CONTENT: StaticPageContent = {
   title: 'About Holy Grills',
   paragraphs: [
@@ -17,7 +19,7 @@ export const SUPPORT_PAGE_CONTENT: StaticPageContent = {
   title: "Questions? We've Got You.",
   paragraphs: [
     "Need help with an order, payment, or delivery timing? We're here — and we actually reply.",
-    'WhatsApp: 07053263931',
+    'WhatsApp support',
     'Email: grillthevibe@gmail.com',
     'Instagram & TikTok: @grillthevibe',
   ],

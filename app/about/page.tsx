@@ -2,6 +2,7 @@
 
 import { SiteLayout } from "@/app/layouts/SiteLayout";
 import { ABOUT_PAGE_CONTENT } from '@/content/staticPagesContent';
+import { Link } from '@/lib/router';
 
 export default function AboutPage() {
   return (
@@ -14,6 +15,9 @@ export default function AboutPage() {
               {paragraph}
             </p>
           ))}
+          <Link to="/menu" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            See what we&apos;re grilling today →
+          </Link>
         </div>
       </main>
     </SiteLayout>

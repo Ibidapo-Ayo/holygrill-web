@@ -18,7 +18,7 @@ export default function Page() {
             </div>
           </section>
           <section className="grid gap-4 md:grid-cols-3">
-            {['3 referrals', '₦1,500 wallet earned', '35 HP bonus'].map((stat) => <div key={stat} className="rounded-[2rem] border border-border bg-card p-5 font-semibold text-foreground">{stat}</div>)}
+            {['3 referrals', '₦1,500 saved', '35 HP bonus'].map((stat) => <div key={stat} className="rounded-[2rem] border border-border bg-card p-5 font-semibold text-foreground">{stat}</div>)}
           </section>
           <section className="rounded-[2rem] border border-border bg-card p-6">
             <h2 className="font-display text-xl font-bold text-foreground">Milestones</h2>

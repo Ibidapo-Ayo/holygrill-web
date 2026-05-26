@@ -11,7 +11,7 @@ export function useDeliveryWindow() {
   useEffect(() => {
     const update = () => setInfo(getDeliveryWindowInfo(new Date(), OPERATING_HOURS));
     update();
-    const timer = window.setInterval(update, 30000);
+    const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
   }, []);
 

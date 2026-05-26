@@ -1,4 +1,4 @@
-import { Flame, Wallet } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import { formatPrice } from '@/data/menu';
 
 interface CartSummaryProps {
@@ -6,7 +6,6 @@ interface CartSummaryProps {
   deliveryFee: number;
   promoDiscount: number;
   hpRedemption: number;
-  walletApplied: number;
   total: number;
   hpToEarn: number;
   onCheckout: () => void;
@@ -19,7 +18,6 @@ export function CartSummary({
   deliveryFee,
   promoDiscount,
   hpRedemption,
-  walletApplied,
   total,
   hpToEarn,
   onCheckout,
@@ -47,10 +45,6 @@ export function CartSummary({
           <span>HP redemption</span>
           <span className="text-success">-{formatPrice(hpRedemption)}</span>
         </div>
-        <div className="flex justify-between text-muted-foreground">
-          <span>Wallet applied</span>
-          <span className="text-success">-{formatPrice(walletApplied)}</span>
-        </div>
         <div className="flex justify-between border-t border-border pt-3 text-base font-bold text-foreground">
           <span>Pay now</span>
           <span className="text-primary">{formatPrice(total)}</span>
@@ -60,11 +54,6 @@ export function CartSummary({
       <div className="rounded-2xl bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
         <div className="flex items-center gap-2">
           <Flame size={16} /> +{hpToEarn} HP projected on this order
-        </div>
-      </div>
-      <div className="rounded-2xl bg-secondary/70 px-3 py-2 text-xs font-medium text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <Wallet size={16} /> Wallet-first checkout supported for backend handoff
         </div>
       </div>
 

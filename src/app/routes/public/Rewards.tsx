@@ -1,46 +1,11 @@
-import { Gift, Lock, Trophy } from 'lucide-react';
+import { Gift, Trophy } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { REWARD_CHALLENGES, REWARD_REDEMPTIONS } from '@/services/mocks/platform';
-import { useAuthStore } from '@/stores/authStore';
 
 const RewardsPage = () => {
-  const { isAuthenticated } = useAuthStore();
   const currentHP = 248;
-
-  if (!isAuthenticated) {
-    return (
-      <main className="flex flex-1 items-center justify-center pb-12 pt-4 md:pt-24">
-        <div className="container mx-auto max-w-md space-y-6 px-4 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-            <Lock size={36} className="text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="font-display text-2xl font-bold text-foreground">Members only</h1>
-            <p className="text-sm text-muted-foreground">
-              Sign in to view your Holy Points, unlock tier rewards, and redeem free meals.
-            </p>
-          </div>
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-cta px-6 py-3 font-extrabold text-primary-foreground shadow-glow"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-primary px-6 py-3 font-extrabold text-primary transition-colors hover:bg-primary/5"
-            >
-              Create Account
-            </Link>
-          </div>
-          <p className="text-xs text-muted-foreground">Earn 1 HP for every ₦100 spent. Redeem for free meals.</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="flex-1 pb-12 pt-4 md:pt-24">
@@ -64,31 +29,29 @@ const RewardsPage = () => {
             <SectionHeader
               eyebrow="Redeem"
               title="Spend HP on perks"
-              description="Every card has visible HP pricing and lock states."
+              description="Square cards keep comparison quick."
             />
-            {REWARD_REDEMPTIONS.map((reward) => {
-              const canRedeem = currentHP >= reward.hpCost && !reward.locked;
+            <div className="grid gap-4 sm:grid-cols-2">
+              {REWARD_REDEMPTIONS.map((reward) => {
+                const canRedeem = currentHP >= reward.hpCost && !reward.locked;
 
-              return (
-                <div key={reward.id} className="flex items-center gap-4 rounded-[2rem] border border-border bg-card p-5">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Gift size={24} />
+                return (
+                  <div key={reward.id} className="rounded-[2rem] border border-border bg-card p-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <Gift size={20} />
+                    </div>
+                    <p className="mt-4 font-display text-lg font-bold text-foreground">{reward.title}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{reward.description}</p>
+                    <button
+                      className={`mt-4 rounded-full px-4 py-2 text-xs font-bold ${canRedeem ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                      disabled={!canRedeem}
+                    >
+                      {reward.locked ? 'Locked' : `${reward.hpCost} HP`}
+                    </button>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-display text-lg font-bold text-foreground">{reward.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{reward.description}</p>
-                  </div>
-                  <button
-                    className={`rounded-full px-4 py-2 text-xs font-bold ${
-                      canRedeem ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
-                    }`}
-                    disabled={!canRedeem}
-                  >
-                    {reward.locked ? 'Locked' : `${reward.hpCost} HP`}
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <div className="space-y-4 rounded-[2rem] border border-border bg-card p-6">

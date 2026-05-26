@@ -25,7 +25,7 @@ export const OPERATING_HOURS: DeliveryWindow[] = [
 
 export const DASHBOARD_STATS: DashboardStat[] = [
   { label: 'Current HP', value: '248 HP', helper: '22 HP until Holy Eater' },
-  { label: 'Wallet Balance', value: '₦8,400', helper: 'Ready for wallet checkout' },
+  { label: 'Weekly streak', value: '3 days', helper: 'Stay active for a bonus' },
   { label: 'Orders this month', value: '9', helper: '2 currently active' },
   { label: 'Referral wins', value: '3', helper: '₦1,500 bonus earned' },
 ];
@@ -47,7 +47,7 @@ export const REWARD_REDEMPTIONS: RewardRedemption[] = [
 export const REWARD_CHALLENGES: RewardChallenge[] = [
   { id: 'challenge-1', title: '3 orders this week', description: 'Place one more order to unlock a 25 HP streak bonus.', current: 2, target: 3, rewardHP: 25 },
   { id: 'challenge-2', title: 'Review your last meal', description: 'Share feedback and earn bonus HP for the squad.', current: 0, target: 1, rewardHP: 10 },
-  { id: 'challenge-3', title: 'Bring a friend', description: 'One successful referral unlocks a wallet top-up perk.', current: 1, target: 2, rewardHP: 40 },
+  { id: 'challenge-3', title: 'Bring a friend', description: 'One successful referral unlocks an extra HP perk.', current: 1, target: 2, rewardHP: 40 },
 ];
 
 export const HP_TRANSACTIONS: RewardTransaction[] = [
@@ -72,13 +72,13 @@ export const WALLET_TRANSACTIONS: WalletTransaction[] = [
 ];
 
 export const EVENT_DISCOVERY_ITEMS: EventDiscoveryItem[] = [
-  { id: 'event-1', title: 'Midnight Grill Run', description: 'Late-night pickup collab for exam week.', date: 'Fri · 9:00 PM', location: 'FUTA South Gate', capacity: '40 seats' },
-  { id: 'event-2', title: 'Squad Feast Friday', description: 'Curated combo menu for hostel squads.', date: 'Sat · 6:00 PM', location: 'Aule Common Room', capacity: 'Limited catering slots' },
+  { id: 'event-1', title: 'Midnight Grill Run', description: 'Late-night pickup collab for exam week.', date: 'Friday, May 22, 2026 · 9:00 PM', location: 'FUTA South Gate', capacity: '40 seats' },
+  { id: 'event-2', title: 'Squad Feast Friday', description: 'Curated combo menu for hostel squads.', date: 'Saturday, May 23, 2026 · 6:00 PM', location: 'Aule Common Room', capacity: 'Limited catering slots' },
 ];
 
 export const REFERRAL_MILESTONES: ReferralMilestone[] = [
   { label: 'Starter bonus', referrals: 1, reward: '15 HP' },
-  { label: 'Squad unlock', referrals: 3, reward: '₦1,500 wallet credit' },
+  { label: 'Squad unlock', referrals: 3, reward: '₦1,500 order discount' },
   { label: 'Campus ambassador', referrals: 5, reward: 'Exclusive merch drop' },
 ];
 
@@ -104,6 +104,10 @@ export const ADMIN_MODULE_ROWS: Record<string, AdminTableRow[]> = {
   hp: [
     { id: 'hp-1', name: 'Review reward rule', status: 'Active', owner: 'Loyalty', updatedAt: 'Today' },
     { id: 'hp-2', name: 'Referral multiplier', status: 'Draft', owner: 'Loyalty', updatedAt: 'Mon' },
+  ],
+  rewards: [
+    { id: 'rw-1', name: 'Free zobo add-on', status: 'Live', owner: 'Loyalty', updatedAt: 'Today' },
+    { id: 'rw-2', name: 'Campus VIP drop', status: 'Locked', owner: 'Loyalty', updatedAt: 'Today' },
   ],
   riders: [
     { id: 'rd-1', name: 'Tobi Rider', status: 'Online', owner: 'Dispatch', updatedAt: '2 mins ago' },

@@ -1,13 +1,14 @@
 import { NavLink, useLocation } from '@/lib/router';
 import { motion } from 'framer-motion';
-import { House, ShoppingCart, Gift, UtensilsCrossed } from 'lucide-react';
+import { House, LayoutDashboard, ShoppingCart, UtensilsCrossed, ClipboardList } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/stores/cartStore';
 import { MOBILE_TAB_LINKS } from '@/constants/navigation';
 
 const ICONS = {
   home: House,
   menu: UtensilsCrossed,
-  rewards: Gift,
+  dashboard: LayoutDashboard,
+  orders: ClipboardList,
   cart: ShoppingCart,
 };
 
@@ -21,7 +22,7 @@ export function BottomTabBar() {
     <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 pb-safe md:hidden">
       <div className="pointer-events-auto px-3 pb-3">
         <nav className="mx-auto max-w-md rounded-3xl border border-border bg-card/95 shadow-tab backdrop-blur-xl" aria-label="Primary">
-          <ul className="grid grid-cols-4 px-2 py-2">
+          <ul className="grid grid-cols-5 px-2 py-2">
             {MOBILE_TAB_LINKS.map(({ to, label, icon }) => {
               const Icon = ICONS[icon];
               return (
