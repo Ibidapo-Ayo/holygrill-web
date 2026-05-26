@@ -8,7 +8,7 @@ const UserProfilePage = () => {
   const { user, setUser, hasHydrated } = useAuthStore();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user.full_name ?? '');
+  const [name, setName] = useState(user?.full_name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [avatarUrl, setAvatarUrl] = useState(user?.photo_url ?? '');
   const [saving, setSaving] = useState(false);
