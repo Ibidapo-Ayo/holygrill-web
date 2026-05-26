@@ -1,3 +1,4 @@
+"use client";
 import { Link, useNavigate } from "@/lib/router";
 import { Flame, Mail, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
