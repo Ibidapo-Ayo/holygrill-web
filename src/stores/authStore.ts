@@ -1,16 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { setCookie, deleteCookie } from "@/lib/cookies";
-import { UserResponse, loginApi, signupApi } from "@/lib/api/auth";
-import {
-  AUTH_TOKEN_COOKIE_NAME,
-  AUTH_TOKEN_EXPIRES_COOKIE_NAME,
-  AUTH_USER_ID_COOKIE_NAME,
-  getCookieExpiryDays,
-} from "@/lib/auth-session";
+import { AuthSessionUser, loginApi, signupApi } from "@/lib/api/auth";
+import { clearAuthCookies, setAuthCookies } from "@/lib/auth-session";
 
 interface AuthState {
-  user: UserResponse["profile"] | null;
+  user: AuthSessionUser["user"] | null;
   isAuthenticated: boolean;
   hasHydrated: boolean;
   isLoading: boolean;
@@ -21,34 +15,10 @@ interface AuthState {
     password: string,
     phone?: string,
   ) => Promise<void>;
-  setUser: (user: UserResponse["profile"] | null) => void;
+  setUser: (user: AuthSessionUser["user"] | null) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   setHasHydrated: (hasHydrated: boolean) => void;
-}
-
-function setAuthCookies(
-  accessToken: string,
-  userId: string,
-  expiresAt: number,
-) {
-  setCookie(
-    AUTH_TOKEN_COOKIE_NAME,
-    accessToken,
-    getCookieExpiryDays(expiresAt),
-  );
-  setCookie(AUTH_USER_ID_COOKIE_NAME, userId);
-  setCookie(
-    AUTH_TOKEN_EXPIRES_COOKIE_NAME,
-    expiresAt.toString(),
-    getCookieExpiryDays(expiresAt),
-  );
-}
-
-function clearAuthCookies() {
-  deleteCookie(AUTH_TOKEN_COOKIE_NAME);
-  deleteCookie(AUTH_USER_ID_COOKIE_NAME);
-  deleteCookie(AUTH_TOKEN_EXPIRES_COOKIE_NAME);
 }
 
 /** Returns the URL only if it starts with http:// or https://. Prevents javascript: URI injection. */
@@ -91,12 +61,18 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const data = await loginApi(email, password);
-          setAuthCookies(data.access_token, data.user.id, data.expires_at);
-          set({ user: data.user.profile, isAuthenticated: true });
-        } catch (e){
-          console.log("Login error",e)
-        } 
-        finally {
+          const accessToken = data.accessToken;
+          const refreshToken = data.refreshToken;
+
+          if (!accessToken || !refreshToken) {
+            throw new Error("There is an error, kindly try again later.");
+          }
+
+          setAuthCookies(accessToken, refreshToken, data.user.id);
+          set({ user: data.user, isAuthenticated: true });
+        } catch (e) {
+          console.log("Login error", e);
+        } finally {
           set({ isLoading: false });
         }
       },
@@ -104,17 +80,17 @@ export const useAuthStore = create<AuthState>()(
       signup: async (name, email, password, phone) => {
         set({ isLoading: true });
         try {
-          const data = await signupApi(name, email, password, phone);
-          if (data && data.success) {
-            await loginApi(email, password).then((loginData) => {
-              setAuthCookies(
-                loginData.access_token,
-                loginData.user.id,
-                loginData.expires_at,
-              );
-              set({ user: loginData.user.profile, isAuthenticated: true });
-            });
+          await signupApi(name, email, password, phone);
+          const loginData = await loginApi(email, password);
+          const accessToken = loginData.accessToken;
+          const refreshToken = loginData.refreshToken;
+
+          if (!accessToken || !refreshToken) {
+            throw new Error("Login response is missing access token.");
           }
+
+          setAuthCookies(accessToken, refreshToken, loginData.user.id);
+          set({ user: loginData.user, isAuthenticated: true });
         } catch (e) {
           console.error("Signup failed:", e);
         } finally {

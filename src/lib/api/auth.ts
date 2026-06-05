@@ -1,10 +1,22 @@
+import { AUTH_TOKEN_COOKIE_NAME } from "../auth-session";
+import { getCookie } from "../cookies";
 import { apiClient } from "./client";
 
+export interface AuthSessionUser {
+  user: {
+    id: string;
+    role: string;
+    email: string;
+    createdAt?: string;
+  };
+}
+
 export interface SignupAuthResponse {
-  user_id: string;
-  name: string;
-  email: string;
-  success: boolean;
+  user: AuthSessionUser["user"] & {
+    name: string;
+    accessToken: string;
+    refreshToken: string;
+  };
 }
 
 export interface AuthUserProfileResponse {
@@ -40,20 +52,13 @@ export interface AuthUserProfileResponse {
 }
 
 export interface UserResponse {
-  profile:AuthUserProfileResponse;
+  profile: AuthUserProfileResponse;
 }
 
 export interface AuthLoginResponse {
-  access_token: string;
-  expires_at: number;
-  message: string;
-  refresh_token: string;
-  success: boolean;
-  user: {
-    email: string;
-    id: string;
-    profile: AuthUserProfileResponse;
-  };
+  user: AuthSessionUser["user"];
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface ForgotPasswordResponse {
@@ -64,6 +69,10 @@ export interface ForgotPasswordResponse {
 export interface ResetPasswordResponse {
   message: string;
   success: boolean;
+}
+
+export function getLoginAccessToken(data): string | null {
+  return getCookie(AUTH_TOKEN_COOKIE_NAME) ?? null;
 }
 
 export async function loginApi(
@@ -83,31 +92,37 @@ export async function signupApi(
   password: string,
   phone_number?: string,
 ): Promise<SignupAuthResponse> {
-  try {
-    const { data } = await apiClient.post<SignupAuthResponse>("/auth/signup", {
-      full_name: name,
-      email: email,
-      password: password,
-      phone: phone_number,
-    });
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+  const { data } = await apiClient.post<SignupAuthResponse>("/auth/signup", {
+    full_name: name,
+    email,
+    password,
+    phone: phone_number,
+  });
+  return data;
+}
+
+export async function logoutApi(refreshToken: string): Promise<void> {
+  const { data } = await apiClient.post("/auth/logout", {
+    refreshToken,
+  });
+
+  return data;
 }
 
 export async function fetchUserProfile(): Promise<UserResponse> {
-  const { data } =
-    await apiClient.get<UserResponse>("/user/profile");
+  const { data } = await apiClient.get<UserResponse>("/user/profile");
   return data;
 }
 
 export async function requestPasswordResetApi(
   email: string,
 ): Promise<ForgotPasswordResponse> {
-  const { data } = await apiClient.post<ForgotPasswordResponse>("/auth/forgot-password", {
-    email,
-  });
+  const { data } = await apiClient.post<ForgotPasswordResponse>(
+    "/auth/forgot-password",
+    {
+      email,
+    },
+  );
   return data;
 }
 
@@ -115,17 +130,22 @@ export async function resetPasswordApi(
   accessToken: string,
   password: string,
 ): Promise<ResetPasswordResponse> {
-  const { data } = await apiClient.post<ResetPasswordResponse>("/auth/reset-password", {
-    access_token: accessToken,
-    password,
-  });
+  const { data } = await apiClient.post<ResetPasswordResponse>(
+    "/auth/reset-password",
+    {
+      access_token: accessToken,
+      password,
+    },
+  );
   return data;
 }
 
-
 export async function updateUserProfileApi(
   profileData: Partial<AuthUserProfileResponse>,
-): Promise<UserResponse> {  
-  const { data } = await apiClient.put<UserResponse>("/user/profile", profileData);
+): Promise<UserResponse> {
+  const { data } = await apiClient.put<UserResponse>(
+    "/user/profile",
+    profileData,
+  );
   return data;
 }

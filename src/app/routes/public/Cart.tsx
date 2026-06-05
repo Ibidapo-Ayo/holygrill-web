@@ -13,6 +13,7 @@ import { MOCK_MENU } from '@/data/menu';
 import { getCartSnapshot } from '@/services/api/cart.service';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
+import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 
 const PROMO_CODES: Record<string, number> = {
@@ -29,6 +30,7 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   const [redeemHP, setRedeemHP] = useState(true);
   const { items, updateQuantity, removeItem, addItem } = useCartStore();
   const { items: savedItems, toggle } = useFavouritesStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   const { data } = useQuery({
     queryKey: ['cart-snapshot', items],
@@ -36,7 +38,9 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
     initialData: { items, walletBalance: 8400, availableHP: 248 },
   });
 
-  const hpRedemption = redeemHP && items.length ? Math.min(600, data.availableHP * 2) : 0;
+  const availableHP = isAuthenticated ? (user?.hp_balance ?? data.availableHP) : data.availableHP;
+  const walletBalance = isAuthenticated ? (user?.wallet_balance ?? data.walletBalance) : data.walletBalance;
+  const hpRedemption = redeemHP && items.length ? Math.min(600, availableHP * 2) : 0;
   const totals = useMemo(
     () => calculateCartTotals({ items, deliveryFee: DELIVERY_FEE, promoDiscount: appliedPromo, hpRedemption }),
     [appliedPromo, hpRedemption, items]
@@ -133,6 +137,14 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
                 </div>
               </div>
               <div className="space-y-3 rounded-3xl bg-secondary/60 p-4 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Wallet balance</span>
+                  <span className="font-semibold text-foreground">{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(walletBalance)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Available HP</span>
+                  <span className="font-semibold text-foreground">{availableHP} HP</span>
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Redeem HP</span>
                   <button onClick={() => setRedeemHP((value) => !value)} className={`rounded-full px-3 py-1 text-xs font-semibold ${redeemHP ? 'bg-primary text-primary-foreground' : 'bg-background text-muted-foreground'}`}>
