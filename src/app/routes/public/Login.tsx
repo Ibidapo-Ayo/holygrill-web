@@ -23,9 +23,12 @@ const LoginPage = () => {
       await login(data.email, data.password);
       toast.success('Welcome back! 🔥');
       navigate('/dashboard');
-    } catch {
-      form.setError('root', { message: 'Invalid email or password.' });
-      toast.error('Invalid email or password.');
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to sign in right now. Please try again.';
+      form.setError('root', { message });
     }
   };
 

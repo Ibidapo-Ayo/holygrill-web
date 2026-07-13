@@ -3,9 +3,11 @@ import { Link } from '@/lib/router';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { REWARD_CHALLENGES, REWARD_REDEMPTIONS } from '@/services/mocks/platform';
+import { useAuthStore } from '@/stores/authStore';
 
 const RewardsPage = () => {
-  const currentHP = 248;
+  const { user, isAuthenticated } = useAuthStore();
+  const currentHP = isAuthenticated ? (user?.hp_balance ?? 0) : 248;
 
   return (
     <main className="flex-1 pb-12 pt-4 md:pt-24">

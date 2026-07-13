@@ -1,17 +1,21 @@
 import { Bell, Gift } from 'lucide-react';
-import { Link, useNavigate } from '@/lib/router';
+import { Link } from '@/lib/router';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { OrderCard } from '@/components/orders/OrderCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { MOCK_ORDERS } from '@/data/mockOrders';
-import { DASHBOARD_STATS, HP_TRANSACTIONS } from '@/services/mocks/platform';
+import { DASHBOARD_STATS } from '@/services/mocks/platform';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 import { DASHBOARD_SIDEBAR_LINKS } from '@/constants/navigation';
+import { useAuthStreak } from '@/hooks/useAuthStreak';
 
 const AccountDashboardPage = () => {
   const { user, hasHydrated } = useAuthStore();
+  const { data: streakData } = useAuthStreak({
+    enabled: hasHydrated && !!user,
+  });
 
   if (!hasHydrated || !user) {
     return null;
@@ -19,6 +23,23 @@ const AccountDashboardPage = () => {
 
   const userOrders = MOCK_ORDERS.filter((order) => order.userId === user.id);
   const initials = getInitials(user.full_name);
+  const dashboardStats = DASHBOARD_STATS.map((stat) =>
+    stat.label === 'Current HP'
+      ? {
+          ...stat,
+          value: `${user.hp_balance} HP`,
+          helper: user.hp_balance > 0 ? stat.helper : 'Start ordering to earn your first HP',
+        }
+      : stat.label === 'Weekly streak' && streakData
+      ? {
+          ...stat,
+          value: `${streakData.streakCount} day${streakData.streakCount === 1 ? '' : 's'}`,
+          helper: streakData.hasBreak
+            ? `Streak break detected (${streakData.daysSinceLastActivity} days idle). Order today to restart.`
+            : 'Streak is active. Keep ordering daily for bonus rewards.',
+        }
+      : stat,
+  );
 
   return (
     <main className="flex-1 pb-12 md:pt-24">
@@ -71,59 +92,42 @@ const AccountDashboardPage = () => {
               </button>
             </div>
 
-          <div className="mt-6">
-            <div className="rounded-[2rem] bg-secondary/60 p-5">
-              <div className="flex items-center gap-3">
-                <HPBadge value={248} size="md" variant="available" />
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Holy Eater tier</span>
-              </div>
-              <h2 className="mt-4 font-display text-2xl font-bold text-foreground">{user.hp_balance} HP balance</h2>
-              <p className="mt-2 text-sm text-muted-foreground">52 HP to reach Grill Master perks.</p>
-              <div className="mt-4">
-                <HPProgressBar currentHP={user.hp_balance} label="Tier progress" />
-              </div>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link to="/rewards" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">View rewards preview <Gift size={14} /></Link>
-                <Link to="/leaderboard" className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground">Leaderboard</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-3 grid-cols-2 md:grid-cols-4">
-          {DASHBOARD_STATS.map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
-              <p className="mt-2 font-display text-xl font-bold text-foreground">{stat.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-          <div className="space-y-4 rounded-[2rem] border border-border bg-card p-6">
-            <SectionHeader title="HP ledger" description="Full transaction history" />
-            <div className="space-y-3">
-              {HP_TRANSACTIONS.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between rounded-2xl bg-secondary/50 px-4 py-3 text-sm">
-                  <div>
-                    <p className="font-semibold text-foreground">{transaction.label}</p>
-                    <p className="text-xs text-muted-foreground">{transaction.date}</p>
-                  </div>
-                  <span className={transaction.hp > 0 ? 'text-success' : 'text-primary'}>{transaction.hp > 0 ? '+' : ''}{transaction.hp} HP</span>
+            <div className="mt-6">
+              <div className="rounded-[2rem] bg-secondary/60 p-5">
+                <div className="flex items-center gap-3">
+                  <HPBadge value={user.hp_balance} size="md" variant="available" />
+                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Holy Eater tier</span>
                 </div>
-              ))}
+                <h2 className="mt-4 font-display text-2xl font-bold text-foreground">{user.hp_balance} HP balance</h2>
+                <p className="mt-2 text-sm text-muted-foreground">52 HP to reach Grill Master perks.</p>
+                <div className="mt-4">
+                  <HPProgressBar currentHP={user.hp_balance} label="Tier progress" />
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link to="/rewards" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">View rewards preview <Gift size={14} /></Link>
+                  <Link to="/leaderboard" className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground">Leaderboard</Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="space-y-4">
-          <SectionHeader title="Recent orders" action={<Link to="/orders" className="text-sm font-semibold text-primary">See all orders</Link>} />
-          {userOrders.length ? userOrders.map((order) => <OrderCard key={order.id} order={order} />) : (
-            <EmptyState icon={Gift} title="No orders yet" description="Start an order to see your HP progress and delivery history here." ctaLabel="Browse menu" ctaTo="/menu" />
-          )}
-        </section>
-      </div>
+          <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {dashboardStats.map((stat) => (
+              <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
+                <p className="mt-2 font-display text-xl font-bold text-foreground">{stat.value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
+              </div>
+            ))}
+          </section>
+
+          <section className="space-y-4">
+            <SectionHeader title="Recent orders" action={<Link to="/orders" className="text-sm font-semibold text-primary">See all orders</Link>} />
+            {userOrders.length ? userOrders.map((order) => <OrderCard key={order.id} order={order} />) : (
+              <EmptyState icon={Gift} title="No orders yet" description="Start an order to see your HP progress and delivery history here." ctaLabel="Browse menu" ctaTo="/menu" />
+            )}
+          </section>
+        </div>
       </div>
     </main>
   );

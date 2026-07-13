@@ -20,5 +20,5 @@ export const DASHBOARD_SIDEBAR_LINKS = [
   { to: '/orders', label: 'My Orders' },
   { to: '/referrals', label: 'Referrals' },
   { to: '/dashboard#notifications', label: 'Notifications' },
-  { to: '/dashboard#profile', label: 'Profile Settings' },
+  { to: '/profile', label: 'Profile Settings' },
 ] as const;
