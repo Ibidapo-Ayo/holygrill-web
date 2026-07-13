@@ -5,13 +5,17 @@ import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { OrderCard } from '@/components/orders/OrderCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { MOCK_ORDERS } from '@/data/mockOrders';
-import { DASHBOARD_STATS, HP_TRANSACTIONS } from '@/services/mocks/platform';
+import { DASHBOARD_STATS } from '@/services/mocks/platform';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 import { DASHBOARD_SIDEBAR_LINKS } from '@/constants/navigation';
+import { useAuthStreak } from '@/hooks/useAuthStreak';
 
 const AccountDashboardPage = () => {
   const { user, hasHydrated } = useAuthStore();
+  const { data: streakData } = useAuthStreak({
+    enabled: hasHydrated && !!user,
+  });
 
   if (!hasHydrated || !user) {
     return null;
@@ -25,6 +29,14 @@ const AccountDashboardPage = () => {
           ...stat,
           value: `${user.hp_balance} HP`,
           helper: user.hp_balance > 0 ? stat.helper : 'Start ordering to earn your first HP',
+        }
+      : stat.label === 'Weekly streak' && streakData
+      ? {
+          ...stat,
+          value: `${streakData.streakCount} day${streakData.streakCount === 1 ? '' : 's'}`,
+          helper: streakData.hasBreak
+            ? `Streak break detected (${streakData.daysSinceLastActivity} days idle). Order today to restart.`
+            : 'Streak is active. Keep ordering daily for bonus rewards.',
         }
       : stat,
   );
@@ -107,23 +119,6 @@ const AccountDashboardPage = () => {
                 <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
               </div>
             ))}
-          </section>
-
-          <section className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-            <div className="space-y-4 rounded-[2rem] border border-border bg-card p-6">
-              <SectionHeader title="HP ledger" description="Full transaction history" />
-              <div className="space-y-3">
-                {HP_TRANSACTIONS.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between rounded-2xl bg-secondary/50 px-4 py-3 text-sm">
-                    <div>
-                      <p className="font-semibold text-foreground">{transaction.label}</p>
-                      <p className="text-xs text-muted-foreground">{transaction.date}</p>
-                    </div>
-                    <span className={transaction.hp > 0 ? 'text-success' : 'text-primary'}>{transaction.hp > 0 ? '+' : ''}{transaction.hp} HP</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </section>
 
           <section className="space-y-4">

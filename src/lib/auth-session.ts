@@ -3,6 +3,7 @@ import { deleteCookie, setCookie } from "./cookies";
 export const AUTH_TOKEN_COOKIE_NAME = "hg_token";
 export const AUTH_USER_REFRESH_TOKEN_COOKIE_NAME = "hg_refresh_token";
 export const AUTH_TOKEN_EXPIRES_COOKIE_NAME = "hg_token_expires";
+export const AUTH_TOKEN_EXPIRES_IN_COOKIE_NAME = "hg_token_expires_in";
 export const AUTH_USER_ID_COOKIE_NAME = "hg_user_id";
 
 export const AUTH_PAGE_PATHS = ["/login", "/signup", "/forgot-password"] as const;
@@ -66,9 +67,14 @@ export function setAuthCookies(
   refreshToken: string,
   id: string,
   expiresAt?: number | string | null,
+  expiresIn?: number | string | null,
 ) {
   const expiryTimestampSeconds = getExpiryTimestampSeconds(expiresAt);
   const cookieExpiryDays = getCookieExpiryDays(expiresAt, Date.now());
+  const expiresInNumber = Number(expiresIn);
+  const resolvedExpiresIn = Number.isFinite(expiresInNumber) && expiresInNumber > 0
+    ? Math.floor(expiresInNumber)
+    : Math.max(expiryTimestampSeconds - Math.floor(Date.now() / 1000), 0);
 
   setCookie(
     AUTH_TOKEN_COOKIE_NAME,
@@ -79,6 +85,11 @@ export function setAuthCookies(
   setCookie(
     AUTH_TOKEN_EXPIRES_COOKIE_NAME,
     expiryTimestampSeconds.toString(),
+    cookieExpiryDays,
+  );
+  setCookie(
+    AUTH_TOKEN_EXPIRES_IN_COOKIE_NAME,
+    resolvedExpiresIn.toString(),
     cookieExpiryDays,
   );
 
@@ -94,5 +105,6 @@ export function clearAuthCookies() {
   deleteCookie(AUTH_TOKEN_COOKIE_NAME);
   deleteCookie(AUTH_USER_ID_COOKIE_NAME);
   deleteCookie(AUTH_TOKEN_EXPIRES_COOKIE_NAME);
+  deleteCookie(AUTH_TOKEN_EXPIRES_IN_COOKIE_NAME);
   deleteCookie(AUTH_USER_REFRESH_TOKEN_COOKIE_NAME);
 }

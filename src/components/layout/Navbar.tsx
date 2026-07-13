@@ -15,8 +15,8 @@ export function Navbar() {
     return null;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -65,7 +65,7 @@ export function Navbar() {
           {isAuthenticated && user ? (
             <div className="flex items-center gap-2">
               <Link
-                to="/profile"
+                to="/dashboard"
                 className="flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-1.5 text-primary transition-colors hover:bg-primary/20"
                 aria-label="Profile"
               >

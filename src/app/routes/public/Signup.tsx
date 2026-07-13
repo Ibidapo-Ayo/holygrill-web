@@ -32,9 +32,12 @@ const SignupPage = () => {
       await signup(data.name, data.email, data.password, data.phone_number);
       toast.success("Account created! Welcome to Holy Grills 🔥");
       navigate("/dashboard");
-    } catch {
-      form.setError("root", { message: "Failed to create account. Please try again." });
-      toast.error("Failed to create account. Please try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to create account right now. Please try again.";
+      form.setError("root", { message });
     }
   };
 

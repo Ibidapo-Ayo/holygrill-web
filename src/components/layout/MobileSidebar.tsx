@@ -20,8 +20,8 @@ export function MobileSidebar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setOpen(false);
     navigate('/');
   };
@@ -41,7 +41,7 @@ export function MobileSidebar() {
 
         {isAuthenticated && user ? (
           <div className="border-b border-border px-5 pb-4">
-            <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3">
+            <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-3">
               {safeImageUrl(user.photo_url) ? (
                 <img
                   src={safeImageUrl(user.photo_url)!}

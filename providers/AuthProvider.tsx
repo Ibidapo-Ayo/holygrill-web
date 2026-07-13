@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchUserProfile, normalizeProfile } from "@/lib/api/auth";
+import { fetchUserProfile } from "@/lib/api/auth";
 import { useAuthStore } from "@/stores/authStore";
 import { useEffect } from "react";
 
@@ -11,7 +11,6 @@ export default function AuthProvider({
 }) {
   const setUser = useAuthStore((state) => state.setUser);
   const setLoading = useAuthStore((state) => state.setLoading);
-  const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
@@ -28,19 +27,29 @@ export default function AuthProvider({
     const fetchUser = async () => {
       try {
         const data = await fetchUserProfile();
-        setUser(normalizeProfile(data.profile));
+        setUser({
+          id: data.id,
+          role: data.role,
+          email: data.email,
+          full_name: data.full_name,
+          photo_url: data.profile.photo_url,
+          hp_balance: data.profile.hp_balance,
+          wallet_balance: data.wallet?.balance ?? data.profile.wallet_balance,
+          date_of_birth: data.profile.date_of_birth,
+          email_notifications: data.profile.email_notifications,
+          created_at: data.profile.created_at,
+          createdAt: data.profile.created_at,
+          phone: data.profile.phone,
+        });
       } catch {
         // Keep the auth session from login/signup response while profile route is unavailable.
-        if (!user) {
-          setUser(null);
-        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [hasHydrated, isAuthenticated, setLoading, setUser, user]);
+  }, [hasHydrated, isAuthenticated, setLoading, setUser]);
 
   return <>{children}</>;
 }
