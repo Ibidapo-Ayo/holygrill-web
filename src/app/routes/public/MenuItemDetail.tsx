@@ -5,10 +5,15 @@ import { useNavigate, useParams } from '@/lib/router';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MOCK_MENU, formatPrice } from '@/data/menu';
+import { ActionSpinner } from '@/components/ui/ActionSpinner';
+import { Textarea } from '@/components/ui/textarea';
+import { useAddCartItem, useUpdateCartItem } from '@/hooks/useCart';
+import { useMenuItemsQuery } from '@/hooks/useMenu';
+import { formatPrice } from '@/data/menu';
+import { getCartErrorMessage } from '@/services/api/cart.service';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
-import { createCartLineId, getCartQuantityForMenuItem, getConfiguredMenuPrice, getPrimaryCartLineId } from '@/utils/pricing';
+import { getCartQuantityForMenuItem, getConfiguredMenuPrice, getPrimaryCartLineId } from '@/utils/pricing';
 import { playUiTone } from '@/utils/sound';
 import { toast } from 'sonner';
 
@@ -17,20 +22,26 @@ const MenuItemDetail = () => {
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [extraQuantities, setExtraQuantities] = useState<Record<string, number>>({});
+  const [notes, setNotes] = useState('');
   const [isDesktop, setIsDesktop] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false
   );
-  const { items, addItem, updateQuantity } = useCartStore();
+  const menuQuery = useMenuItemsQuery();
+  const menuItems = menuQuery.data ?? [];
+  const items = useCartStore((state) => state.items);
+  const addCartItemMutation = useAddCartItem();
+  const updateCartItemMutation = useUpdateCartItem();
   const { toggle: toggleFavourite, isFavourite } = useFavouritesStore();
 
-  const item = useMemo(() => MOCK_MENU.find((entry) => entry.id === menuId), [menuId]);
-  const related = useMemo(() => item ? MOCK_MENU.filter((entry) => entry.category === item.category && entry.id !== item.id).slice(0, 3) : [], [item]);
+  const item = useMemo(() => menuItems.find((entry) => entry.id === menuId), [menuId, menuItems]);
+  const related = useMemo(() => item ? menuItems.filter((entry) => entry.category === item.category && entry.id !== item.id).slice(0, 3) : [], [item, menuItems]);
   const isSaved = item ? isFavourite(item.id) : false;
 
   useEffect(() => {
     if (!item) return;
     setSelectedSize(item.sizes?.[0]?.label ?? null);
     setExtraQuantities({});
+    setNotes('');
   }, [item]);
 
   useLayoutEffect(() => {
@@ -40,6 +51,30 @@ const MenuItemDetail = () => {
     query.addEventListener('change', sync);
     return () => query.removeEventListener('change', sync);
   }, []);
+
+  if (menuQuery.isLoading) {
+    return (
+      <main className="flex-1 pb-12 md:pt-24">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="rounded-3xl border border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
+            Loading menu item...
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (menuQuery.isError) {
+    return (
+      <main className="flex-1 pb-12 md:pt-24">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="rounded-3xl border border-destructive/20 bg-destructive/5 px-6 py-10 text-center text-sm text-destructive">
+            Unable to load this menu item right now.
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!item) {
     return (
@@ -57,7 +92,11 @@ const MenuItemDetail = () => {
   const unitPrice = getConfiguredMenuPrice(item, selectedSize, selectedExtras);
   const total = unitPrice;
   const hpTotal = item.hpValue;
+  const existingLine = items.find((entry) => (entry.menuItemId ?? entry.id) === item.id);
   const existingQty = getCartQuantityForMenuItem(items, item.id);
+  const isAddActionLoading =
+    (addCartItemMutation.isPending && addCartItemMutation.variables?.menu_item_id === item.id) ||
+    (updateCartItemMutation.isPending && updateCartItemMutation.variables?.itemId === existingLine?.id);
 
   const updateExtraQuantity = (title: string, delta: number) => {
     setExtraQuantities((current) => {
@@ -73,28 +112,42 @@ const MenuItemDetail = () => {
 
   const handleAdd = () => {
     if (!item.isAvailable) return;
-    const lineId = createCartLineId(item.id, selectedSize, selectedExtras);
-    const existingLine = items.find((entry) => entry.id === lineId);
-    const extrasForCart = Object.entries(extraQuantities)
-      .filter(([, qty]) => qty > 0)
-      .map(([title, qty]) => (qty > 1 ? `${title} ×${qty}` : title));
+    const trimmedNotes = notes.trim();
 
     if (!existingLine) {
-      addItem({
-        id: lineId,
-        menuItemId: item.id,
-        name: item.name,
-        price: unitPrice,
-        imageUrl: item.imageUrl,
-        hpValue: item.hpValue,
-        sizeLabel: selectedSize ?? undefined,
-        extras: extrasForCart,
-      });
+      addCartItemMutation.mutate(
+        {
+          menu_item_id: item.id,
+          notes: trimmedNotes,
+          quantity: 1,
+        },
+        {
+          onError: (error) => {
+            toast.error(getCartErrorMessage(error, 'Unable to add this item to your cart right now.'));
+          },
+          onSuccess: () => {
+            playUiTone('add');
+            toast.success(`${item.name} added to cart`, { description: `${formatPrice(unitPrice)} • +${hpTotal} HP` });
+          },
+        },
+      );
     } else {
-      updateQuantity(lineId, existingLine.quantity + 1);
+      updateCartItemMutation.mutate(
+        {
+          itemId: existingLine.id,
+          payload: { quantity: existingLine.quantity + 1 },
+        },
+        {
+          onError: (error) => {
+            toast.error(getCartErrorMessage(error, 'Unable to update your cart right now.'));
+          },
+          onSuccess: () => {
+            playUiTone('add');
+            toast.success(`${item.name} added to cart`, { description: `${formatPrice(unitPrice)} • +${hpTotal} HP` });
+          },
+        },
+      );
     }
-    playUiTone('add');
-    toast.success(`${item.name} added to cart`, { description: `${formatPrice(unitPrice)} • +${hpTotal} HP` });
   };
 
   const handleFavourite = () => {
@@ -197,6 +250,20 @@ const MenuItemDetail = () => {
 
       {optionBlocks}
 
+      <section className="space-y-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Special instructions</p>
+          <p className="mt-1 text-xs text-muted-foreground">Optional notes for kitchen prep, allergies, or packing preferences.</p>
+        </div>
+        <Textarea
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          maxLength={500}
+          placeholder="Add a note for this item"
+          className="min-h-[110px] rounded-2xl border-border bg-card"
+        />
+      </section>
+
       <div className="grid gap-4 rounded-3xl border border-border bg-card p-4 sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Order total</p>
@@ -213,8 +280,15 @@ const MenuItemDetail = () => {
       </div>
 
       <div className="space-y-3">
-        <button onClick={handleAdd} disabled={!item.isAvailable} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-fire px-4 py-4 text-base font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40">
-          <ShoppingBag size={18} /> Add to cart — {formatPrice(total)}
+        <button onClick={handleAdd} disabled={!item.isAvailable || isAddActionLoading} className="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-fire px-4 py-4 text-base font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40">
+          {isAddActionLoading ? (
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/20">
+              <ActionSpinner size="lg" tone="light" />
+            </span>
+          ) : (
+            <ShoppingBag size={18} />
+          )}
+          {isAddActionLoading ? 'Adding to cart...' : `Add to cart — ${formatPrice(total)}`}
         </button>
         <button onClick={handleFavourite} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary">
           <Heart size={16} className={isSaved ? 'fill-primary text-primary' : ''} /> {isSaved ? 'Saved item' : 'Save for later'}
@@ -301,13 +375,40 @@ const MenuItemDetail = () => {
                   key={entry.id}
                   {...entry}
                   quantityInCart={getCartQuantityForMenuItem(items, entry.id)}
+                  isAddLoading={addCartItemMutation.isPending && addCartItemMutation.variables?.menu_item_id === entry.id}
                   onAddToCart={(id) => {
-                    const relatedItem = MOCK_MENU.find((menuEntry) => menuEntry.id === id);
+                    const relatedItem = menuItems.find((menuEntry) => menuEntry.id === id);
                     if (!relatedItem) return;
-                    addItem({ id: relatedItem.id, menuItemId: relatedItem.id, name: relatedItem.name, price: relatedItem.price, imageUrl: relatedItem.imageUrl, hpValue: relatedItem.hpValue });
-                    toast.success(`${relatedItem.name} added to cart`);
+
+                    addCartItemMutation.mutate(
+                      {
+                        menu_item_id: relatedItem.id,
+                        notes: '',
+                        quantity: 1,
+                      },
+                      {
+                        onError: (error) => {
+                          toast.error(getCartErrorMessage(error, 'Unable to add this item to your cart right now.'));
+                        },
+                        onSuccess: () => {
+                          toast.success(`${relatedItem.name} added to cart`);
+                        },
+                      },
+                    );
                   }}
-                  onUpdateQuantity={(_, value) => updateQuantity(getPrimaryCartLineId(items, entry.id), value)}
+                  onUpdateQuantity={(_, value) => {
+                    updateCartItemMutation.mutate(
+                      {
+                        itemId: getPrimaryCartLineId(items, entry.id),
+                        payload: { quantity: value },
+                      },
+                      {
+                        onError: (error) => {
+                          toast.error(getCartErrorMessage(error, 'Unable to update your cart right now.'));
+                        },
+                      },
+                    );
+                  }}
                 />
               ))}
             </div>

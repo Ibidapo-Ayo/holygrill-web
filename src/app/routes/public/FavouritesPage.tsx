@@ -1,5 +1,5 @@
 import CartPage from './Cart';
 
-const FavouritesPage = () => <CartPage initialTab="saved" />;
+const FavouritesPage = () => <CartPage />;
 
 export default FavouritesPage;

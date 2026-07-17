@@ -1,25 +1,38 @@
 "use client";
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MenuBrowseCard } from '@/components/menu/MenuBrowseCard';
 import { CategoryTabs } from '@/components/menu/CategoryTabs';
 import { SearchBar } from '@/components/menu/SearchBar';
 import { FoodCardSkeleton } from '@/components/menu/FoodCardSkeleton';
 import { KitchenCountdownCard } from '@/components/shared/KitchenCountdownCard';
-import { getMenuItems } from '@/services/api/menu.service';
+import { useMenuItemsQuery } from '@/hooks/useMenu';
+import { getMenuErrorMessage } from '@/services/api/menu.service';
 import type { MenuItem } from '@/types';
 
-const MenuPage = ({ initialMenu }: { initialMenu: MenuItem[] }) => {
+const MenuPage = ({
+  initialMenu,
+  initialLoadFailed = false,
+}: {
+  initialMenu: MenuItem[];
+  initialLoadFailed?: boolean;
+}) => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
 
-  const { data: menuItems = initialMenu, isFetching, isError } = useQuery({
-    queryKey: ['menu-items'],
-    queryFn: getMenuItems,
-    initialData: initialMenu,
-  });
+  const {
+    data: menuItems = initialMenu,
+    error,
+    isError,
+    isFetching,
+    isLoading,
+  } = useMenuItemsQuery(initialLoadFailed ? undefined : initialMenu);
+
+  const shouldShowLoadingState = (isLoading || isFetching) && menuItems.length === 0;
+  const errorMessage = isError
+    ? getMenuErrorMessage(error, 'Unable to load the menu right now. Please try again.')
+    : null;
 
   const categories = useMemo(
     () => ['All', ...Array.from(new Set(menuItems.map((item) => item.category)))],
@@ -46,8 +59,15 @@ const MenuPage = ({ initialMenu }: { initialMenu: MenuItem[] }) => {
 
       <div className="container mx-auto px-4 py-8">
         <KitchenCountdownCard className="px-0 pb-6" showOrderHint ctaLabel="Build your plate" />
-        {isError ? <p className="mb-4 text-sm text-destructive">Unable to refresh the latest menu right now. Showing the server-rendered menu instead.</p> : null}
-        {isFetching && !menuItems.length ? (
+        {errorMessage && menuItems.length > 0 ? (
+          <p className="mb-4 text-sm text-destructive">{errorMessage} Showing cached menu items.</p>
+        ) : null}
+        {errorMessage && menuItems.length === 0 && !shouldShowLoadingState ? (
+          <div className="rounded-3xl border border-destructive/20 bg-destructive/5 px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-destructive">{errorMessage}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Please check your connection and refresh this page.</p>
+          </div>
+        ) : shouldShowLoadingState ? (
           <div className="space-y-4">
             <p className="text-sm font-semibold text-primary">Firing up the menu… 🔥</p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

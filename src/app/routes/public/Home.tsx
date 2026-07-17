@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Flame, Mail, ShoppingBag } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HeroCarousel } from '@/components/hero/HeroCarousel';
@@ -8,32 +8,54 @@ import { FoodCard } from '@/components/menu/FoodCard';
 import { KitchenCountdownCard } from '@/components/shared/KitchenCountdownCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { StoreClosedDialog } from '@/components/shared/StoreClosedDialog';
+import { useAddCartItem, useUpdateCartItem } from '@/hooks/useCart';
+import { useMenuItemsQuery } from '@/hooks/useMenu';
+import { getCartErrorMessage } from '@/services/api/cart.service';
 import { useCartStore } from '@/stores/cartStore';
-import { MOCK_MENU } from '@/data/menu';
 import { getCartQuantityForMenuItem, getPrimaryCartLineId } from '@/utils/pricing';
 import { playUiTone } from '@/utils/sound';
 import type { HeroSlide } from '@/types';
 import { toast } from 'sonner';
 import {
   HOME_HOLY_POINTS_FEATURES,
-  HOME_STATS,
   HOME_TESTIMONIALS,
 } from '@/content/homeContent';
-
-const FEATURED = MOCK_MENU.filter((item) => item.isAvailable).slice(0, 4);
 
 const HP_ICONS = [Flame, ShoppingBag, Flame] as const;
 
 const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
-  const { items, addItem, updateQuantity } = useCartStore();
+  const items = useCartStore((state) => state.items);
+  const menuQuery = useMenuItemsQuery();
+  const menuItems = menuQuery.data ?? [];
+  const addCartItemMutation = useAddCartItem();
+  const updateCartItemMutation = useUpdateCartItem();
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
+  const featured = useMemo(
+    () => menuItems.filter((item) => item.isAvailable).slice(0, 4),
+    [menuItems],
+  );
+
   const handleAdd = (id: string) => {
-    const item = MOCK_MENU.find((menuItem) => menuItem.id === id);
+    const item = menuItems.find((menuItem) => menuItem.id === id);
     if (!item) return;
-    addItem({ id: item.id, menuItemId: item.id, name: item.name, price: item.price, imageUrl: item.imageUrl, hpValue: item.hpValue });
-    playUiTone('add');
-    toast.success(`${item.name} added to cart`);
+
+    addCartItemMutation.mutate(
+      {
+        menu_item_id: item.id,
+        notes: '',
+        quantity: 1,
+      },
+      {
+        onError: (error) => {
+          toast.error(getCartErrorMessage(error, 'Unable to add this item to your cart right now.'));
+        },
+        onSuccess: () => {
+          playUiTone('add');
+          toast.success(`${item.name} added to cart`);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -43,7 +65,7 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const marqueeItems = [...FEATURED, ...FEATURED];
+  const marqueeItems = [...featured, ...featured];
 
   return (
     <main className="flex flex-1 flex-col">
@@ -62,18 +84,43 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
         <div className="relative mt-6">
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-background to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent" />
+          {menuQuery.isError ? (
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-6 text-sm text-destructive">
+              Unable to load featured items right now.
+            </div>
+          ) : null}
+          {!menuQuery.isError && !featured.length ? (
+            <div className="rounded-2xl border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
+              Featured items are loading.
+            </div>
+          ) : null}
+          {!menuQuery.isError && featured.length ? (
           <div className="animate-[marquee_24s_linear_infinite] flex w-max gap-5">
             {marqueeItems.map((item, index) => (
               <div key={`${item.id}-${index}`} className="w-[280px] shrink-0">
                 <FoodCard
                   {...item}
                   quantityInCart={getCartQuantityForMenuItem(items, item.id)}
+                  isAddLoading={addCartItemMutation.isPending && addCartItemMutation.variables?.menu_item_id === item.id}
                   onAddToCart={handleAdd}
-                  onUpdateQuantity={(_, quantity) => updateQuantity(getPrimaryCartLineId(items, item.id), quantity)}
+                  onUpdateQuantity={(_, quantity) => {
+                    updateCartItemMutation.mutate(
+                      {
+                        itemId: getPrimaryCartLineId(items, item.id),
+                        payload: { quantity },
+                      },
+                      {
+                        onError: (error) => {
+                          toast.error(getCartErrorMessage(error, 'Unable to update your cart right now.'));
+                        },
+                      },
+                    );
+                  }}
                 />
               </div>
             ))}
           </div>
+          ) : null}
         </div>
       </section>
 

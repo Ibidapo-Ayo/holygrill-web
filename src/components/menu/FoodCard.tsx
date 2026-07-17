@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from '@/lib/router';
 import { Plus, Minus } from 'lucide-react';
 import { HPBadge } from '@/components/hp/HPBadge';
+import { ActionSpinner } from '@/components/ui/ActionSpinner';
 import { formatPrice } from '@/data/menu';
 import type { MenuItem } from '@/types';
 
@@ -9,11 +10,12 @@ interface FoodCardProps extends MenuItem {
   quantityInCart?: number;
   onAddToCart: (id: string) => void;
   onUpdateQuantity: (id: string, qty: number) => void;
+  isAddLoading?: boolean;
 }
 
 export function FoodCard({
   id, name, description, price, imageUrl, hpValue, isAvailable,
-  quantityInCart = 0, onAddToCart, onUpdateQuantity,
+  quantityInCart = 0, onAddToCart, onUpdateQuantity, isAddLoading = false,
 }: FoodCardProps) {
   return (
     <motion.div
@@ -74,9 +76,17 @@ export function FoodCard({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => onAddToCart(id)}
-              className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold font-body hover:bg-primary-hover transition-colors"
+              disabled={isAddLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold font-body hover:bg-primary-hover transition-colors disabled:cursor-not-allowed disabled:opacity-80"
             >
-              Add to Cart
+              {isAddLoading ? (
+                <>
+                  <ActionSpinner size="sm" tone="light" />
+                  Adding...
+                </>
+              ) : (
+                'Add to Cart'
+              )}
             </motion.button>
           )}
         </div>

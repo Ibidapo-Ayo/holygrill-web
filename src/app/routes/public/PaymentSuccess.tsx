@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from '@/lib/router';
 import { CheckCircle2, ArrowRight, Flame } from 'lucide-react';
-import { useCartStore } from '@/stores/cartStore';
+import { useClearCart } from '@/hooks/useCart';
+import { getCartErrorMessage } from '@/services/api/cart.service';
 import { playUiTone } from '@/utils/sound';
+import { toast } from 'sonner';
 
 type PaymentState = {
   total: number;
@@ -14,16 +16,21 @@ const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as PaymentState | null;
-  const clearCart = useCartStore((s) => s.clearCart);
+  const clearCartMutation = useClearCart();
 
   useEffect(() => {
     if (!state) {
       navigate('/checkout', { replace: true });
       return;
     }
-    clearCart();
+
+    clearCartMutation.mutate(undefined, {
+      onError: (error) => {
+        toast.error(getCartErrorMessage(error, 'Unable to clear the cart after payment.'));
+      },
+    });
     playUiTone('checkout');
-  }, [state, clearCart, navigate]);
+  }, [clearCartMutation, navigate, state]);
 
   if (!state) return null;
 

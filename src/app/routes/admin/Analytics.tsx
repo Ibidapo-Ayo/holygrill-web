@@ -1,22 +1,24 @@
 import { MOCK_ORDERS, MOCK_USERS } from '@/data/mockOrders';
-import { MOCK_MENU, formatPrice } from '@/data/menu';
+import { formatPrice } from '@/data/menu';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign, ShoppingBag, Users, Flame, Clock, Star, Repeat } from 'lucide-react';
+import { TrendingUp, DollarSign, ShoppingBag, Users, Flame, Clock, Star, Repeat } from 'lucide-react';
+import { useMenuItemsQuery } from '@/hooks/useMenu';
 
 const AdminAnalytics = () => {
+  const menuQuery = useMenuItemsQuery();
+  const menuItems = menuQuery.data ?? [];
   const totalRevenue = MOCK_ORDERS.reduce((sum, o) => sum + o.total, 0);
-  const deliveredOrders = MOCK_ORDERS.filter((o) => o.status === 'delivered');
   const avgOrderValue = totalRevenue / MOCK_ORDERS.length;
 
   // Category breakdown
-  const categoryData = MOCK_MENU.reduce((acc, item) => {
+  const categoryData = menuItems.reduce((acc, item) => {
     if (!acc[item.category]) acc[item.category] = { count: 0, revenue: 0 };
     acc[item.category].count++;
-    acc[item.category].revenue += item.price * 3; // mock multiplier
+    acc[item.category].revenue += item.price * 3;
     return acc;
   }, {} as Record<string, { count: number; revenue: number }>);
 
-  const maxRevenue = Math.max(...Object.values(categoryData).map((d) => d.revenue));
+  const maxRevenue = Math.max(...Object.values(categoryData).map((d) => d.revenue), 1);
 
   // Hourly orders (mock)
   const hourlyData = [
@@ -110,6 +112,7 @@ const AdminAnalytics = () => {
         {/* Category breakdown */}
         <div className="bg-card rounded-xl border border-border p-5">
           <h3 className="font-display font-bold text-foreground text-sm mb-4">Revenue by Category</h3>
+          {menuQuery.isError ? <p className="mb-3 text-xs text-destructive">Unable to load live category data.</p> : null}
           <div className="space-y-3">
             {Object.entries(categoryData).map(([cat, data]) => (
               <div key={cat}>

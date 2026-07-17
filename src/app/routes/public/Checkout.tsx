@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from '@/lib/router';
 import { useCartStore, selectSubtotal, selectTotalHP } from '@/stores/cartStore';
-import { DELIVERY_FEE, formatPrice } from '@/data/menu';
-import { Flame, Loader2, MapPin, Home, Clock, UserRound, Mail, Phone } from 'lucide-react';
+import { formatPrice } from '@/data/menu';
+import { Flame, Mail, Phone, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { FulfillmentDialog } from '@/components/checkout/FulfillmentDialog';
+import { ActionSpinner } from '@/components/ui/ActionSpinner';
 import { hasDeliveryInfo, hasPickupInfo, useFulfillmentStore } from '@/stores/fulfillmentStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useCartQuery } from '@/hooks/useCart';
+import { getCartErrorMessage } from '@/services/api/cart.service';
 
 const CheckoutPage = () => {
   const { items } = useCartStore();
+  const hasUnavailableItems = useCartStore((state) => state.hasUnavailableItems);
   const subtotal = useCartStore(selectSubtotal);
   const totalHP = useCartStore(selectTotalHP);
+  const cartQuery = useCartQuery();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
-  const { method, deliveryInfo, pickupInfo, setMethod } = useFulfillmentStore();
+  const { estimatedDeliveryFee, method } = useFulfillmentStore();
   const deliveryReady = useFulfillmentStore(hasDeliveryInfo);
   const pickupReady = useFulfillmentStore(hasPickupInfo);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Guest contact info
@@ -26,16 +29,52 @@ const CheckoutPage = () => {
   const [guestPhone, setGuestPhone] = useState('');
   const [guestContactError, setGuestContactError] = useState('');
 
-  const deliveryFee = method === 'delivery' ? DELIVERY_FEE : 0;
+  const deliveryFee = method === 'delivery' ? estimatedDeliveryFee : 0;
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
-    if (items.length === 0) navigate('/cart');
-  }, [items.length, navigate]);
+    if (cartQuery.isLoading) {
+      return;
+    }
+
+    if (items.length === 0) {
+      navigate('/cart');
+    }
+  }, [cartQuery.isLoading, items.length, navigate]);
+
+  if (cartQuery.isLoading) {
+    return (
+      <main className="flex-1 md:pt-24 pb-12">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="rounded-lg border border-border bg-card p-5 text-sm text-muted-foreground">
+            Loading checkout...
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (cartQuery.isError && items.length === 0) {
+    return (
+      <main className="flex-1 md:pt-24 pb-12">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="rounded-lg border border-border bg-card p-5 text-sm text-muted-foreground">
+            <p>{getCartErrorMessage(cartQuery.error, 'Unable to load your cart right now.')}</p>
+            <button
+              onClick={() => cartQuery.refetch()}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              <RefreshCw size={14} /> Retry
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (items.length === 0) return null;
 
-  const canPay = method === 'delivery' ? deliveryReady : pickupReady;
+  const canPay = !hasUnavailableItems && (method === 'delivery' ? deliveryReady : pickupReady);
 
   const handlePay = async () => {
     if (!isAuthenticated) {
@@ -46,8 +85,8 @@ const CheckoutPage = () => {
       setGuestContactError('');
     }
     if (!canPay) {
-      toast.error('Please save your delivery or pickup info first.');
-      setDialogOpen(true);
+      toast.error('Please save your delivery or pickup info in cart first.');
+      navigate('/cart');
       return;
     }
     setLoading(true);
@@ -56,30 +95,6 @@ const CheckoutPage = () => {
       replace: true,
     });
   };
-
-  const renderDeliverySummary = () => (
-    <div className="space-y-1 text-sm font-body">
-      <p className="text-muted-foreground">{deliveryInfo?.zone || 'Zone not set'}{deliveryInfo?.area ? ` • ${deliveryInfo.area}` : ''}</p>
-      <p className="text-foreground">{deliveryInfo?.streetAddress || 'Not set'}</p>
-      <p className="text-muted-foreground">{deliveryInfo?.city || 'City not set'}</p>
-      {deliveryInfo?.landmark && <p className="text-muted-foreground">Landmark: {deliveryInfo.landmark}</p>}
-      {deliveryInfo?.phone && <p className="text-muted-foreground">Phone: {deliveryInfo.phone}</p>}
-      {!deliveryReady && <p className="text-destructive text-xs">Complete required fields.</p>}
-    </div>
-  );
-
-  const renderPickupSummary = () => (
-    <div className="space-y-1 text-sm font-body">
-      <p className="text-foreground">{pickupInfo?.restaurantAddress || 'Address not set'}</p>
-      <p className="text-muted-foreground">
-        {pickupInfo?.pickupDate ? `${pickupInfo.pickupDate} • ${pickupInfo?.pickupWindow || 'Window not set'}` : 'Pickup date/window not set'}
-      </p>
-      {pickupInfo?.name && <p className="text-muted-foreground">Name: {pickupInfo.name}</p>}
-      {pickupInfo?.riderName && <p className="text-muted-foreground">Rider: {pickupInfo.riderName}</p>}
-      {pickupInfo?.phone && <p className="text-muted-foreground">Phone: {pickupInfo.phone}</p>}
-      {!pickupReady && <p className="text-destructive text-xs">Complete required fields.</p>}
-    </div>
-  );
 
   return (
     <main className="flex-1 md:pt-24 pb-12">
@@ -134,50 +149,27 @@ const CheckoutPage = () => {
               </div>
             )}
 
-            <div className="bg-card rounded-lg border border-border p-5 space-y-4">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Fulfillment</p>
-                  <h3 className="font-display font-bold text-foreground text-base">Delivery or Pickup</h3>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setMethod('delivery')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold ${method === 'delivery' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'}`}
-                  >
-                    Home Delivery
-                  </button>
-                  <button
-                    onClick={() => setMethod('pickup')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold ${method === 'pickup' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'}`}
-                  >
-                    Pickup Window
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-display text-foreground">
-                    {method === 'delivery' ? <Home size={16} /> : <Clock size={16} />}
-                    {method === 'delivery' ? 'Home Delivery' : 'Pickup Window'}
-                  </div>
-                  <button
-                    onClick={() => setDialogOpen(true)}
-                    className="text-sm font-semibold text-primary hover:underline"
-                  >
-                    {canPay ? 'Edit details' : 'Add details'}
-                  </button>
-                </div>
-
-                <div className="rounded-lg border border-border bg-secondary/50 p-4">
-                  {method === 'delivery' ? renderDeliverySummary() : renderPickupSummary()}
-                </div>
-              </div>
+            <div className="bg-card rounded-lg border border-border p-5 space-y-3">
+              <p className="text-xs text-muted-foreground font-body uppercase tracking-wide">Fulfillment</p>
+              <h3 className="font-display font-bold text-foreground text-base">Delivery or Pickup details are managed on cart</h3>
+              <p className="text-sm text-muted-foreground">
+                Current method: {method === 'delivery' ? 'Home Delivery' : 'Pickup Window'}.
+              </p>
+              <button
+                onClick={() => navigate('/cart')}
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                Update details on cart
+              </button>
             </div>
 
             <div className="bg-card rounded-lg border border-border p-5">
               <h3 className="font-display font-bold text-foreground text-base mb-3">Payment</h3>
+              {hasUnavailableItems ? (
+                <p className="mb-3 text-xs text-destructive">
+                  Remove unavailable items from cart before payment.
+                </p>
+              ) : null}
               <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary border border-primary/30">
                 <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">₦</div>
                 <span className="text-sm font-body text-foreground">Paystack — Cards, Bank Transfer, USSD</span>
@@ -203,7 +195,7 @@ const CheckoutPage = () => {
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{method === 'pickup' ? 'Pickup' : 'Delivery'}</span>
-                  <span className="text-foreground">{method === 'pickup' ? '₦0' : formatPrice(DELIVERY_FEE)}</span>
+                  <span className="text-foreground">{method === 'pickup' ? '₦0' : formatPrice(deliveryFee)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-foreground text-base pt-1">
                   <span>Total</span><span className="text-primary">{formatPrice(total)}</span>
@@ -219,11 +211,13 @@ const CheckoutPage = () => {
                 disabled={loading || !canPay}
                 className="w-full py-3 rounded-lg bg-gradient-fire text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {loading ? <><Loader2 size={16} className="animate-spin" /> Processing...</> : `Pay ${formatPrice(total)}`}
+                {loading ? <><ActionSpinner size="md" tone="light" /> Processing...</> : `Pay ${formatPrice(total)}`}
               </button>
               {!canPay && (
                 <p className="text-xs text-destructive font-body text-center">
-                  Please save your {method === 'delivery' ? 'delivery address' : 'pickup details'} first.
+                  {hasUnavailableItems
+                    ? 'Please remove unavailable items from cart first.'
+                    : `Please save your ${method === 'delivery' ? 'delivery address' : 'pickup details'} first.`}
                 </p>
               )}
             </div>
@@ -231,7 +225,6 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      <FulfillmentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </main>
   );
 };

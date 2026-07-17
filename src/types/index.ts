@@ -144,6 +144,7 @@ export interface CartItem {
   hpValue: number;
   sizeLabel?: string;
   extras?: string[];
+  notes?: string;
 }
 
 export interface RewardTier {

@@ -1,13 +1,30 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CheckCircle2, Clock, Home, MapPin, Phone, StickyNote, UserRound } from 'lucide-react';
+import { CheckCircle2, Clock, Home, LocateFixed, MapPin, Phone, StickyNote, Trash2, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
+import { type AuthAddress } from '@/lib/api/auth';
+import { useAuthAddressesQuery, useDeleteAuthAddress, useSaveAuthAddress } from '@/hooks/useAuthAddresses';
+import { calculateDeliveryFee } from '@/lib/api/delivery';
 import { useFulfillmentStore } from '@/stores/fulfillmentStore';
+import { ActionSpinner } from '@/components/ui/ActionSpinner';
+import { DELIVERY_FEE, formatPrice } from '@/data/menu';
 
 interface FulfillmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface DeliveryFormState {
+  addressId?: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  landmark: string;
+  label: 'Home' | 'Pickup';
+  isDefault: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 const PICKUP_SLOTS = [
@@ -17,17 +34,64 @@ const PICKUP_SLOTS = [
   '4:00 PM - 6:00 PM',
 ];
 
-const DELIVERY_ZONES = {
-  'FUTA Core': ['South Gate', 'North Gate', 'School Gate'],
-  'Campus Hostels': ['Akindeko', 'Jibowu', 'Akintola'],
-  'Off Campus': ['Oba-Ile', 'Ilesha Garage', 'Alagbaka'],
+const EMPTY_DELIVERY_FORM: DeliveryFormState = {
+  streetAddress: '',
+  city: 'Akure',
+  state: 'Ondo',
+  landmark: '',
+  label: 'Home',
+  isDefault: true,
+  latitude: undefined,
+  longitude: undefined,
 };
 
-export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps) {
-  const { method, deliveryInfo, pickupInfo, saveDelivery, savePickup, setMethod } = useFulfillmentStore();
+function toDeliveryForm(address: AuthAddress): DeliveryFormState {
+  return {
+    addressId: address.id,
+    streetAddress: address.address_line,
+    city: address.city,
+    state: address.state,
+    landmark: address.landmark ?? '',
+    label: address.label,
+    isDefault: address.is_default,
+    latitude: address.latitude,
+    longitude: address.longitude,
+  };
+}
 
-  const [deliveryForm, setDeliveryForm] = useState(
-    deliveryInfo ?? { zone: '', area: '', streetAddress: '', city: 'Akure', landmark: '', phone: '' }
+export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps) {
+  const {
+    method,
+    deliveryInfo,
+    pickupInfo,
+    saveDelivery,
+    savePickup,
+    clearDelivery,
+    setDeliveryCoordinates,
+    setEstimatedDeliveryFee,
+    setMethod,
+  } = useFulfillmentStore();
+  const addressesQuery = useAuthAddressesQuery({ enabled: open });
+  const saveAddressMutation = useSaveAuthAddress();
+  const deleteAddressMutation = useDeleteAuthAddress();
+  const [isLocatingUser, setIsLocatingUser] = useState(false);
+  const savedAddresses = useMemo(() => addressesQuery.data ?? [], [addressesQuery.data]);
+  const firstSavedAddress = savedAddresses[0];
+
+  const [deliveryForm, setDeliveryForm] = useState<DeliveryFormState>(
+    deliveryInfo
+      ? {
+          addressId: deliveryInfo.addressId,
+          streetAddress: deliveryInfo.streetAddress,
+          city: deliveryInfo.city,
+          state: deliveryInfo.state,
+          landmark: deliveryInfo.landmark ?? '',
+          label: deliveryInfo.label,
+          isDefault: deliveryInfo.isDefault,
+          latitude: deliveryInfo.latitude,
+          longitude: deliveryInfo.longitude,
+        }
+      : EMPTY_DELIVERY_FORM,
   );
   const [pickupForm, setPickupForm] = useState(
     pickupInfo ?? {
@@ -38,48 +102,195 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
       pickupWindow: '',
       restaurantAddress: '',
       note: '',
-    }
+    },
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const activeTab = useMemo(() => method, [method]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (deliveryInfo) {
+      setDeliveryForm({
+        addressId: deliveryInfo.addressId,
+        streetAddress: deliveryInfo.streetAddress,
+        city: deliveryInfo.city,
+        state: deliveryInfo.state,
+        landmark: deliveryInfo.landmark ?? '',
+        label: deliveryInfo.label,
+        isDefault: deliveryInfo.isDefault,
+        latitude: deliveryInfo.latitude,
+        longitude: deliveryInfo.longitude,
+      });
+      return;
+    }
+
+    if (firstSavedAddress) {
+      setDeliveryForm(toDeliveryForm(firstSavedAddress));
+      return;
+    }
+
+    setDeliveryForm(EMPTY_DELIVERY_FORM);
+  }, [deliveryInfo, firstSavedAddress, open]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (!Number.isFinite(deliveryInfo?.latitude) || !Number.isFinite(deliveryInfo?.longitude)) {
+      return;
+    }
+
+    setDeliveryForm((current) => ({
+      ...current,
+      latitude: deliveryInfo?.latitude,
+      longitude: deliveryInfo?.longitude,
+    }));
+  }, [deliveryInfo?.latitude, deliveryInfo?.longitude, open]);
+
   const validateDelivery = () => {
-    const e: Record<string, string> = {};
-    if (!deliveryForm.streetAddress.trim()) e.streetAddress = 'Address is required';
-    if (!deliveryForm.zone.trim()) e.zone = 'Zone is required';
-    if (!deliveryForm.area.trim()) e.area = 'Area is required';
-    if (!deliveryForm.city.trim()) e.city = 'City is required';
-    if (!deliveryForm.phone.trim()) e.phone = 'Phone is required';
-    else if (!/^0[789]\d{9}$/.test(deliveryForm.phone.trim())) e.phone = 'Enter a valid Nigerian phone number';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    const nextErrors: Record<string, string> = {};
+
+    if (!deliveryForm.streetAddress.trim()) nextErrors.streetAddress = 'Address is required';
+    if (!deliveryForm.city.trim()) nextErrors.city = 'City is required';
+    if (!deliveryForm.state.trim()) nextErrors.state = 'State is required';
+    if (!Number.isFinite(deliveryForm.latitude) || !Number.isFinite(deliveryForm.longitude)) {
+      nextErrors.coordinates = 'Use your location first to capture latitude and longitude';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const validatePickup = () => {
-    const e: Record<string, string> = {};
-    if (!pickupForm.name.trim()) e.name = 'Name is required';
-    if (!pickupForm.phone.trim()) e.phone = 'Phone is required';
-    else if (!/^0[789]\d{9}$/.test(pickupForm.phone.trim())) e.phone = 'Enter a valid Nigerian phone number';
-    if (!pickupForm.pickupDate.trim()) e.pickupDate = 'Date is required';
-    if (!pickupForm.pickupWindow.trim()) e.pickupWindow = 'Select a window';
-    if (!pickupForm.restaurantAddress.trim()) e.restaurantAddress = 'Address is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    const nextErrors: Record<string, string> = {};
+    if (!pickupForm.name.trim()) nextErrors.name = 'Name is required';
+    if (!pickupForm.phone.trim()) nextErrors.phone = 'Phone is required';
+    else if (!/^0[789]\d{9}$/.test(pickupForm.phone.trim())) nextErrors.phone = 'Enter a valid Nigerian phone number';
+    if (!pickupForm.pickupDate.trim()) nextErrors.pickupDate = 'Date is required';
+    if (!pickupForm.pickupWindow.trim()) nextErrors.pickupWindow = 'Select a window';
+    if (!pickupForm.restaurantAddress.trim()) nextErrors.restaurantAddress = 'Address is required';
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleDeliverySave = () => {
-    if (!validateDelivery()) return;
-    saveDelivery({
-      zone: deliveryForm.zone.trim(),
-      area: deliveryForm.area.trim(),
-      streetAddress: deliveryForm.streetAddress.trim(),
-      city: deliveryForm.city.trim(),
-      landmark: deliveryForm.landmark?.trim(),
-      phone: deliveryForm.phone.trim(),
+    if (!validateDelivery()) {
+      return;
+    }
+
+    saveAddressMutation.mutate(
+      {
+        addressId: deliveryForm.addressId,
+        payload: {
+          address_line: deliveryForm.streetAddress.trim(),
+          city: deliveryForm.city.trim(),
+          state: deliveryForm.state.trim(),
+          landmark: deliveryForm.landmark.trim(),
+          label: deliveryForm.label,
+          is_default: deliveryForm.isDefault,
+          latitude: deliveryForm.latitude as number,
+          longitude: deliveryForm.longitude as number,
+        },
+      },
+      {
+        onError: () => {
+          toast.error('Unable to save your address right now. Please try again.');
+        },
+        onSuccess: (savedAddress) => {
+          saveDelivery({
+            addressId: savedAddress.id,
+            streetAddress: savedAddress.address_line,
+            city: savedAddress.city,
+            state: savedAddress.state,
+            landmark: savedAddress.landmark ?? '',
+            label: savedAddress.label,
+            isDefault: savedAddress.is_default,
+            latitude: savedAddress.latitude,
+            longitude: savedAddress.longitude,
+          });
+          toast.success('Delivery address saved');
+          onOpenChange(false);
+        },
+      },
+    );
+  };
+
+  const handleDeleteSavedAddress = () => {
+    const addressId = deliveryForm.addressId ?? firstSavedAddress?.id;
+
+    if (!addressId) {
+      toast.error('No saved address found to delete.');
+      return;
+    }
+
+    deleteAddressMutation.mutate(addressId, {
+      onError: () => {
+        toast.error('Unable to delete this saved address right now.');
+      },
+      onSuccess: () => {
+        clearDelivery();
+        setDeliveryForm(EMPTY_DELIVERY_FORM);
+        setErrors({});
+        toast.success('Saved address deleted.');
+      },
     });
-    toast.success('Delivery info saved');
-    onOpenChange(false);
+  };
+
+  const handleSelectAddress = async (address: AuthAddress) => {
+    const selected = toDeliveryForm(address);
+    setDeliveryForm(selected);
+    saveDelivery({
+      addressId: address.id,
+      streetAddress: address.address_line,
+      city: address.city,
+      state: address.state,
+      landmark: address.landmark ?? '',
+      label: address.label,
+      isDefault: address.is_default,
+      latitude: address.latitude,
+      longitude: address.longitude,
+    });
+
+    try {
+      const fee = await calculateDeliveryFee({
+        delivery_location_id: address.id,
+        delivery_type: 'on_campus',
+        lat: address.latitude,
+        lon: address.longitude,
+      });
+      setEstimatedDeliveryFee(fee);
+    } catch {
+      setEstimatedDeliveryFee(DELIVERY_FEE);
+    }
+
+    toast.success('Address selected.');
+  };
+
+  const handleEditAddress = (address: AuthAddress) => {
+    setMethod('delivery');
+    setDeliveryForm(toDeliveryForm(address));
+    setErrors({});
+  };
+
+  const handleDeleteAddress = (addressId: string) => {
+    deleteAddressMutation.mutate(addressId, {
+      onError: () => {
+        toast.error('Unable to delete this saved address right now.');
+      },
+      onSuccess: () => {
+        if ((deliveryForm.addressId ?? firstSavedAddress?.id) === addressId) {
+          clearDelivery();
+          setDeliveryForm(EMPTY_DELIVERY_FORM);
+        }
+        setErrors({});
+        toast.success('Saved address deleted.');
+      },
+    });
   };
 
   const handlePickupSave = () => {
@@ -97,18 +308,71 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
     onOpenChange(false);
   };
 
+  const handleUseLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      toast.error('Location is not supported on this device/browser.');
+      return;
+    }
+
+    setMethod('delivery');
+    setIsLocatingUser(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const locationId = deliveryForm.addressId ?? firstSavedAddress?.id;
+
+        if (!locationId) {
+          setDeliveryCoordinates(latitude, longitude);
+          setEstimatedDeliveryFee(DELIVERY_FEE);
+          setIsLocatingUser(false);
+          toast.success('Location captured. Delivery fee will be finalized after address save.');
+          return;
+        }
+
+        let fee = DELIVERY_FEE;
+
+        try {
+          fee = await calculateDeliveryFee({
+            delivery_location_id: locationId,
+            delivery_type: 'on_campus',
+            lat: latitude,
+            lon: longitude,
+          });
+        } catch {
+          toast.error('Unable to fetch delivery fee right now. We will use base delivery fee temporarily.');
+        }
+
+        setDeliveryCoordinates(latitude, longitude);
+        setEstimatedDeliveryFee(fee);
+        setIsLocatingUser(false);
+
+        toast.success(`Location captured. Delivery fee estimated at ${formatPrice(fee)}.`);
+      },
+      () => {
+        setIsLocatingUser(false);
+        toast.error('Unable to access your location. Please allow location permission and try again.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+      },
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent
-      className="max-w-3xl w-full p-0 overflow-hidden rounded-t-2xl sm:rounded-lg
-                 left-1/2 top-auto bottom-0 translate-x-[-50%] translate-y-0
-                 sm:top-1/2 sm:bottom-auto sm:translate-y-[-50%]
-                 max-h-[85vh] sm:max-h-[90vh] data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4"
-    >
+      <DialogContent
+        className="max-w-3xl w-full p-0 overflow-hidden rounded-t-2xl sm:rounded-lg
+                   left-1/2 top-auto bottom-0 translate-x-[-50%] translate-y-0
+                   sm:top-1/2 sm:bottom-auto sm:translate-y-[-50%]
+                   max-h-[85vh] sm:max-h-[90vh] data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4"
+      >
         <DialogHeader className="px-6 pt-6">
           <DialogTitle className="font-display text-xl">Delivery or Pickup</DialogTitle>
           <p className="text-sm text-muted-foreground font-body">
-            Choose your fulfillment method, fill the form, and we’ll remember it for checkout.
+            Choose your fulfillment method, fill the form, and we will remember it for checkout.
           </p>
         </DialogHeader>
 
@@ -124,76 +388,187 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
             </TabsList>
 
             <TabsContent value="delivery">
+              <div className="mb-3 text-xs text-muted-foreground font-body">
+                {addressesQuery.isLoading ? 'Checking saved addresses...' : null}
+                {firstSavedAddress
+                  ? ` Displaying first saved address: ${firstSavedAddress.address_line}, ${firstSavedAddress.city}`
+                  : null}
+              </div>
+
+              {savedAddresses.length > 1 ? (
+                <div className="mb-4 space-y-2 rounded-lg border border-border bg-secondary/40 p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Saved addresses</p>
+                  {savedAddresses.map((address, index) => {
+                    const isActive = (deliveryForm.addressId ?? firstSavedAddress?.id) === address.id;
+
+                    return (
+                      <div
+                        key={address.id}
+                        className={`rounded-lg border px-3 py-2 ${isActive ? 'border-primary/60 bg-primary/5' : 'border-border bg-background/70'}`}
+                      >
+                        <p className="text-xs text-muted-foreground">Address {index + 1}</p>
+                        <p className="text-sm font-semibold text-foreground">{address.address_line}</p>
+                        <p className="text-xs text-muted-foreground">{address.city}, {address.state}</p>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => void handleSelectAddress(address)}
+                            className="rounded-md border border-border px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-secondary"
+                          >
+                            {isActive ? 'Selected' : 'Select'}
+                          </button>
+                          <button
+                            onClick={() => handleEditAddress(address)}
+                            className="rounded-md border border-border px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-secondary"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAddress(address.id)}
+                            disabled={deleteAddressMutation.isPending}
+                            className="rounded-md border border-destructive/40 px-2.5 py-1 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-70"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { key: 'streetAddress', label: 'Street Address', placeholder: 'e.g. Obakekere, behind FUTA gate' },
-                  { key: 'city', label: 'City', placeholder: 'Akure' },
-                  { key: 'landmark', label: 'Landmark (optional)', placeholder: 'Near...' },
-                  { key: 'phone', label: 'Phone Number', placeholder: '08012345678' },
-                ].map((field) => (
-                  <div key={field.key}>
-                    <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
-                      {field.key === 'streetAddress' && <MapPin size={14} className="text-primary" />}
-                      {field.key === 'city' && <Home size={14} className="text-primary" />}
-                      {field.key === 'landmark' && <StickyNote size={14} className="text-primary" />}
-                      {field.key === 'phone' && <Phone size={14} className="text-primary" />}
-                      {field.label}
-                    </label>
-                    <input
-                      type="text"
-                      value={deliveryForm[field.key as keyof typeof deliveryForm]}
-                      onChange={(e) =>
-                        setDeliveryForm((prev) => ({ ...prev, [field.key]: e.target.value }))
-                      }
-                      placeholder={field.placeholder}
-                      className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    {errors[field.key] && <p className="text-destructive text-xs font-body mt-1">{errors[field.key]}</p>}
-                  </div>
-                ))}
                 <div>
                   <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
                     <MapPin size={14} className="text-primary" />
-                    Delivery Zone
+                    Street Address
                   </label>
-                  <select
-                    value={deliveryForm.zone}
-                    onChange={(e) => setDeliveryForm((prev) => ({ ...prev, zone: e.target.value, area: '' }))}
-                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  >
-                    <option value="">Select a zone</option>
-                    {Object.keys(DELIVERY_ZONES).map((zone) => <option key={zone} value={zone}>{zone}</option>)}
-                  </select>
-                  {errors.zone && <p className="text-destructive text-xs font-body mt-1">{errors.zone}</p>}
+                  <input
+                    type="text"
+                    value={deliveryForm.streetAddress}
+                    onChange={(event) => setDeliveryForm((prev) => ({ ...prev, streetAddress: event.target.value }))}
+                    placeholder="e.g. Obakekere, behind FUTA gate"
+                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  {errors.streetAddress ? <p className="text-destructive text-xs font-body mt-1">{errors.streetAddress}</p> : null}
                 </div>
+
                 <div>
                   <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
                     <Home size={14} className="text-primary" />
-                    Delivery Area
+                    City
                   </label>
+                  <input
+                    type="text"
+                    value={deliveryForm.city}
+                    onChange={(event) => setDeliveryForm((prev) => ({ ...prev, city: event.target.value }))}
+                    placeholder="Akure"
+                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  {errors.city ? <p className="text-destructive text-xs font-body mt-1">{errors.city}</p> : null}
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
+                    <Home size={14} className="text-primary" />
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryForm.state}
+                    onChange={(event) => setDeliveryForm((prev) => ({ ...prev, state: event.target.value }))}
+                    placeholder="Ondo"
+                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  {errors.state ? <p className="text-destructive text-xs font-body mt-1">{errors.state}</p> : null}
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
+                    <StickyNote size={14} className="text-primary" />
+                    Landmark (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={deliveryForm.landmark}
+                    onChange={(event) => setDeliveryForm((prev) => ({ ...prev, landmark: event.target.value }))}
+                    placeholder="Near..."
+                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">Label</label>
                   <select
-                    value={deliveryForm.area}
-                    onChange={(e) => setDeliveryForm((prev) => ({ ...prev, area: e.target.value }))}
-                    disabled={!deliveryForm.zone}
-                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-60"
+                    value={deliveryForm.label}
+                    onChange={(event) => setDeliveryForm((prev) => ({ ...prev, label: event.target.value as 'Home' | 'Pickup' }))}
+                    className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
-                    <option value="">Select an area</option>
-                    {(DELIVERY_ZONES[deliveryForm.zone as keyof typeof DELIVERY_ZONES] ?? []).map((area) => <option key={area} value={area}>{area}</option>)}
+                    <option value="Home">Home</option>
+                    <option value="Pickup">Pickup</option>
                   </select>
-                  {errors.area && <p className="text-destructive text-xs font-body mt-1">{errors.area}</p>}
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">Default address</label>
+                  <label className="inline-flex items-center gap-2 text-sm font-body text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={deliveryForm.isDefault}
+                      onChange={(event) => setDeliveryForm((prev) => ({ ...prev, isDefault: event.target.checked }))}
+                    />
+                    Set as default
+                  </label>
                 </div>
               </div>
+
+              <div className="mt-3 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-xs text-muted-foreground font-body">
+                Coordinates: {Number.isFinite(deliveryForm.latitude) && Number.isFinite(deliveryForm.longitude)
+                  ? `${deliveryForm.latitude?.toFixed(6)}, ${deliveryForm.longitude?.toFixed(6)}`
+                  : 'Not captured yet. Use my location before saving home delivery.'}
+              </div>
+              {errors.coordinates ? <p className="text-destructive text-xs font-body mt-1">{errors.coordinates}</p> : null}
+
+              <div className="mt-3">
+                <button
+                  onClick={handleUseLocation}
+                  disabled={isLocatingUser}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isLocatingUser ? <ActionSpinner size="sm" tone="fire" /> : <LocateFixed size={14} />}
+                  {isLocatingUser ? 'Capturing location...' : 'Use my location'}
+                </button>
+              </div>
+
               <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground font-body">
                   <CheckCircle2 size={14} className="text-success" />
-                  We’ll deliver to this address and contact your phone if needed.
+                  Home delivery requires location capture before save.
                 </div>
-                <button
-                  onClick={handleDeliverySave}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary-hover transition-colors"
-                >
-                  Save Delivery Info
-                </button>
+                <div className="flex items-center gap-2">
+                  {(deliveryForm.addressId ?? firstSavedAddress?.id) ? (
+                    <button
+                      onClick={handleDeleteSavedAddress}
+                      disabled={deleteAddressMutation.isPending}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-destructive/40 text-destructive font-display font-bold text-sm hover:bg-destructive/10 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {deleteAddressMutation.isPending ? <ActionSpinner size="sm" tone="muted" /> : <Trash2 size={14} />}
+                      {deleteAddressMutation.isPending ? 'Deleting...' : 'Delete Saved Address'}
+                    </button>
+                  ) : null}
+
+                  <button
+                    onClick={handleDeliverySave}
+                    disabled={
+                      saveAddressMutation.isPending ||
+                      !Number.isFinite(deliveryForm.latitude) ||
+                      !Number.isFinite(deliveryForm.longitude)
+                    }
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary-hover transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {saveAddressMutation.isPending ? 'Saving...' : 'Save Delivery Info'}
+                  </button>
+                </div>
               </div>
             </TabsContent>
 
@@ -213,11 +588,11 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
                     <input
                       type={field.type || 'text'}
                       value={pickupForm[field.key as keyof typeof pickupForm]}
-                      onChange={(e) => setPickupForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                      onChange={(event) => setPickupForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
                       placeholder={field.placeholder}
                       className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-foreground text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
-                    {errors[field.key] && <p className="text-destructive text-xs font-body mt-1">{errors[field.key]}</p>}
+                    {errors[field.key] ? <p className="text-destructive text-xs font-body mt-1">{errors[field.key]}</p> : null}
                   </div>
                 ))}
               </div>
@@ -230,7 +605,7 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
                   </label>
                   <select
                     value={pickupForm.pickupWindow}
-                    onChange={(e) => setPickupForm((prev) => ({ ...prev, pickupWindow: e.target.value }))}
+                    onChange={(event) => setPickupForm((prev) => ({ ...prev, pickupWindow: event.target.value }))}
                     className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="">Select a window</option>
@@ -238,7 +613,7 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
                       <option key={slot} value={slot}>{slot}</option>
                     ))}
                   </select>
-                  {errors.pickupWindow && <p className="text-destructive text-xs font-body mt-1">{errors.pickupWindow}</p>}
+                  {errors.pickupWindow ? <p className="text-destructive text-xs font-body mt-1">{errors.pickupWindow}</p> : null}
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-xs text-muted-foreground font-body mb-1">
@@ -248,11 +623,11 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
                   <input
                     type="text"
                     value={pickupForm.restaurantAddress}
-                    onChange={(e) => setPickupForm((prev) => ({ ...prev, restaurantAddress: e.target.value }))}
+                    onChange={(event) => setPickupForm((prev) => ({ ...prev, restaurantAddress: event.target.value }))}
                     placeholder="Opposite FUTA South Gate..."
                     className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
-                  {errors.restaurantAddress && <p className="text-destructive text-xs font-body mt-1">{errors.restaurantAddress}</p>}
+                  {errors.restaurantAddress ? <p className="text-destructive text-xs font-body mt-1">{errors.restaurantAddress}</p> : null}
                 </div>
               </div>
 
@@ -263,7 +638,7 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
                 </label>
                 <textarea
                   value={pickupForm.note}
-                  onChange={(e) => setPickupForm((prev) => ({ ...prev, note: e.target.value }))}
+                  onChange={(event) => setPickupForm((prev) => ({ ...prev, note: event.target.value }))}
                   placeholder="Anything we should know? e.g. rider will call on arrival."
                   className="w-full min-h-[100px] px-3 py-3 rounded-lg bg-secondary border border-border text-sm font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
@@ -272,7 +647,7 @@ export function FulfillmentDialog({ open, onOpenChange }: FulfillmentDialogProps
               <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground font-body">
                   <CheckCircle2 size={14} className="text-success" />
-                  We’ll prep your order to hit the window you select.
+                  We will prep your order to hit the window you select.
                 </div>
                 <button
                   onClick={handlePickupSave}

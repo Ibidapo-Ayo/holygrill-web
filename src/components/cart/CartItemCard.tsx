@@ -12,6 +12,7 @@ import {
 import type { CartItem, MenuItem } from '@/types';
 
 interface CartLineCardProps {
+  children?: React.ReactNode;
   mode: 'cart' | 'saved';
   item: CartItem | MenuItem;
   quantity?: number;
@@ -22,7 +23,7 @@ interface CartLineCardProps {
   onMoveToSaved?: () => void;
 }
 
-export function CartItemCard({ mode, item, quantity = 0, onIncrement, onDecrement, onRemove, onMoveToCart, onMoveToSaved }: CartLineCardProps) {
+export function CartItemCard({ children, mode, item, quantity = 0, onIncrement, onDecrement, onRemove, onMoveToCart, onMoveToSaved }: CartLineCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const cartItem = item as CartItem;
   const menuItem = item as MenuItem;
@@ -92,6 +93,8 @@ export function CartItemCard({ mode, item, quantity = 0, onIncrement, onDecremen
               ) : null}
             </div>
           </div>
+
+          {children ? <div>{children}</div> : null}
         </div>
       </div>
 

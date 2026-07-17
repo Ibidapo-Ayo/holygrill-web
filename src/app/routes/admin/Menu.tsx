@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { MOCK_MENU, CATEGORIES, formatPrice } from '@/data/menu';
+import { useEffect, useMemo, useState } from 'react';
+import { formatPrice } from '@/data/menu';
 import type { MenuItem } from '@/types';
 import { Plus, Edit3, Trash2, Search, X, Eye, EyeOff } from 'lucide-react';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useMenuItemsQuery } from '@/hooks/useMenu';
 
 interface ManagedMenuItem extends MenuItem {
   addOnEditor?: string;
@@ -13,18 +14,32 @@ interface ManagedMenuItem extends MenuItem {
 }
 
 const AdminMenu = () => {
-  const [items, setItems] = useState<ManagedMenuItem[]>(() =>
-    MOCK_MENU.map((item) => ({
-      ...item,
-      addOnEditor: item.extras?.map((extra) => extra.title).join(', ') ?? '',
-      itemOrderCap: 40,
-      dailyOrderCap: 200,
-    }))
-  );
+  const menuQuery = useMenuItemsQuery();
+  const [items, setItems] = useState<ManagedMenuItem[]>([]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (!menuQuery.data) {
+      return;
+    }
+
+    setItems(
+      menuQuery.data.map((item) => ({
+        ...item,
+        addOnEditor: item.extras?.map((extra) => extra.title).join(', ') ?? '',
+        itemOrderCap: 40,
+        dailyOrderCap: 200,
+      }))
+    );
+  }, [menuQuery.data]);
+
+  const categories = useMemo(
+    () => ['All', ...Array.from(new Set(items.map((item) => item.category)))],
+    [items],
+  );
 
   const filtered = items.filter((item) => {
     const matchCat = categoryFilter === 'All' || item.category === categoryFilter;
@@ -65,7 +80,7 @@ const AdminMenu = () => {
         description: formData.description || '',
         price: formData.price || 0,
         imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop',
-        category: formData.category || 'Burgers',
+        category: formData.category || categories.find((category) => category !== 'All') || 'Uncategorized',
         hpValue: formData.hpValue || 10,
         isAvailable: true,
         addOnEditor: formData.addOnEditor || '',
@@ -97,7 +112,7 @@ const AdminMenu = () => {
           )}
         </div>
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
@@ -116,6 +131,13 @@ const AdminMenu = () => {
           <Plus size={16} /> Add Item
         </button>
       </div>
+
+      {menuQuery.isLoading ? (
+        <div className="rounded-xl border border-border bg-card px-4 py-6 text-sm text-muted-foreground">Loading menu items...</div>
+      ) : null}
+      {menuQuery.isError ? (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-6 text-sm text-destructive">Unable to load menu items from the backend.</div>
+      ) : null}
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -171,6 +193,7 @@ const AdminMenu = () => {
         {showForm && (
           <MenuItemForm
             item={editingItem}
+            categories={categories}
             onSave={handleSave}
             onClose={() => setShowForm(false)}
           />
@@ -182,10 +205,12 @@ const AdminMenu = () => {
 
 function MenuItemForm({
   item,
+  categories,
   onSave,
   onClose,
 }: {
   item: ManagedMenuItem | null;
+  categories: string[];
   onSave: (data: Partial<ManagedMenuItem>) => void;
   onClose: () => void;
 }) {
@@ -193,7 +218,7 @@ function MenuItemForm({
     name: item?.name || '',
     description: item?.description || '',
     price: item?.price?.toString() || '',
-    category: item?.category || 'Burgers',
+    category: item?.category || categories.find((category) => category !== 'All') || 'Uncategorized',
     hpValue: item?.hpValue?.toString() || '10',
     imageUrl: item?.imageUrl || '',
     addOnEditor: item?.addOnEditor || '',
@@ -262,7 +287,7 @@ function MenuItemForm({
               onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
               className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/50"
             >
-              {CATEGORIES.filter((c) => c !== 'All').map((cat) => (
+              {categories.filter((category) => category !== 'All').map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>

@@ -16,9 +16,10 @@ export function getConfiguredMenuPrice(item: MenuItem, selectedSize?: string | n
   return getMenuItemBasePrice(item, selectedSize) + getExtrasTotal(item, selectedExtras);
 }
 
-export function createCartLineId(menuItemId: string, selectedSize?: string | null, selectedExtras: string[] = []) {
+export function createCartLineId(menuItemId: string, selectedSize?: string | null, selectedExtras: string[] = [], notes?: string | null) {
   const extrasKey = [...selectedExtras].sort().join('__');
-  return [menuItemId, selectedSize ?? 'default', extrasKey || 'no-extras'].join('::');
+  const notesKey = notes?.trim() ? notes.trim() : 'no-notes';
+  return [menuItemId, selectedSize ?? 'default', extrasKey || 'no-extras', notesKey].join('::');
 }
 
 export function getCartQuantityForMenuItem(items: CartItem[], menuItemId: string) {
