@@ -31,20 +31,19 @@ function asOptionalNumber(value: unknown): number | undefined {
 function mapSizes(value: unknown): MenuItemSize[] | undefined {
   if (!Array.isArray(value)) return undefined;
 
-  const mapped = value
-    .map((entry) => {
-      if (!entry || typeof entry !== 'object') return null;
-      const source = entry as Record<string, unknown>;
-      const label = asString(source.label ?? source.name);
-      if (!label) return null;
+  const mapped: MenuItemSize[] = [];
+  value.forEach((entry) => {
+    if (!entry || typeof entry !== 'object') return;
+    const source = entry as Record<string, unknown>;
+    const label = asString(source.label ?? source.name);
+    if (!label) return;
 
-      return {
-        label,
-        price: asNumber(source.price),
-        description: asOptionalString(source.description),
-      };
-    })
-    .filter((entry): entry is MenuItemSize => Boolean(entry));
+    mapped.push({
+      label,
+      price: asNumber(source.price),
+      description: asOptionalString(source.description),
+    });
+  });
 
   return mapped.length ? mapped : undefined;
 }
@@ -52,20 +51,19 @@ function mapSizes(value: unknown): MenuItemSize[] | undefined {
 function mapExtras(value: unknown): MenuItemExtra[] | undefined {
   if (!Array.isArray(value)) return undefined;
 
-  const mapped = value
-    .map((entry) => {
-      if (!entry || typeof entry !== 'object') return null;
-      const source = entry as Record<string, unknown>;
-      const title = asString(source.title ?? source.name);
-      if (!title) return null;
+  const mapped: MenuItemExtra[] = [];
+  value.forEach((entry) => {
+    if (!entry || typeof entry !== 'object') return;
+    const source = entry as Record<string, unknown>;
+    const title = asString(source.title ?? source.name);
+    if (!title) return;
 
-      return {
-        title,
-        price: asNumber(source.price),
-        imageUrl: asString(source.imageUrl ?? source.image_url ?? source.image, ''),
-      };
-    })
-    .filter((entry): entry is MenuItemExtra => Boolean(entry));
+    mapped.push({
+      title,
+      price: asNumber(source.price),
+      imageUrl: asString(source.imageUrl ?? source.image_url ?? source.image, ''),
+    });
+  });
 
   return mapped.length ? mapped : undefined;
 }
@@ -73,21 +71,20 @@ function mapExtras(value: unknown): MenuItemExtra[] | undefined {
 function mapReviews(value: unknown): MenuItemReview[] | undefined {
   if (!Array.isArray(value)) return undefined;
 
-  const mapped = value
-    .map((entry, index) => {
-      if (!entry || typeof entry !== 'object') return null;
-      const source = entry as Record<string, unknown>;
+  const mapped: MenuItemReview[] = [];
+  value.forEach((entry, index) => {
+    if (!entry || typeof entry !== 'object') return;
+    const source = entry as Record<string, unknown>;
 
-      return {
-        id: asString(source.id ?? source._id, `review-${index}`),
-        author: asString(source.author ?? source.user_name ?? source.name, 'Anonymous'),
-        rating: asNumber(source.rating, 0),
-        comment: asString(source.comment ?? source.review ?? source.text),
-        createdAt: asString(source.createdAt ?? source.created_at, ''),
-        rewardHP: asNumber(source.rewardHP ?? source.reward_hp ?? source.hp_reward, 0),
-      };
-    })
-    .filter((entry): entry is MenuItemReview => Boolean(entry));
+    mapped.push({
+      id: asString(source.id ?? source._id, `review-${index}`),
+      author: asString(source.author ?? source.user_name ?? source.name, 'Anonymous'),
+      rating: asNumber(source.rating, 0),
+      comment: asString(source.comment ?? source.review ?? source.text),
+      createdAt: asString(source.createdAt ?? source.created_at, ''),
+      rewardHP: asNumber(source.rewardHP ?? source.reward_hp ?? source.hp_reward, 0),
+    });
+  });
 
   return mapped.length ? mapped : undefined;
 }
