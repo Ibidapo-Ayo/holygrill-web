@@ -72,8 +72,30 @@ export const WALLET_TRANSACTIONS: WalletTransaction[] = [
 ];
 
 export const EVENT_DISCOVERY_ITEMS: EventDiscoveryItem[] = [
-  { id: 'event-1', title: 'Midnight Grill Run', description: 'Late-night pickup collab for exam week.', date: 'Friday, May 22, 2026 · 9:00 PM', location: 'FUTA South Gate', capacity: '40 seats' },
-  { id: 'event-2', title: 'Squad Feast Friday', description: 'Curated combo menu for hostel squads.', date: 'Saturday, May 23, 2026 · 6:00 PM', location: 'Aule Common Room', capacity: 'Limited catering slots' },
+  {
+    id: 'event-1',
+    title: 'Midnight Grill Run',
+    description: 'Late-night pickup collab for exam week.',
+    date: 'Friday, May 22, 2026 · 9:00 PM',
+    location: 'FUTA South Gate',
+    capacity: '40 seats',
+    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&auto=format&fit=crop&q=80',
+    hpReward: 30,
+    ticketPrice: 1500,
+    featured: true,
+  },
+  {
+    id: 'event-2',
+    title: 'Squad Feast Friday',
+    description: 'Curated combo menu for hostel squads.',
+    date: 'Saturday, May 23, 2026 · 6:00 PM',
+    location: 'Aule Common Room',
+    capacity: 'Limited catering slots',
+    imageUrl: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&auto=format&fit=crop&q=80',
+    hpReward: 24,
+    ticketPrice: 0,
+    featured: false,
+  },
 ];
 
 export const REFERRAL_MILESTONES: ReferralMilestone[] = [
@@ -83,9 +105,42 @@ export const REFERRAL_MILESTONES: ReferralMilestone[] = [
 ];
 
 export const MARKETPLACE_VENDORS: MarketplaceVendor[] = [
-  { id: 'vendor-1', name: 'Holy Merch Pack', category: 'Merch', hpPrice: 250, description: 'Sticker pack, tote, and lanyard.', locked: false },
-  { id: 'vendor-2', name: 'Study Fuel Bundle', category: 'Bundles', hpPrice: 420, cashPrice: 3500, description: 'Snack combo for late-night grinds.', locked: true },
-  { id: 'vendor-3', name: 'Vendor Pop-up Pass', category: 'Experiences', hpPrice: 300, description: 'Priority access for campus pop-up drops.', locked: false },
+  {
+    id: 'vendor-1',
+    name: 'Holy Merch Pack',
+    category: 'Merch',
+    hpPrice: 250,
+    cashPrice: 2200,
+    description: 'Sticker pack, tote, and lanyard.',
+    locked: false,
+    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&auto=format&fit=crop&q=80',
+    stock: 12,
+    listingType: 'product',
+  },
+  {
+    id: 'vendor-2',
+    name: 'Study Fuel Bundle',
+    category: 'Bundles',
+    hpPrice: 420,
+    cashPrice: 3500,
+    description: 'Snack combo for late-night grinds.',
+    locked: true,
+    imageUrl: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=1200&auto=format&fit=crop&q=80',
+    stock: 3,
+    listingType: 'product',
+  },
+  {
+    id: 'vendor-3',
+    name: 'Vendor Pop-up Pass',
+    category: 'Experiences',
+    hpPrice: 300,
+    cashPrice: 2800,
+    description: 'Priority access for campus pop-up drops.',
+    locked: false,
+    imageUrl: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?w=1200&auto=format&fit=crop&q=80',
+    stock: 8,
+    listingType: 'digital',
+  },
 ];
 
 export const ADMIN_MODULE_ROWS: Record<string, AdminTableRow[]> = {

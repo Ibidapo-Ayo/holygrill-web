@@ -226,6 +226,10 @@ export interface EventDiscoveryItem {
   date: string;
   location: string;
   capacity: string;
+  imageUrl?: string;
+  hpReward?: number;
+  ticketPrice?: number;
+  featured?: boolean;
 }
 
 export interface ReferralMilestone {
@@ -242,6 +246,9 @@ export interface MarketplaceVendor {
   cashPrice?: number;
   locked: boolean;
   description: string;
+  imageUrl?: string;
+  stock?: number;
+  listingType?: 'product' | 'digital';
 }
 
 export interface AdminTableRow {

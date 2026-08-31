@@ -17,6 +17,8 @@ const NAV_SECTIONS = [
     items: [
       { to: '/kitchen', label: 'Kitchen Dashboard', icon: UtensilsCrossed },
       { to: '/admin/riders', label: 'Rider Management', icon: Truck },
+      { to: '/admin/events', label: 'Events', icon: Medal },
+      { to: '/admin/marketplace', label: 'Marketplace', icon: ShoppingBag },
       { to: '/admin/abandoned-carts', label: 'Abandoned Carts', icon: ShoppingBag },
       { to: '/admin/notifications', label: 'Notification Centre', icon: Bell },
     ],
