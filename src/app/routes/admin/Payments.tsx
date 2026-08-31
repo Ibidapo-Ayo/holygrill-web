@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { StatCard } from '@/components/admin/StatCard';
-import { MOCK_PAYMENTS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
 import type { PaymentStatus } from '@/types';
 import { DollarSign, CreditCard, ArrowDownLeft, AlertCircle, Clock, Search, X, ExternalLink, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getAdminPayments } from '@/services/api/admin.service';
 
 const STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string; bgColor: string }> = {
   success: { label: 'Success', color: 'text-success', bgColor: 'bg-success/10' },
@@ -22,8 +23,12 @@ const CHANNEL_LABELS: Record<string, string> = {
 const AdminPayments = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ['admin-payments'],
+    queryFn: getAdminPayments,
+  });
 
-  const filtered = MOCK_PAYMENTS.filter((p) => {
+  const filtered = payments.filter((p) => {
     const matchStatus = statusFilter === 'all' || p.status === statusFilter;
     const matchSearch = !search ||
       p.paystackRef.toLowerCase().includes(search.toLowerCase()) ||
@@ -32,27 +37,28 @@ const AdminPayments = () => {
     return matchStatus && matchSearch;
   });
 
-  const totalRevenue = MOCK_PAYMENTS.filter((p) => p.status === 'success').reduce((sum, p) => sum + p.amount, 0);
-  const totalRefunded = MOCK_PAYMENTS.filter((p) => p.status === 'refunded').reduce((sum, p) => sum + p.amount, 0);
-  const pendingCount = MOCK_PAYMENTS.filter((p) => p.status === 'pending').length;
-  const failedCount = MOCK_PAYMENTS.filter((p) => p.status === 'failed').length;
+  const totalRevenue = payments.filter((p) => p.status === 'success').reduce((sum, p) => sum + p.amount, 0);
+  const totalRefunded = payments.filter((p) => p.status === 'refunded').reduce((sum, p) => sum + p.amount, 0);
+  const pendingCount = payments.filter((p) => p.status === 'pending').length;
+  const failedCount = payments.filter((p) => p.status === 'failed').length;
 
-  const channelBreakdown = MOCK_PAYMENTS.filter((p) => p.status === 'success').reduce((acc, p) => {
+  const channelBreakdown = payments.filter((p) => p.status === 'success').reduce((acc, p) => {
     acc[p.channel] = (acc[p.channel] || 0) + p.amount;
     return acc;
   }, {} as Record<string, number>);
-  const maxChannelRevenue = Math.max(...Object.values(channelBreakdown));
+  const maxChannelRevenue = Math.max(...Object.values(channelBreakdown), 1);
 
   return (
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <StatCard title="Total Revenue" value={formatPrice(totalRevenue)} change="+18.2% vs last week" changeType="positive" icon={DollarSign} />
-        <StatCard title="Total Refunded" value={formatPrice(totalRefunded)} change={`${MOCK_PAYMENTS.filter(p => p.status === 'refunded').length} transactions`} changeType="negative" icon={ArrowDownLeft} iconColor="text-destructive" />
+        <StatCard title="Total Refunded" value={formatPrice(totalRefunded)} change={`${payments.filter(p => p.status === 'refunded').length} transactions`} changeType="negative" icon={ArrowDownLeft} iconColor="text-destructive" />
         <StatCard title="Pending" value={pendingCount.toString()} change="Awaiting confirmation" changeType="neutral" icon={Clock} iconColor="text-accent" />
         <StatCard title="Failed" value={failedCount.toString()} change="Require attention" changeType={failedCount > 0 ? 'negative' : 'neutral'} icon={AlertCircle} iconColor="text-destructive" />
       </div>
 
+      {isLoading ? <p className="text-sm text-muted-foreground">Loading payment activity…</p> : null}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Main transactions table */}
         <div className="xl:col-span-3">
@@ -194,7 +200,7 @@ const AdminPayments = () => {
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-display font-bold text-foreground text-sm mb-3">Recent Activity</h3>
             <div className="space-y-3">
-              {MOCK_PAYMENTS.slice(0, 5).map((p) => {
+              {payments.slice(0, 5).map((p) => {
                 const cfg = STATUS_CONFIG[p.status];
                 return (
                   <div key={p.id} className="flex items-center gap-2.5">

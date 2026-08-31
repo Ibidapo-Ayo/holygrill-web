@@ -1,13 +1,20 @@
+import { useQuery } from '@tanstack/react-query';
 import { Gift, Trophy } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { SectionHeader } from '@/components/shared/SectionHeader';
-import { REWARD_CHALLENGES, REWARD_REDEMPTIONS } from '@/services/mocks/platform';
+import { getRewardsSnapshot } from '@/services/api/reward.service';
 import { useAuthStore } from '@/stores/authStore';
 
 const RewardsPage = () => {
   const { user, isAuthenticated } = useAuthStore();
-  const currentHP = isAuthenticated ? (user?.hp_balance ?? 0) : 248;
+  const { data, isError } = useQuery({
+    queryKey: ['rewards-snapshot'],
+    queryFn: getRewardsSnapshot,
+  });
+  const currentHP = isAuthenticated ? (user?.hp_balance ?? data?.balance ?? 0) : (data?.balance ?? 0);
+  const redemptions = data?.redemptions ?? [];
+  const challenges = data?.challenges ?? [];
 
   return (
     <main className="flex-1 pb-12 pt-4 md:pt-24">
@@ -26,6 +33,7 @@ const RewardsPage = () => {
           </div>
         </section>
 
+        {isError ? <p className="text-sm text-destructive">Unable to refresh rewards right now.</p> : null}
         <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
           <div className="space-y-4">
             <SectionHeader
@@ -34,7 +42,7 @@ const RewardsPage = () => {
               description="Square cards keep comparison quick."
             />
             <div className="grid gap-4 sm:grid-cols-2">
-              {REWARD_REDEMPTIONS.map((reward) => {
+              {redemptions.map((reward) => {
                 const canRedeem = currentHP >= reward.hpCost && !reward.locked;
 
                 return (
@@ -62,7 +70,7 @@ const RewardsPage = () => {
               title="Active now"
               description="Complete actions to earn more HP faster."
             />
-            {REWARD_CHALLENGES.map((challenge) => (
+            {challenges.map((challenge) => (
               <div key={challenge.id} className="rounded-2xl bg-secondary/50 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-semibold text-foreground">{challenge.title}</p>

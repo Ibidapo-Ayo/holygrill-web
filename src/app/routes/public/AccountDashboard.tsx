@@ -1,19 +1,24 @@
+import { useQuery } from '@tanstack/react-query';
 import { Bell, Gift } from 'lucide-react';
 import { Link } from '@/lib/router';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { HPProgressBar } from '@/components/hp/HPProgressBar';
 import { OrderCard } from '@/components/orders/OrderCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
-import { MOCK_ORDERS } from '@/data/mockOrders';
-import { DASHBOARD_STATS } from '@/services/mocks/platform';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useAuthStore, getInitials, safeImageUrl } from '@/stores/authStore';
 import { DASHBOARD_SIDEBAR_LINKS } from '@/constants/navigation';
 import { useAuthStreak } from '@/hooks/useAuthStreak';
+import { getOrders } from '@/services/api/order.service';
 
 const AccountDashboardPage = () => {
   const { user, hasHydrated } = useAuthStore();
   const { data: streakData } = useAuthStreak({
+    enabled: hasHydrated && !!user,
+  });
+  const { data: allOrders = [] } = useQuery({
+    queryKey: ['orders'],
+    queryFn: getOrders,
     enabled: hasHydrated && !!user,
   });
 
@@ -21,25 +26,37 @@ const AccountDashboardPage = () => {
     return null;
   }
 
-  const userOrders = MOCK_ORDERS.filter((order) => order.userId === user.id);
+  const userOrders = allOrders.filter((order) => order.userId === user.id);
+  const monthlyOrders = userOrders.length;
+  const activeOrders = userOrders.filter((order) =>
+    ['placed', 'confirmed', 'preparing', 'out_for_delivery'].includes(order.status),
+  ).length;
+  const referralWins = userOrders.filter((order) => order.hpEarned > 0).length;
   const initials = getInitials(user.full_name);
-  const dashboardStats = DASHBOARD_STATS.map((stat) =>
-    stat.label === 'Current HP'
-      ? {
-          ...stat,
-          value: `${user.hp_balance} HP`,
-          helper: user.hp_balance > 0 ? stat.helper : 'Start ordering to earn your first HP',
-        }
-      : stat.label === 'Weekly streak' && streakData
-      ? {
-          ...stat,
-          value: `${streakData.streakCount} day${streakData.streakCount === 1 ? '' : 's'}`,
-          helper: streakData.hasBreak
-            ? `Streak break detected (${streakData.daysSinceLastActivity} days idle). Order today to restart.`
-            : 'Streak is active. Keep ordering daily for bonus rewards.',
-        }
-      : stat,
-  );
+  const dashboardStats = [
+    {
+      label: 'Current HP',
+      value: `${user.hp_balance} HP`,
+      helper: user.hp_balance > 0 ? 'Trackable from your backend profile balance.' : 'Start ordering to earn your first HP',
+    },
+    {
+      label: 'Weekly streak',
+      value: `${streakData?.streakCount ?? 0} day${(streakData?.streakCount ?? 0) === 1 ? '' : 's'}`,
+      helper: streakData?.hasBreak
+        ? `Streak break detected (${streakData.daysSinceLastActivity} days idle). Order today to restart.`
+        : 'Streak is active. Keep ordering daily for bonus rewards.',
+    },
+    {
+      label: 'Orders this month',
+      value: `${monthlyOrders}`,
+      helper: `${activeOrders} currently active`,
+    },
+    {
+      label: 'Referral wins',
+      value: `${referralWins}`,
+      helper: 'Referral and HP trend reflects live order rewards.',
+    },
+  ];
 
   return (
     <main className="flex-1 pb-12 md:pt-24">

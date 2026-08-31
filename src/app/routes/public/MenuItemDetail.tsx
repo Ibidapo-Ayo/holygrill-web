@@ -1,11 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Clock, Flame, Heart, MessageSquare, Minus, Plus, ShoppingBag, Star, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from '@/lib/router';
 import { FoodCard } from '@/components/menu/FoodCard';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MOCK_MENU, formatPrice } from '@/data/menu';
+import { formatPrice } from '@/data/menu';
+import { getMenuItems } from '@/services/api/menu.service';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
 import { createCartLineId, getCartQuantityForMenuItem, getConfiguredMenuPrice, getPrimaryCartLineId } from '@/utils/pricing';
@@ -20,11 +22,15 @@ const MenuItemDetail = () => {
   const [isDesktop, setIsDesktop] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : false
   );
+  const { data: menuItems = [], isLoading } = useQuery({
+    queryKey: ['menu-items'],
+    queryFn: getMenuItems,
+  });
   const { items, addItem, updateQuantity } = useCartStore();
   const { toggle: toggleFavourite, isFavourite } = useFavouritesStore();
 
-  const item = useMemo(() => MOCK_MENU.find((entry) => entry.id === menuId), [menuId]);
-  const related = useMemo(() => item ? MOCK_MENU.filter((entry) => entry.category === item.category && entry.id !== item.id).slice(0, 3) : [], [item]);
+  const item = useMemo(() => menuItems.find((entry) => entry.id === menuId), [menuId, menuItems]);
+  const related = useMemo(() => item ? menuItems.filter((entry) => entry.category === item.category && entry.id !== item.id).slice(0, 3) : [], [item, menuItems]);
   const isSaved = item ? isFavourite(item.id) : false;
 
   useEffect(() => {
@@ -40,6 +46,16 @@ const MenuItemDetail = () => {
     query.addEventListener('change', sync);
     return () => query.removeEventListener('change', sync);
   }, []);
+
+  if (isLoading) {
+    return (
+      <main className="flex-1 pb-12 md:pt-24">
+        <div className="container mx-auto max-w-3xl px-4">
+          <p className="text-sm text-muted-foreground">Loading menu item…</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!item) {
     return (
@@ -302,7 +318,7 @@ const MenuItemDetail = () => {
                   {...entry}
                   quantityInCart={getCartQuantityForMenuItem(items, entry.id)}
                   onAddToCart={(id) => {
-                    const relatedItem = MOCK_MENU.find((menuEntry) => menuEntry.id === id);
+                    const relatedItem = menuItems.find((menuEntry) => menuEntry.id === id);
                     if (!relatedItem) return;
                     addItem({ id: relatedItem.id, menuItemId: relatedItem.id, name: relatedItem.name, price: relatedItem.price, imageUrl: relatedItem.imageUrl, hpValue: relatedItem.hpValue });
                     toast.success(`${relatedItem.name} added to cart`);

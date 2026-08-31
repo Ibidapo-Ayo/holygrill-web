@@ -1,15 +1,23 @@
-import { MOCK_ORDERS, MOCK_USERS } from '@/data/mockOrders';
-import { MOCK_MENU, formatPrice } from '@/data/menu';
+import { useQuery } from '@tanstack/react-query';
+import { formatPrice } from '@/data/menu';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingBag, Users, Flame, Clock, Star, Repeat } from 'lucide-react';
+import { getAdminAnalyticsSnapshot } from '@/services/api/admin.service';
 
 const AdminAnalytics = () => {
-  const totalRevenue = MOCK_ORDERS.reduce((sum, o) => sum + o.total, 0);
-  const deliveredOrders = MOCK_ORDERS.filter((o) => o.status === 'delivered');
-  const avgOrderValue = totalRevenue / MOCK_ORDERS.length;
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-analytics'],
+    queryFn: getAdminAnalyticsSnapshot,
+  });
+  const orders = data?.orders ?? [];
+  const menuItems = data?.menuItems ?? [];
+  const users = data?.users ?? [];
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const deliveredOrders = orders.filter((o) => o.status === 'delivered');
+  const avgOrderValue = orders.length ? totalRevenue / orders.length : 0;
 
   // Category breakdown
-  const categoryData = MOCK_MENU.reduce((acc, item) => {
+  const categoryData = menuItems.reduce((acc, item) => {
     if (!acc[item.category]) acc[item.category] = { count: 0, revenue: 0 };
     acc[item.category].count++;
     acc[item.category].revenue += item.price * 3; // mock multiplier
@@ -39,6 +47,7 @@ const AdminAnalytics = () => {
 
   return (
     <div className="space-y-6">
+      {isLoading ? <p className="text-sm text-muted-foreground">Loading analytics snapshot…</p> : null}
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
@@ -134,7 +143,7 @@ const AdminAnalytics = () => {
         <div className="bg-card rounded-xl border border-border p-5">
           <h3 className="font-display font-bold text-foreground text-sm mb-4">Top Customers</h3>
           <div className="space-y-3">
-            {MOCK_USERS.sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 5).map((user, i) => (
+            {[...users].sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 5).map((user, i) => (
               <div key={user.id} className="flex items-center gap-3">
                 <span className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold font-body ${
                   i === 0 ? 'bg-accent/20 text-accent' : 'bg-secondary text-muted-foreground'
