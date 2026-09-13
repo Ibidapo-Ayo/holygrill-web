@@ -1,16 +1,25 @@
-import { useState } from 'react';
-import { MOCK_USERS } from '@/data/mockOrders';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { formatPrice } from '@/data/menu';
 import { Search, X, Flame, TrendingUp, Crown, ChevronDown, Edit3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { getAdminUsers } from '@/services/api/admin.service';
 
 const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'totalHP' | 'ordersCount' | 'totalSpent'>('totalHP');
   const [editingUser, setEditingUser] = useState<string | null>(null);
-  const [users, setUsers] = useState(MOCK_USERS);
+  const { data: fetchedUsers = [], isLoading } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: getAdminUsers,
+  });
+  const [users, setUsers] = useState(fetchedUsers);
   const [hpInput, setHpInput] = useState('');
+
+  useEffect(() => {
+    setUsers(fetchedUsers);
+  }, [fetchedUsers]);
 
   const filtered = users
     .filter((u) => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
@@ -31,6 +40,7 @@ const AdminUsers = () => {
   return (
     <div className="space-y-6">
       {/* Summary cards */}
+      {isLoading ? <p className="text-sm text-muted-foreground">Loading users…</p> : null}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">

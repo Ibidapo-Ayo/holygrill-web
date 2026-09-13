@@ -1,17 +1,21 @@
+import { useQuery } from '@tanstack/react-query';
 import { StatCard } from '@/components/admin/StatCard';
 import { OrderCard } from '@/components/orders/OrderCard';
-import { MOCK_ORDERS } from '@/data/mockOrders';
 import { formatPrice } from '@/data/menu';
 import { DollarSign, ShoppingBag, Users, Flame, TrendingUp, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const recentOrders = MOCK_ORDERS.slice(0, 4);
-const activeOrders = MOCK_ORDERS.filter((o) => o.status !== 'delivered');
+import { getOrders } from '@/services/api/order.service';
 
 const AdminDashboard = () => {
-  const totalRevenue = MOCK_ORDERS.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = MOCK_ORDERS.length;
-  const totalHP = MOCK_ORDERS.reduce((sum, o) => sum + o.hpEarned, 0);
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: getOrders,
+  });
+  const recentOrders = orders.slice(0, 4);
+  const activeOrders = orders.filter((o) => o.status !== 'delivered');
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = orders.length;
+  const totalHP = orders.reduce((sum, o) => sum + o.hpEarned, 0);
 
   return (
     <div className="space-y-8">
@@ -19,9 +23,10 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <StatCard title="Total Revenue" value={formatPrice(totalRevenue)} change="+12.5%" changeType="positive" icon={DollarSign} />
         <StatCard title="Total Orders" value={totalOrders.toString()} change="+8 today" changeType="positive" icon={ShoppingBag} />
-        <StatCard title="Active Customers" value="156" change="+23%" changeType="positive" icon={Users} iconColor="text-accent" />
+        <StatCard title="Active Customers" value={new Set(orders.map((order) => order.userId)).size.toString()} change="+23%" changeType="positive" icon={Users} iconColor="text-accent" />
         <StatCard title="HP Distributed" value={`${totalHP} HP`} change="+209 today" changeType="neutral" icon={Flame} iconColor="text-accent" />
       </div>
+      {isLoading ? <p className="text-sm text-muted-foreground">Refreshing dashboard metrics…</p> : null}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Active orders */}

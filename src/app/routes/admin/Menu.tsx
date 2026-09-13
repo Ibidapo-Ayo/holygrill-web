@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { MOCK_MENU, CATEGORIES, formatPrice } from '@/data/menu';
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { CATEGORIES, formatPrice } from '@/data/menu';
 import type { MenuItem } from '@/types';
 import { Plus, Edit3, Trash2, Search, X, Eye, EyeOff } from 'lucide-react';
 import { HPBadge } from '@/components/hp/HPBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { getMenuItems } from '@/services/api/menu.service';
 
 interface ManagedMenuItem extends MenuItem {
   addOnEditor?: string;
@@ -13,24 +15,36 @@ interface ManagedMenuItem extends MenuItem {
 }
 
 const AdminMenu = () => {
-  const [items, setItems] = useState<ManagedMenuItem[]>(() =>
-    MOCK_MENU.map((item) => ({
+  const { data: menuItems = [], isLoading } = useQuery({
+    queryKey: ['admin-menu-items'],
+    queryFn: getMenuItems,
+  });
+  const [items, setItems] = useState<ManagedMenuItem[]>([]);
+
+  useEffect(() => {
+    setItems(
+      menuItems.map((item) => ({
       ...item,
       addOnEditor: item.extras?.map((extra) => extra.title).join(', ') ?? '',
       itemOrderCap: 40,
       dailyOrderCap: 200,
-    }))
-  );
+      })),
+    );
+  }, [menuItems]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const filtered = items.filter((item) => {
-    const matchCat = categoryFilter === 'All' || item.category === categoryFilter;
-    const matchSearch = !search || item.name.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filtered = useMemo(
+    () =>
+      items.filter((item) => {
+        const matchCat = categoryFilter === 'All' || item.category === categoryFilter;
+        const matchSearch = !search || item.name.toLowerCase().includes(search.toLowerCase());
+        return matchCat && matchSearch;
+      }),
+    [categoryFilter, items, search],
+  );
 
   const toggleAvailability = (id: string) => {
     setItems((prev) =>
@@ -81,6 +95,7 @@ const AdminMenu = () => {
   return (
     <div className="space-y-6">
       {/* Controls */}
+      {isLoading ? <p className="text-sm text-muted-foreground">Loading menu catalogue…</p> : null}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

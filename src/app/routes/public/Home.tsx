@@ -9,7 +9,8 @@ import { KitchenCountdownCard } from '@/components/shared/KitchenCountdownCard';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { StoreClosedDialog } from '@/components/shared/StoreClosedDialog';
 import { useCartStore } from '@/stores/cartStore';
-import { MOCK_MENU } from '@/data/menu';
+import { useQuery } from '@tanstack/react-query';
+import { getMenuItems } from '@/services/api/menu.service';
 import { getCartQuantityForMenuItem, getPrimaryCartLineId } from '@/utils/pricing';
 import { playUiTone } from '@/utils/sound';
 import type { HeroSlide } from '@/types';
@@ -20,16 +21,19 @@ import {
   HOME_TESTIMONIALS,
 } from '@/content/homeContent';
 
-const FEATURED = MOCK_MENU.filter((item) => item.isAvailable).slice(0, 4);
-
 const HP_ICONS = [Flame, ShoppingBag, Flame] as const;
 
 const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
   const { items, addItem, updateQuantity } = useCartStore();
   const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const { data: menuItems = [] } = useQuery({
+    queryKey: ['menu-items'],
+    queryFn: getMenuItems,
+  });
+  const featuredItems = menuItems.filter((item) => item.isAvailable).slice(0, 4);
 
   const handleAdd = (id: string) => {
-    const item = MOCK_MENU.find((menuItem) => menuItem.id === id);
+    const item = menuItems.find((menuItem) => menuItem.id === id);
     if (!item) return;
     addItem({ id: item.id, menuItemId: item.id, name: item.name, price: item.price, imageUrl: item.imageUrl, hpValue: item.hpValue });
     playUiTone('add');
@@ -43,7 +47,7 @@ const Home = ({ heroSlides }: { heroSlides: HeroSlide[] }) => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const marqueeItems = [...FEATURED, ...FEATURED];
+  const marqueeItems = [...featuredItems, ...featuredItems];
 
   return (
     <main className="flex flex-1 flex-col">

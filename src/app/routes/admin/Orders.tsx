@@ -1,10 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MOCK_ORDERS } from '@/data/mockOrders';
+import { useQuery } from '@tanstack/react-query';
 import { formatPrice } from '@/data/menu';
 import type { Order, OrderStatus } from '@/types';
 import { Package, ChevronDown, Search, X, AlertTriangle, RotateCcw, Truck, CheckCircle2, XCircle, RefreshCw, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import {
+  cancelOrder as cancelOrderApi,
+  getOrders,
+  refundOrder as refundOrderApi,
+  updateOrderStatus as updateOrderStatusApi,
+} from '@/services/api/order.service';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
   all: { label: 'All', color: '', bgColor: '' },
@@ -28,18 +34,20 @@ const AdminOrders = () => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const { data: fetchedOrders = [], isLoading } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: getOrders,
+    refetchInterval: 15000,
+  });
+  const [orders, setOrders] = useState<Order[]>([]);
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [lastPolled, setLastPolled] = useState(new Date());
 
-  // Simulate polling every 15s
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLastPolled(new Date());
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
+    setOrders(fetchedOrders);
+    setLastPolled(new Date());
+  }, [fetchedOrders]);
 
   const filtered = orders.filter((o) => {
     const matchFilter = filter === 'all' || o.status === filter;
@@ -50,7 +58,7 @@ const AdminOrders = () => {
     return matchFilter && matchSearch;
   });
 
-  const advanceStatus = (orderId: string) => {
+  const advanceStatus = async (orderId: string) => {
     setOrders((prev) =>
       prev.map((o) => {
         if (o.id !== orderId) return o;
@@ -63,10 +71,20 @@ const AdminOrders = () => {
         };
       })
     );
-    toast.success('Order status updated');
+    const targetOrder = orders.find((order) => order.id === orderId);
+    const next = targetOrder ? NEXT_STATUS[targetOrder.status] : undefined;
+
+    if (!next) return;
+
+    try {
+      await updateOrderStatusApi(orderId, next);
+      toast.success('Order status updated');
+    } catch {
+      toast.error('Unable to sync order status with backend');
+    }
   };
 
-  const cancelOrder = (orderId: string) => {
+  const cancelOrder = async (orderId: string) => {
     if (!cancelReason.trim()) {
       toast.error('Please provide a reason');
       return;
@@ -83,12 +101,17 @@ const AdminOrders = () => {
           : o
       )
     );
-    toast.success('Order cancelled');
+    try {
+      await cancelOrderApi(orderId, cancelReason);
+      toast.success('Order cancelled');
+    } catch {
+      toast.error('Unable to cancel order in backend');
+    }
     setCancelModalId(null);
     setCancelReason('');
   };
 
-  const refundOrder = (orderId: string) => {
+  const refundOrder = async (orderId: string) => {
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
@@ -101,7 +124,12 @@ const AdminOrders = () => {
           : o
       )
     );
-    toast.success('Refund initiated');
+    try {
+      await refundOrderApi(orderId);
+      toast.success('Refund initiated');
+    } catch {
+      toast.error('Unable to initiate refund in backend');
+    }
   };
 
   const statusCounts = orders.reduce((acc, o) => {
@@ -147,6 +175,7 @@ const AdminOrders = () => {
           <RefreshCw size={12} className="animate-spin-slow" />
           <span>Auto-refreshing every 15s</span>
         </div>
+        {isLoading ? <span className="text-xs text-muted-foreground">Loading orders…</span> : null}
       </div>
 
       {/* Orders table */}

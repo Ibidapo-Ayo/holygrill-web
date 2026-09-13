@@ -1,11 +1,16 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Bell, ChefHat } from 'lucide-react';
 import { AdminGuard } from '@/components/admin/AdminGuard';
-import { MOCK_ORDERS } from '@/data/mockOrders';
+import { getOrders } from '@/services/api/order.service';
 
 export default function Page() {
-  const queue = MOCK_ORDERS.filter((order) => ['placed', 'confirmed', 'preparing'].includes(order.status));
+  const { data: orders = [] } = useQuery({
+    queryKey: ['kitchen-orders'],
+    queryFn: getOrders,
+  });
+  const queue = orders.filter((order) => ['placed', 'confirmed', 'preparing'].includes(order.status));
 
   return (
     <AdminGuard allowKitchen>

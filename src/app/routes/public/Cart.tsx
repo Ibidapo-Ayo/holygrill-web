@@ -9,8 +9,8 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { Input } from '@/components/ui/input';
 import { calculateCartTotals, createCartLineId } from '@/utils/pricing';
 import { DELIVERY_FEE } from '@/data/menu';
-import { MOCK_MENU } from '@/data/menu';
 import { getCartSnapshot } from '@/services/api/cart.service';
+import { getMenuItems } from '@/services/api/menu.service';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavouritesStore } from '@/stores/favouritesStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -36,6 +36,10 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
     queryKey: ['cart-snapshot', items],
     queryFn: () => getCartSnapshot(items),
     initialData: { items, walletBalance: 8400, availableHP: 248 },
+  });
+  const { data: menuItems = [] } = useQuery({
+    queryKey: ['menu-items'],
+    queryFn: getMenuItems,
   });
 
   const availableHP = isAuthenticated ? (user?.hp_balance ?? data.availableHP) : data.availableHP;
@@ -67,7 +71,7 @@ const CartPage = ({ initialTab = 'cart' }: { initialTab?: 'cart' | 'saved' }) =>
   };
 
   const saveCartItemToFavourites = (item: (typeof items)[number]) => {
-    const menuItem = MOCK_MENU.find((entry) => entry.id === (item.menuItemId ?? item.id));
+    const menuItem = menuItems.find((entry) => entry.id === (item.menuItemId ?? item.id));
     if (menuItem && !savedItems.some((entry) => entry.id === menuItem.id)) {
       toggle(menuItem);
       toast.success('Saved to favourites');
