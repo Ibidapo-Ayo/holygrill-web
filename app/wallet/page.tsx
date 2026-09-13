@@ -1,7 +1,8 @@
 'use client';
 
-import { notFound } from 'next/navigation';
+import { SiteLayout } from '@/app/layouts/SiteLayout';
+import WalletPage from '@/app/routes/public/Wallet';
 
 export default function Page() {
-  notFound();
+  return <SiteLayout title="Wallet"><WalletPage /></SiteLayout>;
 }

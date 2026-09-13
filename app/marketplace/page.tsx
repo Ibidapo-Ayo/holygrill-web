@@ -1,7 +1,8 @@
 'use client';
 
-import { notFound } from 'next/navigation';
+import { SiteLayout } from '@/app/layouts/SiteLayout';
+import MarketplacePage from '@/app/routes/public/Marketplace';
 
 export default function Page() {
-  notFound();
+  return <SiteLayout title="Marketplace"><MarketplacePage /></SiteLayout>;
 }

@@ -1,6 +1,8 @@
 export const DESKTOP_NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/menu', label: 'Menu' },
+  { to: '/events', label: 'Events' },
+  { to: '/marketplace', label: 'Marketplace' },
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/orders', label: 'My Orders' },
   { to: '/leaderboard', label: 'Leaderboard' },
@@ -18,7 +20,12 @@ export const MOBILE_TAB_LINKS = [
 export const DASHBOARD_SIDEBAR_LINKS = [
   { to: '/dashboard', label: 'My HP' },
   { to: '/orders', label: 'My Orders' },
+  { to: '/wallet', label: 'Wallet' },
   { to: '/referrals', label: 'Referrals' },
-  { to: '/dashboard#notifications', label: 'Notifications' },
+  { to: '/notifications', label: 'Notifications' },
+  { to: '/streak', label: 'Streak' },
+  { to: '/hall-of-fame', label: 'Hall of Fame' },
+  { to: '/order-locks', label: 'Order Locks' },
+  { to: '/addresses', label: 'Addresses' },
   { to: '/profile', label: 'Profile Settings' },
 ] as const;
